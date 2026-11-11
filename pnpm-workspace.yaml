@@ -1,0 +1,6 @@
+allowBuilds:
+  classic-level: true
+  edgedriver: true
+  esbuild: true
+  geckodriver: true
+  obsidian-typings: true

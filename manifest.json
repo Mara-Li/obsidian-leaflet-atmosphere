@@ -1,0 +1,14 @@
+{
+	"id": "<%= data.id %>",
+	"name": "<%= data.name %>",
+	"version": "0.0.0",
+	"minAppVersion": "1.13.0",
+	"description": "<%= data.description %>",
+	"author": "<%= data.author.name %>",
+	"authorUrl": "<%= data.author.url %>",
+	<%_ if (data.fundingUrl) { _%>
+		"fundingUrl": "<%= data.fundingUrl %>",
+	<%_
+	} _%>
+	"isDesktopOnly": <%= data.isDesktopOnly %>
+}
