@@ -29,7 +29,7 @@ You can also browse the [[Reading List]] or flip through the [[Sketchbook]].
 
 ## How it is made
 
-Each post is a plain Markdown note. Formatting such as ==highlights==, ~~mistakes~~, <u>underlines</u>, `inline code` and [external links](https://leaflet.pub) is converted to Leaflet rich text.[^stack] Footnotes work too, even inline ones.^[Like this one, written directly in the sentence.]
+Each post is a plain Markdown note. Formatting such as ==highlights== (in ==🟢color== too), ~~mistakes~~, <u>underlines</u>, `inline code` and [external links](https://leaflet.pub) is converted to Leaflet rich text.[^stack] Footnotes work too, even inline ones.^[Like this one, written directly in the sentence.]
 
 ---
 

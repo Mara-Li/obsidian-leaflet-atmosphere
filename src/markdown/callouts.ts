@@ -6,6 +6,7 @@ import type {
 	OrderedListItem,
 	UnorderedListItem,
 } from "../leaflet/types";
+import { cssColor } from "./highlights";
 import { escapeHtml } from "./inline";
 
 export interface CalloutStyle {
@@ -72,6 +73,11 @@ export function richTextToHtml(text: string, facets: Facet[] = []): string {
 				const name = feature.$type.split("#")[1] ?? "";
 				if (feature.$type === "pub.leaflet.richtext.facet#link")
 					piece = `<a href="${escapeHtml(feature.uri)}" target="_blank">${piece}</a>`;
+				else if (
+					feature.$type === "pub.leaflet.richtext.facet#highlight" &&
+					feature.color
+				)
+					piece = `<mark style="background:${cssColor(feature.color)}">${piece}</mark>`;
 				else if (TAGS[name]) piece = `${TAGS[name][0]}${piece}${TAGS[name][1]}`;
 			}
 		}

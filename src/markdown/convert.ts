@@ -35,6 +35,7 @@ import {
 import { type PostTheme, themeCss } from "../leaflet/fonts";
 import type { LinkPreview } from "../leaflet/linkPreview";
 import { calloutHtml, calloutStyle, richTextToHtml } from "./callouts";
+import { cssColor, splitHighlightColor } from "./highlights";
 import { type EmbeddedNote, splitSubpath } from "./preprocess";
 
 type Generic = Tokens.Generic;
@@ -636,12 +637,13 @@ export class MarkdownConverter {
 				return this.renderInline(token.tokens!, col, withFeature(features, F.italic));
 			case "del":
 				return this.renderInline(token.tokens!, col, withFeature(features, F.strike));
-			case "highlight":
-				return this.renderInline(
-					(token as HighlightToken).tokens,
-					col,
-					withFeature(features, F.highlight)
-				);
+			case "highlight": {
+				const { color, tokens } = splitHighlightColor((token as HighlightToken).tokens);
+				const feature: FacetFeature = color
+					? { $type: "pub.leaflet.richtext.facet#highlight", color }
+					: F.highlight;
+				return this.renderInline(tokens, col, withFeature(features, feature));
+			}
 			case "codespan":
 				return col.append(decodeEntities(str(token.text)), withFeature(features, F.code));
 			case "inlineMath":
@@ -905,8 +907,11 @@ function htmlInline(tokens: Token[], resolve: (target: string) => string | null)
 					return `<em>${inner()}</em>`;
 				case "del":
 					return `<s>${inner()}</s>`;
-				case "highlight":
-					return `<mark>${inner()}</mark>`;
+				case "highlight": {
+					const { color, tokens } = splitHighlightColor(t.tokens ?? []);
+					const style = color ? ` style="background:${cssColor(color)}"` : "";
+					return `<mark${style}>${htmlInline(tokens, resolve)}</mark>`;
+				}
 				case "codespan":
 				case "inlineMath":
 					return `<code>${escapeHtml(decodeEntities(str(t.text)))}</code>`;
