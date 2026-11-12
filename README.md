@@ -70,7 +70,7 @@ The keys of the first seven properties can be changed in the settings. Deleting 
 | Mermaid diagrams | Image rendered by Obsidian, or code block |
 | Bullet, numbered and task lists (nested) | List blocks with checkboxes |
 | Blockquotes | Blockquote blocks |
-| Callouts `> [!note] Title` | Configurable in **Conversion → Callouts**: a blockquote with an emoji and a title on the color of the type, a colored HTML box like Obsidian (with the fonts, size and text color of the publication), or a card opening a sub-page of the post |
+| Callouts `> [!note] Title` | Configurable in **Conversion → Callouts**: a blockquote with an emoji and a title on the color of the type, a colored HTML box like Obsidian (with the fonts, size and text color of the publication), or a card opening a sub-page of the post. Foldable callouts (`[!note]+`, `[!note]-`) become sub-pages in every mode (can be disabled) |
 | Code blocks | Code blocks with language and theme |
 | `$$ math $$` / `$inline$` | Math blocks / inline code |
 | Footnotes `[^1]` and inline footnotes `^[note]` | Leaflet footnotes |

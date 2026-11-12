@@ -155,7 +155,9 @@
 			"calloutsPage": "Card opening a sub-page",
 			"embedsPage": "Card opening a sub-page",
 			"mentions": "Mentions",
-			"mentionsDesc": "Turn @handle.bsky.social into a mention of the Bluesky account."
+			"mentionsDesc": "Turn @handle.bsky.social into a mention of the Bluesky account.",
+			"foldableCallouts": "Foldable callouts as sub-pages",
+			"foldableCalloutsDesc": "Callouts written [!type]+ or [!type]- become a card opening a sub-page, whatever the mode above."
 		},
 		"after": {
 			"heading": "When publishing",

@@ -7,10 +7,16 @@ import type { BlockquoteBlock, HtmlBlock, StandardDocument } from "../../src/lea
 
 async function publishCallouts(
 	mode: CalloutMode,
-	theme: { bodyFont?: string; textColor?: string } = {}
+	theme: { bodyFont?: string; textColor?: string } = {},
+	foldableCalloutsAsPages = false
 ): Promise<StandardDocument> {
 	// Callouts.md is not marked: allow publishing it by hand
-	await setup({ calloutMode: mode, publishKey: "", publications: [{ ...PUBLICATION, ...theme }] });
+	await setup({
+		calloutMode: mode,
+		foldableCalloutsAsPages,
+		publishKey: "",
+		publications: [{ ...PUBLICATION, ...theme }],
+	});
 	await publish("Callouts.md");
 	const record = Object.values(await getRecords())[0]!;
 	expect(validateDocument(record)).toBe("");
@@ -49,6 +55,24 @@ describe("Callouts", function () {
 			"unorderedList",
 			"blockquote",
 		]);
+	});
+
+	it("become sub-pages when foldable, whatever the mode", async function () {
+		for (const mode of ["quote", "html"] as const) {
+			const record = await publishCallouts(mode, {}, true);
+			const blocks = blocksOf(record);
+			// Only [!faq]- is foldable
+			expect(blocks.filter((b) => b.$type === "pub.leaflet.blocks.page")).toEqual([
+				{ $type: "pub.leaflet.blocks.page", id: "callout-1" },
+			]);
+			expect(blocks.at(-1)).toEqual({ $type: "pub.leaflet.blocks.page", id: "callout-1" });
+			expect(blocksOf(record, 1)[0]).toMatchObject({
+				$type: "pub.leaflet.blocks.header",
+				plaintext: "❓ Why sourdough?",
+			});
+			const others = mode === "quote" ? "pub.leaflet.blocks.blockquote" : "pub.leaflet.blocks.html";
+			expect(blocks.filter((b) => b.$type === others)).toHaveLength(2);
+		}
 	});
 
 	it("become colored HTML boxes", async function () {

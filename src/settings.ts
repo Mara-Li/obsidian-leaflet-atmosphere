@@ -300,6 +300,12 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 						},
 					},
 					{
+						name: t("settings.content.foldableCallouts"),
+						desc: t("settings.content.foldableCalloutsDesc"),
+						visible: () => this.plugin.settings.calloutMode !== "page",
+						control: { type: "toggle", key: "foldableCalloutsAsPages" },
+					},
+					{
 						name: t("settings.content.mermaid"),
 						desc: t("settings.content.mermaidDesc"),
 						control: {

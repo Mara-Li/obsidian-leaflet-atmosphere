@@ -155,7 +155,9 @@
 			"calloutsPage": "Carte ouvrant une sous-page",
 			"embedsPage": "Carte ouvrant une sous-page",
 			"mentions": "Mentions",
-			"mentionsDesc": "Transforme @handle.bsky.social en mention du compte Bluesky."
+			"mentionsDesc": "Transforme @handle.bsky.social en mention du compte Bluesky.",
+			"foldableCallouts": "Callouts repliables en sous-pages",
+			"foldableCalloutsDesc": "Les callouts écrits [!type]+ ou [!type]- deviennent une carte ouvrant une sous-page, quel que soit le mode ci-dessus."
 		},
 		"after": {
 			"heading": "Lors de la publication",

@@ -321,7 +321,9 @@ export class MarkdownConverter {
 		callout: Callout,
 		inner: LeafletBlock[]
 	): Promise<LeafletBlock[]> {
-		const mode = this.deps.settings.calloutMode;
+		const { calloutMode, foldableCalloutsAsPages } = this.deps.settings;
+		// A foldable callout hides its content: a sub-page does the same on Leaflet
+		const mode = callout.foldable && foldableCalloutsAsPages ? "page" : calloutMode;
 		const style = calloutStyle(callout.type);
 		const { r, g, b } = style.color;
 		// The quote mode marks the title like Obsidian: bold, on the color of the type
@@ -838,6 +840,8 @@ function splitAltSize(alt: string): [string, number | undefined] {
 interface Callout {
 	type: string;
 	title: Generic[] | null;
+	/** Written `[!type]+` or `[!type]-`: folded in Obsidian. */
+	foldable: boolean;
 }
 
 /** Detect an Obsidian callout (`> [!type] title`) and strip its marker from the tokens. */
@@ -846,7 +850,7 @@ function extractCallout(children: Token[]): Callout | null {
 	if (paragraph?.type !== "paragraph") return null;
 	const first = paragraph.tokens[0];
 	if (first?.type !== "text") return null;
-	const match = /^\[!([\w-]+)\][+-]?[ \t]*/.exec(first.text as string);
+	const match = /^\[!([\w-]+)\]([+-]?)[ \t]*/.exec(first.text as string);
 	if (!match) return null;
 
 	const rest: Generic[] = [
@@ -881,7 +885,11 @@ function extractCallout(children: Token[]): Callout | null {
 	const hasTitle = title.some(
 		(t) => (t.text as string | undefined)?.trim() || t.type !== "text"
 	);
-	return { type: match[1]!.toLowerCase(), title: hasTitle ? title : null };
+	return {
+		type: match[1]!.toLowerCase(),
+		title: hasTitle ? title : null,
+		foldable: match[2] !== "",
+	};
 }
 
 function wikilinkTargets(tokens: Token[]): string[] {

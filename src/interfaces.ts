@@ -39,6 +39,7 @@ export interface LeafletAtmosphereSettings {
 	tableMode: TableMode;
 	mermaidMode: MermaidMode;
 	calloutMode: CalloutMode;
+	foldableCalloutsAsPages: boolean;
 	dataview: boolean;
 	linkCards: boolean;
 	mentions: boolean;
@@ -85,6 +86,7 @@ export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
 	tableMode: "html",
 	mermaidMode: "image",
 	calloutMode: "quote",
+	foldableCalloutsAsPages: true,
 	dataview: true,
 	linkCards: true,
 	mentions: true,
