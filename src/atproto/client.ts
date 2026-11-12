@@ -1,6 +1,14 @@
-import { requestUrl, type RequestUrlResponse } from "obsidian";
+import i18next from "i18next";
+import { requestUrl } from "obsidian";
 import type { BlobRef } from "../leaflet/types";
-import { resolveIdentity } from "./identity";
+import {
+	type DidDocument,
+	normalizeIdentifier,
+	normalizePdsUrl,
+	pdsFromDidDocument,
+	readJson,
+	resolvePds,
+} from "./identity";
 
 export class XrpcError extends Error {
 	constructor(
@@ -8,7 +16,7 @@ export class XrpcError extends Error {
 		public error: string,
 		message: string
 	) {
-		super(`${error || status}: ${message}`);
+		super(error ? `${error}: ${message}` : message);
 	}
 }
 
@@ -17,6 +25,7 @@ interface Session {
 	handle: string;
 	accessJwt: string;
 	refreshJwt: string;
+	didDoc?: DidDocument;
 }
 
 export interface Credentials {
@@ -49,13 +58,28 @@ export class AtpClient {
 	}
 
 	async login(): Promise<Session> {
-		const { identifier, password, pdsUrl } = this.credentials;
-		if (!identifier || !password) throw new Error("Missing identifier or app password");
-		this.pds = pdsUrl?.replace(/\/+$/, "") || (await resolveIdentity(identifier)).pds;
-		const res = await this.raw("POST", "com.atproto.server.createSession", {
-			body: { identifier: identifier.replace(/^@/, "").trim(), password },
-		});
-		this.session = res.json as Session;
+		const identifier = normalizeIdentifier(this.credentials.identifier);
+		const { password } = this.credentials;
+		if (!identifier || !password) throw new Error(i18next.t("error.missingCredentials"));
+		this.pds =
+			normalizePdsUrl(this.credentials.pdsUrl ?? "") || (await resolvePds(identifier));
+		try {
+			this.session = await this.raw<Session>("POST", "com.atproto.server.createSession", {
+				body: { identifier, password: password.trim() },
+			});
+		} catch (e) {
+			if (e instanceof XrpcError && e.error === "AuthenticationRequired")
+				throw new Error(i18next.t("error.badCredentials", { identifier }), { cause: e });
+			throw e;
+		}
+		// A login through the entryway (email) continues on the account's own PDS
+		if (this.session.didDoc) {
+			try {
+				this.pds = pdsFromDidDocument(this.session.didDoc);
+			} catch {
+				/* keep the current PDS */
+			}
+		}
 		return this.session;
 	}
 
@@ -68,14 +92,14 @@ export class AtpClient {
 			await this.login();
 			return;
 		}
-		const res = await this.raw("POST", "com.atproto.server.refreshSession", {
+		const res = await this.raw<Session>("POST", "com.atproto.server.refreshSession", {
 			token: this.session.refreshJwt,
 		}).catch(() => null);
-		if (res) this.session = { ...this.session, ...(res.json as Session) };
+		if (res) this.session = { ...this.session, ...res };
 		else await this.login();
 	}
 
-	private async raw(
+	private async raw<T>(
 		method: "GET" | "POST",
 		nsid: string,
 		opts: {
@@ -85,15 +109,16 @@ export class AtpClient {
 			contentType?: string;
 			token?: string;
 		} = {}
-	): Promise<RequestUrlResponse> {
+	): Promise<T> {
 		const query = Object.entries(opts.params ?? {})
 			.filter(([, v]) => v !== undefined)
 			.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
 			.join("&");
 		const headers: Record<string, string> = {};
 		if (opts.token) headers.Authorization = `Bearer ${opts.token}`;
+		const url = `${this.pds}/xrpc/${nsid}${query ? `?${query}` : ""}`;
 		const res = await requestUrl({
-			url: `${this.pds}/xrpc/${nsid}${query ? `?${query}` : ""}`,
+			url,
 			method,
 			headers,
 			contentType:
@@ -103,21 +128,23 @@ export class AtpClient {
 			throw: false,
 		});
 		if (res.status >= 400) {
-			let error = "";
-			let message = res.text;
+			let json: { error?: string; message?: string };
 			try {
-				const json = res.json as { error?: string; message?: string };
-				error = json.error ?? "";
-				message = json.message ?? message;
-			} catch {
-				/* not json */
+				json = readJson(res, url);
+			} catch (e) {
+				// An HTML page or a proxy error: not an AT Protocol server
+				throw new XrpcError(res.status, "", (e as Error).message);
 			}
-			throw new XrpcError(res.status, error, message);
+			throw new XrpcError(
+				res.status,
+				json.error ?? "",
+				json.message ?? `HTTP ${res.status}`
+			);
 		}
-		return res;
+		return readJson<T>(res, url);
 	}
 
-	private async call(
+	private async call<T>(
 		method: "GET" | "POST",
 		nsid: string,
 		opts: {
@@ -126,14 +153,14 @@ export class AtpClient {
 			binary?: ArrayBuffer;
 			contentType?: string;
 		} = {}
-	): Promise<RequestUrlResponse> {
+	): Promise<T> {
 		await this.ensureSession();
 		try {
-			return await this.raw(method, nsid, { ...opts, token: this.session!.accessJwt });
+			return await this.raw<T>(method, nsid, { ...opts, token: this.session!.accessJwt });
 		} catch (e) {
 			if (e instanceof XrpcError && (e.error === "ExpiredToken" || e.status === 401)) {
 				await this.refresh();
-				return this.raw(method, nsid, { ...opts, token: this.session!.accessJwt });
+				return this.raw<T>(method, nsid, { ...opts, token: this.session!.accessJwt });
 			}
 			throw e;
 		}
@@ -145,10 +172,9 @@ export class AtpClient {
 		repo = this.did
 	): Promise<ListedRecord<T> | null> {
 		try {
-			const res = await this.call("GET", "com.atproto.repo.getRecord", {
+			return await this.call<ListedRecord<T>>("GET", "com.atproto.repo.getRecord", {
 				params: { repo, collection, rkey },
 			});
-			return res.json as ListedRecord<T>;
 		} catch (e) {
 			if (e instanceof XrpcError && (e.error === "RecordNotFound" || e.status === 404))
 				return null;
@@ -160,10 +186,11 @@ export class AtpClient {
 		const out: ListedRecord<T>[] = [];
 		let cursor: string | undefined;
 		do {
-			const res = await this.call("GET", "com.atproto.repo.listRecords", {
-				params: { repo, collection, limit: 100, cursor },
-			});
-			const json = res.json as { records: ListedRecord<T>[]; cursor?: string };
+			const json = await this.call<{ records: ListedRecord<T>[]; cursor?: string }>(
+				"GET",
+				"com.atproto.repo.listRecords",
+				{ params: { repo, collection, limit: 100, cursor } }
+			);
 			out.push(...json.records);
 			cursor = json.records.length ? json.cursor : undefined;
 		} while (cursor);
@@ -175,10 +202,9 @@ export class AtpClient {
 		rkey: string,
 		record: unknown
 	): Promise<{ uri: string; cid: string }> {
-		const res = await this.call("POST", "com.atproto.repo.putRecord", {
+		return this.call<{ uri: string; cid: string }>("POST", "com.atproto.repo.putRecord", {
 			body: { repo: this.did, collection, rkey, record, validate: false },
 		});
-		return res.json as { uri: string; cid: string };
 	}
 
 	async deleteRecord(collection: string, rkey: string): Promise<void> {
@@ -188,20 +214,23 @@ export class AtpClient {
 	}
 
 	async uploadBlob(data: ArrayBuffer, mimeType: string): Promise<BlobRef> {
-		const res = await this.call("POST", "com.atproto.repo.uploadBlob", {
-			binary: data,
-			contentType: mimeType,
-		});
-		return (res.json as { blob: BlobRef }).blob;
+		const res = await this.call<{ blob: BlobRef }>(
+			"POST",
+			"com.atproto.repo.uploadBlob",
+			{
+				binary: data,
+				contentType: mimeType,
+			}
+		);
+		return res.blob;
 	}
 
 	async getBskyPost(uri: string): Promise<{ uri: string; cid: string } | null> {
-		const res = await requestUrl({
-			url: `https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=${encodeURIComponent(uri)}`,
-			throw: false,
-		});
+		const url = `https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=${encodeURIComponent(uri)}`;
+		const res = await requestUrl({ url, throw: false });
 		if (res.status >= 400) return null;
-		const post = (res.json as { posts: { uri: string; cid: string }[] }).posts[0];
+		const post = readJson<{ posts?: { uri: string; cid: string }[] }>(res, url)
+			.posts?.[0];
 		return post ? { uri: post.uri, cid: post.cid } : null;
 	}
 }

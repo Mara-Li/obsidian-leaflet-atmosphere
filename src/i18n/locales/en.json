@@ -31,7 +31,10 @@
 		"slugTaken": "A document with the record key \"{{slug}}\" already exists",
 		"unknownPublication": "Unknown publication \"{{name}}\", refresh the list in the settings",
 		"publishDisabled": "Publishing is disabled for this note ({{key}}: false)",
-		"notMarked": "This note is not marked for publishing ({{key}}: true)"
+		"notMarked": "This note is not marked for publishing ({{key}}: true)",
+		"notJson": "{{host}} did not answer like an AT Protocol server (HTTP {{status}}). Check your handle and the PDS URL in the settings.",
+		"unknownHandle": "Handle \"{{handle}}\" not found. Use your full handle, e.g. alice.bsky.social.",
+		"badCredentials": "Wrong handle or app password for {{identifier}}."
 	},
 	"modal": {
 		"choosePublication": "Choose where to publish",
@@ -46,19 +49,19 @@
 	},
 	"settings": {
 		"account": {
-			"heading": "Account",
 			"identifier": "Handle",
-			"identifierDesc": "Your Bluesky / atproto handle or DID.",
+			"identifierDesc": "Your handle (alice.bsky.social), your DID or your email.",
 			"password": "App password",
 			"passwordDesc": "Create one in Bluesky → Settings → Privacy and security → App passwords.",
 			"pds": "PDS URL",
-			"pdsDesc": "Leave empty to resolve it from your handle.",
+			"pdsDesc": "Leave empty to find it from your handle. Required for an email login on a PDS other than Bluesky.",
 			"test": "Test connection",
 			"testDesc": "Log in and load your publications.",
-			"testButton": "Connect"
+			"testButton": "Connect",
+			"notConnected": "Not configured",
+			"pdsInvalid": "The URL cannot contain spaces"
 		},
 		"publication": {
-			"heading": "Publication",
 			"default": "Default publication",
 			"defaultDesc": "Where new notes are published. Override per note with the \"leaflet_publication\" property.",
 			"refresh": "Refresh publications",
@@ -78,7 +81,6 @@
 			"recommendsDesc": "Override per note with \"leaflet_recommends\"."
 		},
 		"frontmatter": {
-			"heading": "Properties",
 			"title": "Title property",
 			"titleDesc": "Falls back to the first heading, then to the file name.",
 			"description": "Description property",
@@ -96,10 +98,11 @@
 			"publish": "Publish property",
 			"publishDesc": "Set it to true to mark a note for publishing, false to block it.",
 			"requireFlag": "Only publish marked notes",
-			"requireFlagDesc": "Refuse to publish a note unless its publish property is true."
+			"requireFlagDesc": "Refuse to publish a note unless its publish property is true.",
+			"readHeading": "Read when publishing",
+			"writeHeading": "Saved after publishing"
 		},
 		"content": {
-			"heading": "Content",
 			"slugAsKey": "Use slug as record key",
 			"slugAsKeyDesc": "Build the post URL from the slug or file name instead of a random identifier.",
 			"firstHeading": "Use first heading as title",
@@ -129,12 +132,24 @@
 			"mermaidImage": "Image rendered by Obsidian",
 			"mermaidCode": "Code block",
 			"dataview": "Convert Dataview queries",
-			"dataviewDesc": "Replace the queries with their result. When disabled, queries are removed. Requires the Dataview plugin."
+			"dataviewDesc": "Replace the queries with their result. When disabled, queries are removed. Requires the Dataview plugin.",
+			"blocksHeading": "Blocks",
+			"imagesHeading": "Images"
 		},
 		"after": {
 			"heading": "After publishing",
 			"copy": "Copy link",
 			"open": "Open in browser"
+		},
+		"pages": {
+			"account": "Account",
+			"accountDesc": "Bluesky handle, app password and PDS.",
+			"publication": "Publication",
+			"publicationDesc": "Where notes are published and the default post preferences.",
+			"content": "Conversion",
+			"contentDesc": "How Obsidian Markdown becomes a Leaflet post.",
+			"properties": "Properties",
+			"propertiesDesc": "Note properties read and written by the plugin."
 		}
 	}
 }

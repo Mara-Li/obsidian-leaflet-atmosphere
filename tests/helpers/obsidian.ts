@@ -40,7 +40,26 @@ export async function setup(
 	settings: Partial<LeafletAtmosphereSettings> = {},
 	vault = TEST_VAULT
 ): Promise<void> {
-	await obsidianPage.resetVault(vault, notesOf(vault));
+	const notes = notesOf(vault);
+	await obsidianPage.resetVault(vault, notes);
+	// Wait for the metadata cache to hold the properties of the restored notes
+	const expected: Record<string, string[]> = {};
+	for (const [file, content] of Object.entries(notes)) {
+		const yaml = /^---\n([\s\S]*?)\n---/.exec(content)?.[1] ?? "";
+		expected[file] = [...yaml.matchAll(/^([A-Za-z_][\w-]*):/gm)].map((m) => m[1]!).sort();
+	}
+	await browser.waitUntil(
+		() =>
+			browser.executeObsidian(({ app }, wanted) => {
+				return Object.entries(wanted).every(([p, keys]) => {
+					const file = app.vault.getFileByPath(p);
+					if (!file) return false;
+					const fm = app.metadataCache.getFileCache(file)?.frontmatter ?? {};
+					return JSON.stringify(Object.keys(fm).sort()) === JSON.stringify(keys);
+				});
+			}, expected),
+		{ timeout: 15000, timeoutMsg: "Metadata cache not ready" }
+	);
 	await browser.executeObsidian(
 		({ plugins }, { did, defaults, overrides }) => {
 			const plugin = plugins.leafletAtmosphere;

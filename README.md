@@ -7,10 +7,12 @@ Documents are written as [`site.standard.document`](https://standard.site) recor
 ## ⚙️ Setup
 
 1. Create an app password in Bluesky: **Settings → Privacy and security → App passwords**.
-2. In **Settings → Leaflet Atmosphere**, fill in your handle (or DID) and select the app password (it is kept in Obsidian's secret storage, not in `data.json`).
-3. Select **Connect**: your publications are loaded and the first one becomes the default publication.
+2. In **Settings → Leaflet Atmosphere → Account**, fill in your handle (`alice.bsky.social`, `@alice.bsky.social` or a `bsky.app` profile link also work), your DID or your email, and select the app password (it is kept in Obsidian's secret storage, not in `data.json`).
+3. Select **Connect**: your publications are loaded and the first one becomes the default publication. Change it in **Publication**.
 
-If your account is not hosted on Bluesky, the PDS is resolved from your handle. You can also set it manually.
+If your account is not hosted on Bluesky, the PDS is resolved from your handle. You can also set it manually (`https://` and a trailing `/xrpc` are optional). An email login goes through `bsky.social` unless a PDS is set.
+
+The other settings are grouped in sub-pages: **Publication** (default publication and post preferences), **Conversion** (how Markdown is converted) and **Properties** (note properties read and written by the plugin).
 
 ## 🚀 Usage
 

@@ -31,7 +31,10 @@
 		"slugTaken": "Un document avec la clé « {{slug}} » existe déjà",
 		"unknownPublication": "Publication « {{name}} » inconnue, actualisez la liste dans les réglages",
 		"publishDisabled": "La publication est désactivée pour cette note ({{key}}: false)",
-		"notMarked": "Cette note n'est pas marquée pour publication ({{key}}: true)"
+		"notMarked": "Cette note n'est pas marquée pour publication ({{key}}: true)",
+		"notJson": "{{host}} n'a pas répondu comme un serveur AT Protocol (HTTP {{status}}). Vérifiez votre identifiant et l'URL du PDS dans les réglages.",
+		"unknownHandle": "Identifiant « {{handle}} » introuvable. Utilisez votre handle complet, par exemple alice.bsky.social.",
+		"badCredentials": "Identifiant ou mot de passe d'application incorrect pour {{identifier}}."
 	},
 	"modal": {
 		"choosePublication": "Choisissez où publier",
@@ -46,19 +49,19 @@
 	},
 	"settings": {
 		"account": {
-			"heading": "Compte",
 			"identifier": "Identifiant",
-			"identifierDesc": "Votre handle Bluesky / atproto ou votre DID.",
+			"identifierDesc": "Votre handle (alice.bsky.social), votre DID ou votre e-mail.",
 			"password": "Mot de passe d'application",
 			"passwordDesc": "À créer dans Bluesky → Paramètres → Confidentialité et sécurité → Mots de passe d'application.",
 			"pds": "URL du PDS",
-			"pdsDesc": "Laisser vide pour le déduire de votre identifiant.",
+			"pdsDesc": "Laisser vide pour le déduire de l'identifiant. Nécessaire pour une connexion par e-mail sur un autre PDS que Bluesky.",
 			"test": "Tester la connexion",
 			"testDesc": "Se connecter et charger vos publications.",
-			"testButton": "Connexion"
+			"testButton": "Connexion",
+			"notConnected": "Non configuré",
+			"pdsInvalid": "L'URL ne peut pas contenir d'espaces"
 		},
 		"publication": {
-			"heading": "Publication",
 			"default": "Publication par défaut",
 			"defaultDesc": "Où publier les nouvelles notes. Modifiable par note avec la propriété « leaflet_publication ».",
 			"refresh": "Actualiser les publications",
@@ -78,7 +81,6 @@
 			"recommendsDesc": "Modifiable par note avec « leaflet_recommends »."
 		},
 		"frontmatter": {
-			"heading": "Propriétés",
 			"title": "Propriété du titre",
 			"titleDesc": "À défaut, le premier titre puis le nom du fichier sont utilisés.",
 			"description": "Propriété de la description",
@@ -96,10 +98,11 @@
 			"publish": "Propriété de publication",
 			"publishDesc": "À true pour marquer une note à publier, à false pour la bloquer.",
 			"requireFlag": "Publier uniquement les notes marquées",
-			"requireFlagDesc": "Refuse de publier une note dont la propriété de publication n'est pas à true."
+			"requireFlagDesc": "Refuse de publier une note dont la propriété de publication n'est pas à true.",
+			"readHeading": "Lues à la publication",
+			"writeHeading": "Enregistrées après publication"
 		},
 		"content": {
-			"heading": "Contenu",
 			"slugAsKey": "Utiliser le slug comme clé",
 			"slugAsKeyDesc": "Construire l'URL à partir du slug ou du nom de fichier plutôt que d'un identifiant aléatoire.",
 			"firstHeading": "Utiliser le premier titre comme titre",
@@ -129,12 +132,24 @@
 			"mermaidImage": "Image rendue par Obsidian",
 			"mermaidCode": "Bloc de code",
 			"dataview": "Convertir les requêtes Dataview",
-			"dataviewDesc": "Remplace les requêtes par leur résultat. Désactivé, les requêtes sont retirées. Nécessite le plugin Dataview."
+			"dataviewDesc": "Remplace les requêtes par leur résultat. Désactivé, les requêtes sont retirées. Nécessite le plugin Dataview.",
+			"blocksHeading": "Blocs",
+			"imagesHeading": "Images"
 		},
 		"after": {
 			"heading": "Après publication",
 			"copy": "Copier le lien",
 			"open": "Ouvrir dans le navigateur"
+		},
+		"pages": {
+			"account": "Compte",
+			"accountDesc": "Identifiant Bluesky, mot de passe d'application et PDS.",
+			"publication": "Publication",
+			"publicationDesc": "Où publier les notes et préférences par défaut des articles.",
+			"content": "Conversion",
+			"contentDesc": "Comment le Markdown d'Obsidian devient un article Leaflet.",
+			"properties": "Propriétés",
+			"propertiesDesc": "Propriétés des notes lues et écrites par le plugin."
 		}
 	}
 }

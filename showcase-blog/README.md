@@ -17,7 +17,7 @@ The notes in `Books`, `Snippets`, `Drafts` and the drawing have `leaflet_publish
 ## Try it
 
 1. Copy this folder anywhere in your vault.
-2. Connect your account in **Settings → Leaflet Atmosphere** and choose a publication.
+2. Connect your account in **Settings → Leaflet Atmosphere → Account** and choose a publication in **Publication**.
 3. Run **Publish all marked notes** from the command palette.
 
 The seven posts are published with working links between them: a post linking to a note that is not published yet reserves its future address. Run the command again after editing a note to update the posts.
