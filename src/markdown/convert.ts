@@ -33,6 +33,7 @@ import {
 	withFeature,
 } from "./inline";
 import { type PostTheme, themeCss } from "../leaflet/fonts";
+import type { LinkPreview } from "../leaflet/linkPreview";
 import { calloutHtml, calloutStyle, richTextToHtml } from "./callouts";
 import { type EmbeddedNote, splitSubpath } from "./preprocess";
 
@@ -81,6 +82,8 @@ export interface ConverterDeps {
 	resolveBskyPost(handleOrDid: string, rkey: string): Promise<StrongRef | null>;
 	/** SVG markup of a rendered Mermaid diagram. */
 	renderDiagram?: (source: string) => Promise<string | null>;
+	/** Title, image and standard.site records of a web page, for link cards. */
+	linkPreview?: (url: string) => Promise<LinkPreview>;
 	/** DID of a mentioned handle, or null when it does not exist. */
 	resolveMention?: (handle: string) => Promise<string | null>;
 	/** Notes embedded as sub-pages by the preprocessor. */
@@ -273,9 +276,32 @@ export class MarkdownConverter {
 			if (block) return block;
 			this.warnings.push(url);
 		}
-		if (token.type === "link" && bare && /^https?:/i.test(url))
-			return { $type: "pub.leaflet.blocks.website", src: url };
+		if (token.type === "link" && bare && /^https?:/i.test(url)) return this.linkCard(url);
 		return null;
+	}
+
+	/** Card of a web page, or the Leaflet card of a standard.site post or publication. */
+	private async linkCard(url: string): Promise<LeafletBlock> {
+		const preview = (await this.deps.linkPreview?.(url).catch(() => null)) ?? {};
+		if (preview.document)
+			return { $type: "pub.leaflet.blocks.standardSitePost", uri: preview.document };
+		if (preview.publication)
+			return {
+				$type: "pub.leaflet.blocks.standardSitePublication",
+				uri: preview.publication,
+			};
+		const image = preview.image
+			? await this.deps.images
+					.upload(preview.image, this.deps.sourcePath)
+					.catch(() => null)
+			: null;
+		return {
+			$type: "pub.leaflet.blocks.website",
+			src: url,
+			...(preview.title && { title: preview.title }),
+			...(preview.description && { description: preview.description }),
+			...(image && { previewImage: image.blob }),
+		};
 	}
 
 	private async bskyPost(actor: string, rkey: string): Promise<LeafletBlock | null> {

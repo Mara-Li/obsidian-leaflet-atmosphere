@@ -99,6 +99,17 @@ export interface WebsiteBlock {
 	src: string;
 	title?: string;
 	description?: string;
+	previewImage?: BlobRef;
+}
+
+export interface StandardSitePostBlock {
+	$type: "pub.leaflet.blocks.standardSitePost";
+	uri: string;
+}
+
+export interface StandardSitePublicationBlock {
+	$type: "pub.leaflet.blocks.standardSitePublication";
+	uri: string;
 }
 
 export interface IframeBlock {
@@ -162,6 +173,8 @@ export type LeafletBlock =
 	| MathBlock
 	| HorizontalRuleBlock
 	| WebsiteBlock
+	| StandardSitePostBlock
+	| StandardSitePublicationBlock
 	| IframeBlock
 	| HtmlBlock
 	| BskyPostBlock

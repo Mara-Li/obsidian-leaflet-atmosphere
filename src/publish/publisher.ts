@@ -4,6 +4,7 @@ import type { AtpClient, ListedRecord } from "../atproto/client";
 import { isValidRecordKey, nextTid, parseAtUri } from "../atproto/tid";
 import type { PostTheme } from "../leaflet/fonts";
 import { ImageUploader } from "../leaflet/images";
+import { fetchLinkPreview, type LinkPreview } from "../leaflet/linkPreview";
 import {
 	DOCUMENT_COLLECTION,
 	documentUrl,
@@ -64,6 +65,7 @@ export class Publisher {
 	private owners = new Map<string, string>();
 	private documents: Promise<ListedRecord<StandardDocument>[]> | null = null;
 	private mentions = new Map<string, Promise<string | null>>();
+	private previews = new Map<string, Promise<LinkPreview>>();
 	private themes = new Map<string, Promise<Partial<PublicationInfo> | null>>();
 
 	constructor(private plugin: LeafletAtmosphere) {}
@@ -134,6 +136,7 @@ export class Publisher {
 			strictLineBreaks: this.strictLineBreaks(),
 			resolveBskyPost: (actor, postRkey) => this.resolveBskyPost(client, actor, postRkey),
 			resolveMention: (handle) => this.resolveMention(client, handle),
+			linkPreview: (url) => this.linkPreview(url),
 			renderDiagram: (source) => renderMermaid(this.app, source, file.path),
 			theme: await this.themeOf(client, site),
 			embeds: preprocessor.embeds,
@@ -394,6 +397,16 @@ export class Publisher {
 		}
 		choice ??= options.site ?? existingSite ?? this.settings.defaultPublication;
 		return choice && choice.startsWith("at://") ? choice : choice || standaloneSite(did);
+	}
+
+	/** Preview of a linked page, fetched once per run. */
+	private linkPreview(url: string): Promise<LinkPreview> {
+		let pending = this.previews.get(url);
+		if (!pending) {
+			pending = fetchLinkPreview(url).catch(() => ({}));
+			this.previews.set(url, pending);
+		}
+		return pending;
 	}
 
 	/** DID of a mentioned handle, resolved once per run. */

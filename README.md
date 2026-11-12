@@ -77,7 +77,7 @@ The keys of the first seven properties can be changed in the settings. Deleting 
 | Tables | HTML block (with the fonts of the publication) or code block |
 | A Bluesky post alone on its line: bare or labelled link (`bsky.app` or another client), `at://` URI, or the embed code copied from Bluesky | Bluesky post embed (a post that cannot be found becomes a link card, with a warning) |
 | A YouTube link alone on its line, or `![](youtube url)` | Video embed |
-| A web address alone on its line | Link card |
+| A web address alone on its line | Link card with the title, description and image of the page; a standard.site post or publication gets its Leaflet card |
 | `<iframe src="…">` | Embed block |
 | `%%comments%%`, `<!-- comments -->`, block IDs, frontmatter | Removed |
 
@@ -93,6 +93,7 @@ The plugin only contacts the services needed to publish, and only when you run a
 - `public.api.bsky.app`, `plc.directory` or your domain, to resolve your handle and your PDS;
 - `public.api.bsky.app` to fetch Bluesky posts embedded in a note;
 - the remote images of the note, when **Upload remote images** is enabled.
+- the web pages linked alone on their line, to build their link card (title, description, image and standard.site records), when **Link cards** is enabled.
 
 Nothing else is collected or sent.
 
