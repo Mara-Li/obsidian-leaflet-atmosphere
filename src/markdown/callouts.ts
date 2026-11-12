@@ -1,3 +1,4 @@
+import { type PostTheme, themeCss } from "../leaflet/fonts";
 import { utf8Length } from "../leaflet/richtext";
 import type {
 	Facet,
@@ -98,12 +99,17 @@ function listToHtml(
 }
 
 /** HTML of the blocks of a callout body, with a rough line count for the height. */
-export function blocksToHtml(blocks: LeafletBlock[]): { html: string; lines: number } {
+export function blocksToHtml(
+	blocks: LeafletBlock[],
+	fontSize = 16
+): { html: string; lines: number } {
 	let lines = 0;
+	// Characters per line in a ~620px wide post, for this font size
+	const perLine = Math.round(1150 / fontSize);
 	const count = (text: string) =>
 		text
 			.split("\n")
-			.reduce((n, line) => n + Math.max(1, Math.ceil(utf8Length(line) / 75)), 0);
+			.reduce((n, line) => n + Math.max(1, Math.ceil(utf8Length(line) / perLine)), 0);
 	const parts = blocks.map((block) => {
 		switch (block.$type) {
 			case "pub.leaflet.blocks.text":
@@ -138,20 +144,22 @@ export function blocksToHtml(blocks: LeafletBlock[]): { html: string; lines: num
 export function calloutHtml(
 	style: CalloutStyle,
 	titleHtml: string,
-	blocks: LeafletBlock[]
+	blocks: LeafletBlock[],
+	theme?: PostTheme
 ): { html: string; height: number } {
 	const { r, g, b } = style.color;
-	const body = blocksToHtml(blocks);
+	const font = themeCss(theme);
+	const body = blocksToHtml(blocks, font.fontSize);
 	const css =
-		"body{margin:0;font-family:system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.5;color:#222}" +
+		font.css +
 		`.callout{background:rgba(${r},${g},${b},.1);border-radius:6px;padding:12px 16px}` +
-		`.title{color:rgb(${r},${g},${b});font-weight:600;margin-bottom:4px}` +
+		`.title{color:rgb(${r},${g},${b});font-weight:700;margin-bottom:4px}` +
 		"p{margin:0 0 8px}p:last-child{margin:0}ul,ol{margin:0 0 8px;padding-left:22px}" +
 		"pre{background:rgba(0,0,0,.05);padding:8px;border-radius:4px;overflow:auto;margin:0 0 8px}" +
 		`a{color:rgb(${r},${g},${b})}`;
 	const html =
-		`<style>${css}</style><div class="callout"><div class="title">${style.emoji} ${titleHtml}</div>` +
+		`<style>${css}</style><div class="callout"><div class="title heading">${style.emoji} ${titleHtml}</div>` +
 		`${body.html}</div>`;
-	const height = Math.round(24 + 28 + body.lines * 22.5);
+	const height = Math.round(24 + font.lineHeight + 4 + body.lines * font.lineHeight);
 	return { html, height: Math.min(1600, Math.max(16, height)) };
 }

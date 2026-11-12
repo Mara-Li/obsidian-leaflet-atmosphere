@@ -32,6 +32,7 @@ import {
 	InlineCollector,
 	withFeature,
 } from "./inline";
+import { type PostTheme, themeCss } from "../leaflet/fonts";
 import { calloutHtml, calloutStyle, richTextToHtml } from "./callouts";
 import { splitSubpath } from "./preprocess";
 
@@ -64,6 +65,8 @@ export interface ConverterDeps {
 	resolveBskyPost(handleOrDid: string, rkey: string): Promise<StrongRef | null>;
 	/** SVG markup of a rendered Mermaid diagram. */
 	renderDiagram?: (source: string) => Promise<string | null>;
+	/** Fonts and colors of the publication, for HTML blocks. */
+	theme?: PostTheme;
 	/** Published (or reserved) URL of a note, used for internal links. */
 	noteUrl?: (file: TFile) => Promise<string | null>;
 }
@@ -274,7 +277,8 @@ export class MarkdownConverter {
 			const { html, height } = calloutHtml(
 				style,
 				richTextToHtml(title.text, title.facets),
-				inner
+				inner,
+				this.deps.theme
 			);
 			return [{ $type: "pub.leaflet.blocks.html", html, height }];
 		}
@@ -396,15 +400,17 @@ export class MarkdownConverter {
 					`<tr>${r.map((c) => `<td${align(c.align)}>${htmlInline(c.tokens, resolve)}</td>`).join("")}</tr>`
 			)
 			.join("");
+		const font = themeCss(this.deps.theme);
 		const style =
-			"body{margin:0;font-family:system-ui,sans-serif;font-size:15px;color:#222}" +
+			font.css +
 			"table{border-collapse:collapse;width:100%}" +
-			"th,td{border:1px solid #ccc;padding:6px 10px;text-align:left}" +
-			"th{background:#f4f4f4}code{font-family:monospace}";
+			"th,td{border:1px solid rgba(128,128,128,.35);padding:6px 10px;text-align:left}" +
+			"th{background:rgba(128,128,128,.1)}";
+		const rowHeight = font.lineHeight + 13;
 		return {
 			$type: "pub.leaflet.blocks.html",
 			html: `<style>${style}</style><table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>`,
-			height: Math.min(1600, Math.max(16, (token.rows.length + 1) * 36 + 8)),
+			height: Math.min(1600, Math.max(16, (token.rows.length + 1) * rowHeight + 8)),
 		};
 	}
 

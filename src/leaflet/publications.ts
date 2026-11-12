@@ -4,14 +4,47 @@ import type { PublicationInfo } from "./types";
 
 export const DOCUMENT_COLLECTION = "site.standard.document";
 
+interface Color {
+	r?: number;
+	g?: number;
+	b?: number;
+	a?: number;
+}
+
+interface Theme {
+	bodyFont?: string;
+	headingFont?: string;
+	primary?: Color;
+}
+
 interface StandardPublication {
 	name?: string;
 	url?: string;
+	theme?: Theme;
 }
 
 interface LegacyPublication {
 	name?: string;
 	base_path?: string;
+	theme?: Theme;
+}
+
+function toCss(color: Color | undefined): string | undefined {
+	if (!color || [color.r, color.g, color.b].some((c) => typeof c !== "number"))
+		return undefined;
+	return typeof color.a === "number"
+		? `rgba(${color.r},${color.g},${color.b},${color.a / 100})`
+		: `rgb(${color.r},${color.g},${color.b})`;
+}
+
+/** Fonts and text color of a publication theme, without empty values. */
+function themeOf(theme: Theme | undefined): Partial<PublicationInfo> {
+	const out: Partial<PublicationInfo> = {};
+	if (theme?.bodyFont) out.bodyFont = theme.bodyFont;
+	if (theme?.headingFont) out.headingFont = theme.headingFont;
+	const textColor = toCss(theme?.primary);
+	if (textColor) out.textColor = textColor;
+	return out;
 }
 
 export async function fetchPublications(client: AtpClient): Promise<PublicationInfo[]> {
@@ -24,6 +57,7 @@ export async function fetchPublications(client: AtpClient): Promise<PublicationI
 		return {
 			uri: r.uri,
 			name,
+			...themeOf(r.value.theme),
 			url:
 				r.value.url?.replace(/\/+$/, "") ||
 				`https://leaflet.pub/lish/${client.did}/${encodeURIComponent(name)}`,
@@ -38,6 +72,7 @@ export async function fetchPublications(client: AtpClient): Promise<PublicationI
 		out.push({
 			uri: r.uri,
 			name,
+			...themeOf(r.value.theme),
 			url: r.value.base_path
 				? `https://${r.value.base_path.replace(/\/+$/, "")}`
 				: `https://leaflet.pub/lish/${client.did}/${encodeURIComponent(name)}`,

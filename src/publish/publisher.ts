@@ -3,6 +3,7 @@ import type { FrontMatterCache, TFile } from "obsidian";
 import type { AtpClient, ListedRecord } from "../atproto/client";
 import { resolveHandle } from "../atproto/identity";
 import { isValidRecordKey, nextTid, parseAtUri } from "../atproto/tid";
+import type { PostTheme } from "../leaflet/fonts";
 import { ImageUploader } from "../leaflet/images";
 import {
 	DOCUMENT_COLLECTION,
@@ -128,6 +129,7 @@ export class Publisher {
 			strictLineBreaks: this.strictLineBreaks(),
 			resolveBskyPost: (actor, postRkey) => this.resolveBskyPost(client, actor, postRkey),
 			renderDiagram: (source) => renderMermaid(this.app, source, file.path),
+			theme: this.themeOf(site),
 			noteUrl: (target) =>
 				target.path === file.path
 					? Promise.resolve(selfUrl)
@@ -370,6 +372,16 @@ export class Publisher {
 		}
 		choice ??= options.site ?? existingSite ?? this.settings.defaultPublication;
 		return choice && choice.startsWith("at://") ? choice : choice || standaloneSite(did);
+	}
+
+	/** Fonts and text color of the publication, for HTML blocks. */
+	private themeOf(site: string): PostTheme {
+		const pub = this.settings.publications.find((p) => p.uri === site);
+		return {
+			...(pub?.bodyFont && { bodyFont: pub.bodyFont }),
+			...(pub?.headingFont && { headingFont: pub.headingFont }),
+			...(pub?.textColor && { textColor: pub.textColor }),
+		};
 	}
 
 	private publicationsFor(site: string): PublicationInfo[] {

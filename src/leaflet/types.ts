@@ -215,4 +215,8 @@ export interface PublicationInfo {
 	uri: string;
 	name: string;
 	url: string;
+	/** Leaflet font ids and text color of the publication theme. */
+	bodyFont?: string;
+	headingFont?: string;
+	textColor?: string;
 }

@@ -1,12 +1,16 @@
 import { expect } from "@wdio/globals";
 import { sliceBytes, validateDocument } from "../helpers/lexicons";
-import { getRecords, publish, setup } from "../helpers/obsidian";
+import { browser } from "@wdio/globals";
+import { getRecords, PUBLICATION, publish, setup } from "../helpers/obsidian";
 import type { CalloutMode } from "../../src/interfaces";
 import type { BlockquoteBlock, HtmlBlock, StandardDocument } from "../../src/leaflet/types";
 
-async function publishCallouts(mode: CalloutMode): Promise<StandardDocument> {
+async function publishCallouts(
+	mode: CalloutMode,
+	theme: { bodyFont?: string; textColor?: string } = {}
+): Promise<StandardDocument> {
 	// Callouts.md is not marked: allow publishing it by hand
-	await setup({ calloutMode: mode, publishKey: "" });
+	await setup({ calloutMode: mode, publishKey: "", publications: [{ ...PUBLICATION, ...theme }] });
 	await publish("Callouts.md");
 	const record = Object.values(await getRecords())[0]!;
 	expect(validateDocument(record)).toBe("");
@@ -56,6 +60,46 @@ describe("Callouts", function () {
 		expect(boxes[0]!.html).toContain('<a href="https://example.com" target="_blank">an hour</a>');
 		expect(boxes[1]!.html).toContain("<ul><li>Hot oven</li><li>Sharp knife</li></ul>");
 		for (const box of boxes) expect(box.height).toBeGreaterThan(60);
+		// Default Leaflet font, served by leaflet.pub
+		expect(boxes[0]!.html).toContain("url('https://leaflet.pub/fonts/iaw-quattro-vf.woff2')");
+		expect(boxes[0]!.html).toContain("font-size:16px");
+	});
+
+	it("use the font and text color of the publication", async function () {
+		const blocks = blocksOf(
+			await publishCallouts("html", { bodyFont: "lora", textColor: "rgb(40,60,90)" })
+		);
+		const box = blocks.find((b): b is HtmlBlock => b.$type === "pub.leaflet.blocks.html")!;
+		expect(box.html).toContain("https://fonts.googleapis.com/css2?family=Lora:");
+		expect(box.html).toContain("font-family:'Lora',Georgia, serif;font-size:17px");
+		expect(box.html).toContain("color:rgb(40,60,90)");
+		expect(box.html).not.toContain("iaw-quattro");
+	});
+
+	it("reads the theme of the publications", async function () {
+		await setup();
+		const pub = await browser.executeObsidian(async ({ plugins }, uri) => {
+			const store = (window as unknown as { leafletTest: { records: Record<string, unknown> } })
+				.leafletTest;
+			store.records[`site.standard.publication/${uri.split("/").pop()}`] = {
+				$type: "site.standard.publication",
+				name: "Test garden",
+				url: "https://garden.example.com",
+				theme: {
+					$type: "pub.leaflet.publication#theme",
+					bodyFont: "lora",
+					headingFont: "montserrat",
+					primary: { $type: "pub.leaflet.theme.color#rgb", r: 40, g: 60, b: 90 },
+				},
+			};
+			await plugins.leafletAtmosphere.refreshPublications();
+			return plugins.leafletAtmosphere.settings.publications[0];
+		}, PUBLICATION.uri);
+		expect(pub).toMatchObject({
+			bodyFont: "lora",
+			headingFont: "montserrat",
+			textColor: "rgb(40,60,90)",
+		});
 	});
 
 	it("become cards opening sub-pages", async function () {
