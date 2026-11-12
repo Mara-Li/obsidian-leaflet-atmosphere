@@ -60,6 +60,8 @@ export interface ConverterDeps {
 	sourcePath: string;
 	strictLineBreaks: boolean;
 	resolveBskyPost(handleOrDid: string, rkey: string): Promise<StrongRef | null>;
+	/** URLs published during the current run, by file path. */
+	publishedUrls?: Map<string, string>;
 }
 
 export interface ConvertResult {
@@ -303,9 +305,7 @@ export class MarkdownConverter {
 		return { $type: "pub.leaflet.blocks.unorderedList", children };
 	}
 
-	private async listItem(
-		item: Tokens.ListItem
-	): Promise<{
+	private async listItem(item: Tokens.ListItem): Promise<{
 		content: ListContent;
 		nested: (UnorderedListBlock | OrderedListBlock)[];
 	}> {
@@ -582,6 +582,8 @@ export class MarkdownConverter {
 			this.deps.sourcePath
 		);
 		if (!(file instanceof TFile)) return null;
+		const known = this.deps.publishedUrls?.get(file.path);
+		if (known) return known;
 		const fm = this.deps.app.metadataCache.getFileCache(file)?.frontmatter;
 		const url = fm?.[this.deps.settings.urlKey] as unknown;
 		return typeof url === "string" && /^https?:\/\//.test(url) ? url : null;

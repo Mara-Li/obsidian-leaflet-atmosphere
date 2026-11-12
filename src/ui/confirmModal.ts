@@ -6,7 +6,9 @@ export class ConfirmModal extends Modal {
 		app: App,
 		title: string,
 		private message: string,
-		private onConfirm: () => void
+		private onConfirm: () => void,
+		private confirmText = i18next.t("modal.confirm"),
+		private destructive = true
 	) {
 		super(app);
 		this.setTitle(title);
@@ -18,15 +20,14 @@ export class ConfirmModal extends Modal {
 			.addButton((b) =>
 				b.setButtonText(i18next.t("modal.cancel")).onClick(() => this.close())
 			)
-			.addButton((b) =>
-				b
-					.setButtonText(i18next.t("modal.confirm"))
-					.setDestructive()
-					.onClick(() => {
-						this.close();
-						this.onConfirm();
-					})
-			);
+			.addButton((b) => {
+				b.setButtonText(this.confirmText).onClick(() => {
+					this.close();
+					this.onConfirm();
+				});
+				if (this.destructive) b.setDestructive();
+				else b.setCta();
+			});
 	}
 
 	onClose() {

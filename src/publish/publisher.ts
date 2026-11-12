@@ -47,6 +47,9 @@ export interface PublishOptions {
 }
 
 export class Publisher {
+	/** Notes published by this instance; the metadata cache may lag behind. */
+	readonly published = new Map<string, { uri: string; url: string }>();
+
 	constructor(private plugin: LeafletAtmosphere) {}
 
 	private get settings() {
@@ -63,7 +66,9 @@ export class Publisher {
 
 	/** Record key of the document already published from this note, if any. */
 	existingRkey(file: TFile, did: string): string | undefined {
-		const uri = getString(this.frontmatter(file), this.settings.uriKey);
+		const uri =
+			this.published.get(file.path)?.uri ??
+			getString(this.frontmatter(file), this.settings.uriKey);
 		const parsed = uri ? parseAtUri(uri) : null;
 		if (!parsed || parsed.collection !== DOCUMENT_COLLECTION || parsed.repo !== did)
 			return undefined;
@@ -75,6 +80,7 @@ export class Publisher {
 		const did = client.did;
 		const fm = this.frontmatter(file);
 		const s = this.settings;
+		this.checkPublishFlag(fm);
 
 		let rkey = this.existingRkey(file, did);
 		const existing = rkey
@@ -101,6 +107,7 @@ export class Publisher {
 			sourcePath: file.path,
 			strictLineBreaks: this.strictLineBreaks(),
 			resolveBskyPost: (actor, postRkey) => this.resolveBskyPost(client, actor, postRkey),
+			publishedUrls: new Map([...this.published].map(([path, v]) => [path, v.url])),
 		});
 		const converted = await converter.convert(markdown);
 
@@ -139,6 +146,7 @@ export class Publisher {
 
 		const result = await client.putRecord(DOCUMENT_COLLECTION, rkey, record);
 		const url = documentUrl(site, path, this.publicationsFor(site));
+		this.published.set(file.path, { uri: result.uri, url });
 
 		if (s.writeFrontmatter)
 			await this.app.fileManager.processFrontMatter(
@@ -157,14 +165,30 @@ export class Publisher {
 		const rkey = this.existingRkey(file, client.did);
 		if (!rkey) return false;
 		await client.deleteRecord(DOCUMENT_COLLECTION, rkey);
+		this.published.delete(file.path);
 		await this.app.fileManager.processFrontMatter(
 			file,
 			(front: Record<string, unknown>) => {
 				delete front[this.settings.uriKey];
 				delete front[this.settings.urlKey];
+				const key = this.settings.publishKey;
+				if (key && front[key] === true) front[key] = false;
 			}
 		);
 		return true;
+	}
+
+	isMarked(file: TFile): boolean {
+		return getBoolean(this.frontmatter(file), this.settings.publishKey) === true;
+	}
+
+	private checkPublishFlag(fm: FrontMatterCache | undefined) {
+		const key = this.settings.publishKey;
+		if (!key) return;
+		const flag = getBoolean(fm, key);
+		if (flag === false) throw new Error(i18next.t("error.publishDisabled", { key }));
+		if (flag !== true && this.settings.requirePublishFlag)
+			throw new Error(i18next.t("error.notMarked", { key }));
 	}
 
 	private strictLineBreaks(): boolean {

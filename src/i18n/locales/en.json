@@ -7,7 +7,8 @@
 		"open": "Open published note in browser",
 		"refreshPublications": "Refresh publications",
 		"fileMenu": "Publish to Leaflet",
-		"ribbon": "Publish to Leaflet"
+		"ribbon": "Publish to Leaflet",
+		"publishMarked": "Publish all marked notes"
 	},
 	"notice": {
 		"publishing": "Publishing to Leaflet…",
@@ -18,13 +19,19 @@
 		"linkCopied": "Leaflet link copied",
 		"missingImages": "Some images could not be uploaded: {{list}}",
 		"publicationsRefreshed": "{{count}} publication(s) found",
-		"connected": "Connected as {{handle}}"
+		"connected": "Connected as {{handle}}",
+		"batchProgress": "Publishing {{current}}/{{total}}: {{name}}",
+		"batchDone": "Leaflet: {{created}} published, {{updated}} updated, {{failed}} failed",
+		"batchFailed": "Failed: {{list}}",
+		"noMarked": "No note has \"{{key}}: true\""
 	},
 	"error": {
 		"prefix": "Leaflet: {{message}}",
 		"missingCredentials": "Set your handle and app password in the plugin settings",
 		"slugTaken": "A document with the record key \"{{slug}}\" already exists",
-		"unknownPublication": "Unknown publication \"{{name}}\", refresh the list in the settings"
+		"unknownPublication": "Unknown publication \"{{name}}\", refresh the list in the settings",
+		"publishDisabled": "Publishing is disabled for this note ({{key}}: false)",
+		"notMarked": "This note is not marked for publishing ({{key}}: true)"
 	},
 	"modal": {
 		"choosePublication": "Choose where to publish",
@@ -32,7 +39,10 @@
 		"unpublishTitle": "Delete from Leaflet?",
 		"unpublishDesc": "The document \"{{title}}\" will be removed from your PDS. The note stays in your vault.",
 		"confirm": "Delete",
-		"cancel": "Cancel"
+		"cancel": "Cancel",
+		"batchTitle": "Publish marked notes?",
+		"batchDesc": "{{count}} note(s) with \"{{key}}: true\" will be published or updated on Leaflet.",
+		"publish": "Publish"
 	},
 	"settings": {
 		"account": {
@@ -82,7 +92,11 @@
 			"url": "URL property",
 			"write": "Save link in properties",
 			"writeDesc": "Store the record URI and URL in the note after publishing. Required to update a post.",
-			"noSpaces": "Property names cannot contain spaces"
+			"noSpaces": "Property names cannot contain spaces",
+			"publish": "Publish property",
+			"publishDesc": "Set it to true to mark a note for publishing, false to block it.",
+			"requireFlag": "Only publish marked notes",
+			"requireFlagDesc": "Refuse to publish a note unless its publish property is true."
 		},
 		"content": {
 			"heading": "Content",

@@ -238,6 +238,17 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 				heading: t("settings.frontmatter.heading"),
 				items: [
 					this.keyField(
+						"publishKey",
+						t("settings.frontmatter.publish"),
+						t("settings.frontmatter.publishDesc")
+					),
+					{
+						name: t("settings.frontmatter.requireFlag"),
+						desc: t("settings.frontmatter.requireFlagDesc"),
+						visible: () => !!this.plugin.settings.publishKey,
+						control: { type: "toggle", key: "requirePublishFlag" },
+					},
+					this.keyField(
 						"titleKey",
 						t("settings.frontmatter.title"),
 						t("settings.frontmatter.titleDesc")

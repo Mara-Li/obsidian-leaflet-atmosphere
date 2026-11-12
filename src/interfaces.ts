@@ -13,6 +13,8 @@ export interface LeafletAtmosphereSettings {
 	publications: PublicationInfo[];
 	defaultPublication: string;
 
+	publishKey: string;
+	requirePublishFlag: boolean;
 	titleKey: string;
 	descriptionKey: string;
 	tagsKey: string;
@@ -51,6 +53,8 @@ export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
 	publications: [],
 	defaultPublication: "",
 
+	publishKey: "leaflet_publish",
+	requirePublishFlag: false,
 	titleKey: "title",
 	descriptionKey: "description",
 	tagsKey: "tags",

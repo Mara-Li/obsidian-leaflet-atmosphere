@@ -6,6 +6,7 @@ import {
 	publishedUrl,
 	publishFile,
 	publishFileTo,
+	publishMarkedFiles,
 	unpublishFile,
 } from "./actions";
 
@@ -39,6 +40,13 @@ export function registerCommands(plugin: LeafletAtmosphere) {
 			if (!checking) publishFileTo(plugin, file);
 			return true;
 		},
+	});
+
+	plugin.addCommand({
+		id: "publish-marked-notes",
+		name: t("commands.publishMarked"),
+		icon: "send",
+		callback: () => publishMarkedFiles(plugin),
 	});
 
 	plugin.addCommand({

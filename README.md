@@ -16,6 +16,7 @@ If your account is not hosted on Bluesky, the PDS is resolved from your handle. 
 
 | Command | Description |
 | --- | --- |
+| **Publish all marked notes** | Publish or update every note with `leaflet_publish: true`, after confirmation. |
 | **Publish current note** | Create or update the Leaflet post of the note. Also available in the file menu and the ribbon. |
 | **Publish current note to…** | Choose the publication (or your personal page) before publishing. |
 | **Delete current note from Leaflet** | Delete the record from your PDS. The note is kept. |
@@ -28,6 +29,7 @@ After the first publication, the record URI (`leaflet_uri`) and the URL (`leafle
 
 | Property | Default key | Usage |
 | --- | --- | --- |
+| Publish | `leaflet_publish` | `true` marks the note for **Publish all marked notes**, `false` blocks any publishing. With **Only publish marked notes**, `true` is required. |
 | Title | `title` | Falls back to the first `# heading` (removed from the body), then to the file name. |
 | Description | `description` | Post subtitle. |
 | Tags | `tags` | Leading `#` are removed. |
@@ -37,7 +39,7 @@ After the first publication, the record URI (`leaflet_uri`) and the URL (`leafle
 | Publication | `leaflet_publication` | Name, URL or AT-URI of a publication, or `none` for your personal page. |
 | Preferences | `leaflet_discover`, `leaflet_comments`, `leaflet_mentions`, `leaflet_recommends` | `true` / `false`, override the defaults of the settings. |
 
-The keys of the first six properties can be changed in the settings.
+The keys of the first seven properties can be changed in the settings. Deleting a note from Leaflet sets `leaflet_publish` back to `false`.
 
 ### Markdown support
 

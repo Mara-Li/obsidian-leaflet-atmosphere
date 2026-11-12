@@ -7,7 +7,8 @@
 		"open": "Ouvrir la note publiée dans le navigateur",
 		"refreshPublications": "Actualiser les publications",
 		"fileMenu": "Publier sur Leaflet",
-		"ribbon": "Publier sur Leaflet"
+		"ribbon": "Publier sur Leaflet",
+		"publishMarked": "Publier toutes les notes marquées"
 	},
 	"notice": {
 		"publishing": "Publication sur Leaflet…",
@@ -18,13 +19,19 @@
 		"linkCopied": "Lien Leaflet copié",
 		"missingImages": "Certaines images n'ont pas pu être envoyées : {{list}}",
 		"publicationsRefreshed": "{{count}} publication(s) trouvée(s)",
-		"connected": "Connecté en tant que {{handle}}"
+		"connected": "Connecté en tant que {{handle}}",
+		"batchProgress": "Publication {{current}}/{{total}} : {{name}}",
+		"batchDone": "Leaflet : {{created}} publiée(s), {{updated}} mise(s) à jour, {{failed}} en échec",
+		"batchFailed": "Échecs : {{list}}",
+		"noMarked": "Aucune note n'a « {{key}}: true »"
 	},
 	"error": {
 		"prefix": "Leaflet : {{message}}",
 		"missingCredentials": "Renseignez votre identifiant et votre mot de passe d'application dans les réglages du plugin",
 		"slugTaken": "Un document avec la clé « {{slug}} » existe déjà",
-		"unknownPublication": "Publication « {{name}} » inconnue, actualisez la liste dans les réglages"
+		"unknownPublication": "Publication « {{name}} » inconnue, actualisez la liste dans les réglages",
+		"publishDisabled": "La publication est désactivée pour cette note ({{key}}: false)",
+		"notMarked": "Cette note n'est pas marquée pour publication ({{key}}: true)"
 	},
 	"modal": {
 		"choosePublication": "Choisissez où publier",
@@ -32,7 +39,10 @@
 		"unpublishTitle": "Supprimer de Leaflet ?",
 		"unpublishDesc": "Le document « {{title}} » sera supprimé de votre PDS. La note reste dans votre coffre.",
 		"confirm": "Supprimer",
-		"cancel": "Annuler"
+		"cancel": "Annuler",
+		"batchTitle": "Publier les notes marquées ?",
+		"batchDesc": "{{count}} note(s) avec « {{key}}: true » seront publiées ou mises à jour sur Leaflet.",
+		"publish": "Publier"
 	},
 	"settings": {
 		"account": {
@@ -82,7 +92,11 @@
 			"url": "Propriété de l'URL",
 			"write": "Enregistrer le lien dans les propriétés",
 			"writeDesc": "Stocke l'URI et l'URL dans la note après publication. Nécessaire pour mettre à jour un article.",
-			"noSpaces": "Le nom de propriété ne peut pas contenir d'espaces"
+			"noSpaces": "Le nom de propriété ne peut pas contenir d'espaces",
+			"publish": "Propriété de publication",
+			"publishDesc": "À true pour marquer une note à publier, à false pour la bloquer.",
+			"requireFlag": "Publier uniquement les notes marquées",
+			"requireFlagDesc": "Refuse de publier une note dont la propriété de publication n'est pas à true."
 		},
 		"content": {
 			"heading": "Contenu",
