@@ -140,7 +140,12 @@
 			"dataview": "Convert Dataview queries",
 			"dataviewDesc": "Replace the queries with their result. When disabled, queries are removed. Requires the Dataview plugin.",
 			"blocksHeading": "Blocks",
-			"imagesHeading": "Images"
+			"imagesHeading": "Images",
+			"callouts": "Callouts",
+			"calloutsDesc": "Leaflet has no callout block.",
+			"calloutsQuote": "Quote with emoji and colored title",
+			"calloutsHtml": "Colored box (HTML block)",
+			"calloutsPage": "Card opening a sub-page"
 		},
 		"after": {
 			"heading": "When publishing",

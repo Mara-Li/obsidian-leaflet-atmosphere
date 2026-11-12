@@ -21,7 +21,7 @@ export type FacetFeature =
 	| { $type: "pub.leaflet.richtext.facet#strikethrough" }
 	| { $type: "pub.leaflet.richtext.facet#underline" }
 	| { $type: "pub.leaflet.richtext.facet#code" }
-	| { $type: "pub.leaflet.richtext.facet#highlight" }
+	| { $type: "pub.leaflet.richtext.facet#highlight"; color?: RgbaColor }
 	| { $type: "pub.leaflet.richtext.facet#link"; uri: string }
 	| { $type: "pub.leaflet.richtext.facet#didMention"; did: string }
 	| { $type: "pub.leaflet.richtext.facet#id"; id: string }
@@ -31,6 +31,15 @@ export type FacetFeature =
 			contentPlaintext: string;
 			contentFacets?: Facet[];
 	  };
+
+export interface RgbaColor {
+	$type: "pub.leaflet.theme.color#rgba";
+	r: number;
+	g: number;
+	b: number;
+	/** Opacity from 0 to 100 */
+	a: number;
+}
 
 export interface Facet {
 	index: ByteSlice;
@@ -109,6 +118,12 @@ export interface BskyPostBlock {
 	postRef: StrongRef;
 }
 
+export interface PageBlock {
+	$type: "pub.leaflet.blocks.page";
+	id: string;
+	display?: "full" | "compact";
+}
+
 export type ListContent = TextBlock | HeaderBlock | ImageBlock;
 
 export interface UnorderedListItem {
@@ -150,6 +165,7 @@ export type LeafletBlock =
 	| IframeBlock
 	| HtmlBlock
 	| BskyPostBlock
+	| PageBlock
 	| UnorderedListBlock
 	| OrderedListBlock;
 

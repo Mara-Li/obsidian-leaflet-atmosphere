@@ -140,7 +140,12 @@
 			"dataview": "Convertir les requêtes Dataview",
 			"dataviewDesc": "Remplace les requêtes par leur résultat. Désactivé, les requêtes sont retirées. Nécessite le plugin Dataview.",
 			"blocksHeading": "Blocs",
-			"imagesHeading": "Images"
+			"imagesHeading": "Images",
+			"callouts": "Callouts",
+			"calloutsDesc": "Leaflet n'a pas de bloc callout.",
+			"calloutsQuote": "Citation avec emoji et titre coloré",
+			"calloutsHtml": "Encadré coloré (bloc HTML)",
+			"calloutsPage": "Carte ouvrant une sous-page"
 		},
 		"after": {
 			"heading": "Lors de la publication",

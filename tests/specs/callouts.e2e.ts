@@ -1,0 +1,82 @@
+import { expect } from "@wdio/globals";
+import { sliceBytes, validateDocument } from "../helpers/lexicons";
+import { getRecords, publish, setup } from "../helpers/obsidian";
+import type { CalloutMode } from "../../src/interfaces";
+import type { BlockquoteBlock, HtmlBlock, StandardDocument } from "../../src/leaflet/types";
+
+async function publishCallouts(mode: CalloutMode): Promise<StandardDocument> {
+	// Callouts.md is not marked: allow publishing it by hand
+	await setup({ calloutMode: mode, publishKey: "" });
+	await publish("Callouts.md");
+	const record = Object.values(await getRecords())[0]!;
+	expect(validateDocument(record)).toBe("");
+	return record;
+}
+
+const blocksOf = (record: StandardDocument, page = 0) =>
+	record.content.pages[page]!.blocks.map((b) => b.block);
+
+describe("Callouts", function () {
+	it("become quotes with an emoji and a colored title", async function () {
+		const blocks = blocksOf(await publishCallouts("quote"));
+		const quotes = blocks.filter(
+			(b): b is BlockquoteBlock => b.$type === "pub.leaflet.blocks.blockquote"
+		);
+		expect(quotes.map((q) => q.plaintext)).toEqual([
+			"💡 Bake with patience\nLet the dough rest for an hour.",
+			"⚠️ Warning",
+			"❓ Why sourdough?\nBecause it tastes better.",
+		]);
+		const highlight = quotes[0]!.facets!.find((f) =>
+			f.features.some((x) => x.$type === "pub.leaflet.richtext.facet#highlight")
+		)!;
+		expect(
+			sliceBytes(quotes[0]!.plaintext, highlight.index.byteStart, highlight.index.byteEnd)
+		).toBe("Bake with patience");
+		expect(highlight.features).toContainEqual({
+			$type: "pub.leaflet.richtext.facet#highlight",
+			color: { $type: "pub.leaflet.theme.color#rgba", r: 0, g: 191, b: 188, a: 25 },
+		});
+		// The list of the warning stays a list after its title
+		expect(blocks.map((b) => b.$type.split(".").pop())).toEqual([
+			"text",
+			"blockquote",
+			"blockquote",
+			"unorderedList",
+			"blockquote",
+		]);
+	});
+
+	it("become colored HTML boxes", async function () {
+		const blocks = blocksOf(await publishCallouts("html"));
+		const boxes = blocks.filter((b): b is HtmlBlock => b.$type === "pub.leaflet.blocks.html");
+		expect(boxes).toHaveLength(3);
+		expect(boxes[0]!.html).toContain("rgba(0,191,188,.1)");
+		expect(boxes[0]!.html).toContain("💡 Bake with <strong>patience</strong>");
+		expect(boxes[0]!.html).toContain('<a href="https://example.com" target="_blank">an hour</a>');
+		expect(boxes[1]!.html).toContain("<ul><li>Hot oven</li><li>Sharp knife</li></ul>");
+		for (const box of boxes) expect(box.height).toBeGreaterThan(60);
+	});
+
+	it("become cards opening sub-pages", async function () {
+		const record = await publishCallouts("page");
+		const blocks = blocksOf(record);
+		expect(blocks.filter((b) => b.$type === "pub.leaflet.blocks.page")).toEqual([
+			{ $type: "pub.leaflet.blocks.page", id: "callout-1" },
+			{ $type: "pub.leaflet.blocks.page", id: "callout-2" },
+			{ $type: "pub.leaflet.blocks.page", id: "callout-3" },
+		]);
+		expect(record.content.pages.map((p) => p.id).slice(1)).toEqual([
+			"callout-1",
+			"callout-2",
+			"callout-3",
+		]);
+		const first = blocksOf(record, 1);
+		expect(first[0]).toMatchObject({
+			$type: "pub.leaflet.blocks.header",
+			plaintext: "💡 Bake with patience",
+		});
+		expect(blocksOf(record, 2)[1]!.$type).toBe("pub.leaflet.blocks.unorderedList");
+		expect(record.textContent).toContain("Because it tastes better.");
+	});
+});

@@ -7,6 +7,7 @@ import type {
 	FacetFeature,
 	ImageBlock,
 	LeafletBlock,
+	LinearDocumentPage,
 	ListContent,
 	OrderedListBlock,
 	OrderedListItem,
@@ -31,6 +32,7 @@ import {
 	InlineCollector,
 	withFeature,
 } from "./inline";
+import { calloutHtml, calloutStyle, richTextToHtml } from "./callouts";
 import { splitSubpath } from "./preprocess";
 
 type Generic = Tokens.Generic;
@@ -68,6 +70,8 @@ export interface ConverterDeps {
 
 export interface ConvertResult {
 	blocks: LeafletBlock[];
+	/** Secondary pages, opened from page blocks (callouts in "page" mode). */
+	pages: LinearDocumentPage[];
 	title?: string;
 	textContent: string;
 	warnings: string[];
@@ -94,6 +98,7 @@ export class MarkdownConverter {
 	private footnotes = new Map<string, Generic[]>();
 	private inlineFootnotes = 0;
 	private warnings: string[] = [];
+	private pages: LinearDocumentPage[] = [];
 
 	constructor(private deps: ConverterDeps) {}
 
@@ -118,7 +123,14 @@ export class MarkdownConverter {
 		}
 
 		const blocks = await this.blocks(tokens);
-		return { blocks, title, textContent: plainText(blocks), warnings: this.warnings };
+		const pageBlocks = this.pages.flatMap((p) => p.blocks.map((b) => b.block));
+		return {
+			blocks,
+			pages: this.pages,
+			title,
+			textContent: plainText([...blocks, ...pageBlocks]),
+			warnings: this.warnings,
+		};
 	}
 
 	private async blocks(tokens: Token[]): Promise<LeafletBlock[]> {
@@ -228,45 +240,63 @@ export class MarkdownConverter {
 		const children = [...token.tokens];
 		const callout = extractCallout(children);
 		const inner = await this.blocks(children);
-		const out: LeafletBlock[] = [];
-		let quote: RichText | null = null;
-		let separator = "\n\n";
-		if (callout) {
-			const col = new InlineCollector();
-			if (callout.title) await this.renderInline(callout.title, col, [F.bold]);
-			quote = col.text().trim();
-			if (quote.isBlank)
-				quote.append(callout.type.charAt(0).toUpperCase() + callout.type.slice(1), [
-					F.bold,
-				]);
-			separator = "\n";
+		return callout ? this.callout(callout, inner) : mergeQuote(inner, null);
+	}
+
+	private async callout(
+		callout: Callout,
+		inner: LeafletBlock[]
+	): Promise<LeafletBlock[]> {
+		const mode = this.deps.settings.calloutMode;
+		const style = calloutStyle(callout.type);
+		const { r, g, b } = style.color;
+		// The quote mode marks the title like Obsidian: bold, on the color of the type
+		const titleFeatures: FacetFeature[] =
+			mode === "quote"
+				? [
+						F.bold,
+						{
+							$type: "pub.leaflet.richtext.facet#highlight",
+							color: { $type: "pub.leaflet.theme.color#rgba", r, g, b, a: 25 },
+						},
+					]
+				: [];
+		const col = new InlineCollector();
+		if (callout.title) await this.renderInline(callout.title, col, titleFeatures);
+		let title = col.text().trim();
+		if (title.isBlank)
+			title = new RichText().append(
+				callout.type.charAt(0).toUpperCase() + callout.type.slice(1),
+				titleFeatures
+			);
+
+		if (mode === "html") {
+			const { html, height } = calloutHtml(
+				style,
+				richTextToHtml(title.text, title.facets),
+				inner
+			);
+			return [{ $type: "pub.leaflet.blocks.html", html, height }];
 		}
-		const flush = () => {
-			if (quote && !quote.isBlank)
-				out.push({ $type: "pub.leaflet.blocks.blockquote", ...quote.toBlockFields() });
-			quote = null;
-		};
-		for (const block of inner) {
-			if (
-				block.$type === "pub.leaflet.blocks.text" ||
-				block.$type === "pub.leaflet.blocks.blockquote" ||
-				block.$type === "pub.leaflet.blocks.header"
-			) {
-				const rich =
-					block.$type === "pub.leaflet.blocks.header"
-						? new RichText().append(block.plaintext, [F.bold])
-						: RichText.from(block.plaintext, block.facets);
-				quote ??= new RichText();
-				if (!quote.isBlank) quote.append(separator);
-				separator = "\n\n";
-				quote.appendRich(rich);
-			} else {
-				flush();
-				out.push(block);
-			}
+		const heading = new RichText().append(`${style.emoji} `).appendRich(title);
+		if (mode === "page") {
+			const id = `callout-${this.pages.length + 1}`;
+			const header: LeafletBlock = {
+				$type: "pub.leaflet.blocks.header",
+				level: 2,
+				...heading.toBlockFields(),
+			};
+			this.pages.push({
+				$type: "pub.leaflet.pages.linearDocument",
+				id,
+				blocks: [header, ...inner].map((block) => ({
+					$type: "pub.leaflet.pages.linearDocument#block",
+					block,
+				})),
+			});
+			return [{ $type: "pub.leaflet.blocks.page", id }];
 		}
-		flush();
-		return out;
+		return mergeQuote(inner, heading);
 	}
 
 	private async list(token: Tokens.List): Promise<UnorderedListBlock | OrderedListBlock> {
@@ -626,6 +656,39 @@ export class MarkdownConverter {
 		const url = fm?.[this.deps.settings.urlKey] as unknown;
 		return typeof url === "string" && /^https?:\/\//.test(url) ? url : null;
 	}
+}
+
+/** Text blocks of a quote merged into blockquotes, other blocks kept in between. */
+function mergeQuote(inner: LeafletBlock[], heading: RichText | null): LeafletBlock[] {
+	const out: LeafletBlock[] = [];
+	let quote: RichText | null = heading;
+	let separator = heading ? "\n" : "\n\n";
+	const flush = () => {
+		if (quote && !quote.isBlank)
+			out.push({ $type: "pub.leaflet.blocks.blockquote", ...quote.toBlockFields() });
+		quote = null;
+	};
+	for (const block of inner) {
+		if (
+			block.$type === "pub.leaflet.blocks.text" ||
+			block.$type === "pub.leaflet.blocks.blockquote" ||
+			block.$type === "pub.leaflet.blocks.header"
+		) {
+			const rich =
+				block.$type === "pub.leaflet.blocks.header"
+					? new RichText().append(block.plaintext, [F.bold])
+					: RichText.from(block.plaintext, block.facets);
+			quote ??= new RichText();
+			if (!quote.isBlank) quote.append(separator);
+			separator = "\n\n";
+			quote.appendRich(rich);
+		} else {
+			flush();
+			out.push(block);
+		}
+	}
+	flush();
+	return out;
 }
 
 function splitAltSize(alt: string): [string, number | undefined] {

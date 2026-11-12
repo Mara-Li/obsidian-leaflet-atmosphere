@@ -15,6 +15,7 @@ import type {
 	DocumentPreferences,
 	LeafletBlock,
 	LeafletContent,
+	LinearDocumentPage,
 	PublicationInfo,
 	StandardDocument,
 	StrongRef,
@@ -149,6 +150,7 @@ export class Publisher {
 			content: await this.content(
 				client,
 				converted.blocks,
+				converted.pages,
 				existing?.value.content?.pages?.[0]?.id
 			),
 		};
@@ -343,17 +345,19 @@ export class Publisher {
 	private async content(
 		client: AtpClient,
 		blocks: LeafletBlock[],
+		extraPages: LinearDocumentPage[],
 		pageId?: string
 	): Promise<LeafletContent> {
-		const pages = [
+		const pages: LinearDocumentPage[] = [
 			{
-				$type: "pub.leaflet.pages.linearDocument" as const,
+				$type: "pub.leaflet.pages.linearDocument",
 				id: pageId ?? crypto.randomUUID(),
 				blocks: blocks.map((block) => ({
-					$type: "pub.leaflet.pages.linearDocument#block" as const,
+					$type: "pub.leaflet.pages.linearDocument#block",
 					block,
 				})),
 			},
+			...extraPages,
 		];
 		const json = JSON.stringify(pages);
 		if (utf8Length(json) <= BLOB_PAGES_THRESHOLD)

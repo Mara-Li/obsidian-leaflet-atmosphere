@@ -4,6 +4,7 @@ export type WikilinkMode = "text" | "published";
 export type EmbedMode = "inline" | "link";
 export type TableMode = "html" | "code";
 export type MermaidMode = "image" | "code";
+export type CalloutMode = "quote" | "html" | "page";
 
 export interface LeafletAtmosphereSettings {
 	identifier: string;
@@ -36,6 +37,7 @@ export interface LeafletAtmosphereSettings {
 	embedMode: EmbedMode;
 	tableMode: TableMode;
 	mermaidMode: MermaidMode;
+	calloutMode: CalloutMode;
 	dataview: boolean;
 	linkCards: boolean;
 	uploadRemoteImages: boolean;
@@ -79,6 +81,7 @@ export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
 	embedMode: "inline",
 	tableMode: "html",
 	mermaidMode: "image",
+	calloutMode: "quote",
 	dataview: true,
 	linkCards: true,
 	uploadRemoteImages: true,

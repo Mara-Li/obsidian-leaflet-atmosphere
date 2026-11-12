@@ -81,7 +81,7 @@ describe("Publishing a note", function () {
 			"text",
 		]);
 		const quote = blocks[1] as { plaintext: string };
-		expect(quote.plaintext).toBe("Callout title\nCallout body");
+		expect(quote.plaintext).toBe("💡 Callout title\nCallout body");
 		const list = blocks[2] as { children: { checked?: boolean }[] };
 		expect(list.children.map((c) => c.checked)).toEqual([true, false]);
 		expect((blocks[5] as { language: string }).language).toBe("dataview");

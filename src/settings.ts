@@ -267,6 +267,19 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 						},
 					},
 					{
+						name: t("settings.content.callouts"),
+						desc: t("settings.content.calloutsDesc"),
+						control: {
+							type: "dropdown",
+							key: "calloutMode",
+							options: {
+								quote: t("settings.content.calloutsQuote"),
+								html: t("settings.content.calloutsHtml"),
+								page: t("settings.content.calloutsPage"),
+							},
+						},
+					},
+					{
 						name: t("settings.content.mermaid"),
 						desc: t("settings.content.mermaidDesc"),
 						control: {
