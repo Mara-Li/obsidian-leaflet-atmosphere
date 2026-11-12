@@ -246,6 +246,20 @@ export class Publisher {
 		};
 	}
 
+	/** Delete a post of the account, through its note when it still has one. */
+	async deletePost(uri: string, file?: TFile | null): Promise<void> {
+		if (file && (await this.unpublish(file))) return;
+		const client = await this.plugin.getClient();
+		const parsed = parseAtUri(uri);
+		if (
+			!parsed ||
+			parsed.collection !== DOCUMENT_COLLECTION ||
+			parsed.repo !== client.did
+		)
+			throw new Error(i18next.t("error.notOwnPost"));
+		await client.deleteRecord(DOCUMENT_COLLECTION, parsed.rkey);
+	}
+
 	async unpublish(file: TFile): Promise<boolean> {
 		const client = await this.plugin.getClient();
 		const rkey = this.existingRkey(file, client.did);

@@ -25,6 +25,7 @@ The other settings are grouped in sub-pages: **Publication** (default publicatio
 | **Retrieve the Leaflet link of current note** | Restore `leaflet_uri` and `leaflet_url` of a note that lost them, without publishing it. |
 | **Delete current note from Leaflet** | Delete the record from your PDS. The note is kept. |
 | **Copy Leaflet link** / **Open published note in browser** | Use the URL saved in the note. |
+| **Manage Leaflet posts** | Open a view listing every post of your account (including posts without a note, written elsewhere or whose note was deleted): search, filter by publication or by posts without note, open the note or the post, and delete one or several posts. |
 | **Refresh publications** | Reload the publications of your account. |
 
 On desktop, the progress is shown in the status bar; on mobile, in a notice.
@@ -32,6 +33,8 @@ On desktop, the progress is shown in the status bar; on mobile, in a notice.
 After the first publication, the record URI (`leaflet_uri`) and the URL (`leaflet_url`) are saved in the note properties. Publishing again updates the same post (its publication date and Bluesky post are kept).
 
 If a note lost its properties (sync issue, failed write…), publishing it again does not create a duplicate nor fail: the plugin looks for its post at the key it should use (reserved address or slug), then by title when a single post matches, and updates it. A post already linked to another note of the vault is never taken.
+
+When a published note is deleted from the vault, the plugin asks whether to delete its post too (or always deletes it, or keeps it: **Settings → Deleted notes**). Several notes deleted at once (a folder) are asked about together.
 
 Links to another note point to its published post. When the linked note is marked with `leaflet_publish: true` but not published yet, its future address is reserved: only `leaflet_url` is saved in its properties (`leaflet_uri` is written by the publication itself), so the link works as soon as that note is published. The commands that need a published post (copy, open, delete) are not offered on a reserved note. Links to unmarked notes become plain text.
 

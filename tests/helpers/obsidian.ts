@@ -41,6 +41,10 @@ export async function setup(
 	vault = TEST_VAULT
 ): Promise<void> {
 	const notes = notesOf(vault);
+	// Restoring the vault deletes notes: their posts are not the business of the next test
+	await browser.executeObsidian(({ plugins }) => {
+		plugins.leafletAtmosphere.settings.onNoteDeleted = "keep";
+	});
 	await obsidianPage.resetVault(vault, notes);
 	// Wait for the metadata cache to hold the properties of the restored notes
 	const expected: Record<string, string[]> = {};

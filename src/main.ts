@@ -6,7 +6,9 @@ import { showError } from "./commands/actions";
 import { resources, translationLanguage } from "./i18n";
 import { DEFAULT_SETTINGS, type LeafletAtmosphereSettings } from "./interfaces";
 import { fetchPublications } from "./leaflet/publications";
+import { DeletionWatcher } from "./publish/deletions";
 import { LeafletAtmosphereSettingTab } from "./settings";
+import { MANAGER_VIEW, PostsManagerView } from "./ui/manager/view";
 
 export default class LeafletAtmosphere extends Plugin {
 	settings: LeafletAtmosphereSettings = { ...DEFAULT_SETTINGS };
@@ -31,6 +33,8 @@ export default class LeafletAtmosphere extends Plugin {
 			this.statusBarEl.addClass("leaflet-atmosphere-status");
 			this.statusBarEl.hide();
 		}
+		this.registerView(MANAGER_VIEW, (leaf) => new PostsManagerView(leaf, this));
+		new DeletionWatcher(this).register();
 		registerCommands(this);
 		this.addSettingTab(new LeafletAtmosphereSettingTab(this.app, this));
 	}

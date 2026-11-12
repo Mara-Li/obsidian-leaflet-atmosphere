@@ -15,6 +15,7 @@ describe("Settings", function () {
 			"page:Conversion",
 			"page:Properties",
 			"group:",
+			"group:",
 		]);
 	});
 });

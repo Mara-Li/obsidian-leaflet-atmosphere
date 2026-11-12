@@ -204,8 +204,7 @@ export interface EmbeddedNote {
 }
 
 /** Line standing for a note embedded as a sub-page (an HTML block: opening tag alone). */
-export const EMBED_PLACEHOLDER = (id: string) =>
-	`<leaflet-embed data-id="${id}">`;
+export const EMBED_PLACEHOLDER = (id: string) => `<leaflet-embed data-id="${id}">`;
 
 /** Remove comments and block ids outside of code. */
 function cleanUp(text: string): string {

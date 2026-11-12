@@ -124,6 +124,8 @@ async function buildPlugin() {
 			...builtins,
 		],
 		format: "cjs",
+		jsx: "automatic",
+		jsxImportSource: "preact",
 		target: "esnext",
 		logLevel: "info",
 		sourcemap: isProd ? false : "inline",

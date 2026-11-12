@@ -1,6 +1,7 @@
 import i18next from "i18next";
 import { type Menu, Notice, type TAbstractFile, TFile, TFolder } from "obsidian";
 import type LeafletAtmosphere from "../main";
+import { openPostsManager } from "../ui/manager/view";
 import {
 	canPublish,
 	isPublished,
@@ -140,6 +141,13 @@ export function registerCommands(plugin: LeafletAtmosphere) {
 			if (!checking) window.open(url);
 			return true;
 		},
+	});
+
+	plugin.addCommand({
+		id: "manage-posts",
+		name: t("commands.manage"),
+		icon: "layout-list",
+		callback: () => void openPostsManager(plugin),
 	});
 
 	plugin.addCommand({

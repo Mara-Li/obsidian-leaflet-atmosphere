@@ -15,6 +15,7 @@ describe("Plugin", function () {
 		expect(commands.sort()).toEqual(
 			[
 				"copy-link",
+				"manage-posts",
 				"open-in-browser",
 				"publish-marked-notes",
 				"publish-note",

@@ -80,6 +80,25 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 			},
 			{
 				type: "group",
+				heading: t("settings.deleted.heading"),
+				items: [
+					{
+						name: t("settings.deleted.mode"),
+						desc: t("settings.deleted.modeDesc"),
+						control: {
+							type: "dropdown",
+							key: "onNoteDeleted",
+							options: {
+								ask: t("settings.deleted.ask"),
+								delete: t("settings.deleted.delete"),
+								keep: t("settings.deleted.keep"),
+							},
+						},
+					},
+				],
+			},
+			{
+				type: "group",
 				heading: t("settings.after.heading"),
 				items: [
 					{

@@ -12,7 +12,8 @@
 		"updateMenu": "Update on Leaflet",
 		"folderMenu": "Publish folder to Leaflet ({{count}})",
 		"filesMenu": "Publish {{count}} notes to Leaflet",
-		"pull": "Retrieve the Leaflet link of current note"
+		"pull": "Retrieve the Leaflet link of current note",
+		"manage": "Manage Leaflet posts"
 	},
 	"notice": {
 		"published": "Published to Leaflet",
@@ -42,7 +43,8 @@
 		"publishDisabled": "Publishing is disabled for this note ({{key}}: false)",
 		"notMarked": "This note is not marked for publishing ({{key}}: true)",
 		"unknownHandle": "Handle \"{{handle}}\" not found. Use your full handle, e.g. alice.bsky.social.",
-		"badCredentials": "Wrong handle or app password for {{identifier}}."
+		"badCredentials": "Wrong handle or app password for {{identifier}}.",
+		"notOwnPost": "This post does not belong to the connected account"
 	},
 	"modal": {
 		"choosePublication": "Choose where to publish",
@@ -169,6 +171,14 @@
 			"contentDesc": "How Obsidian Markdown becomes a Leaflet post.",
 			"properties": "Properties",
 			"propertiesDesc": "Note properties read and written by the plugin."
+		},
+		"deleted": {
+			"heading": "Deleted notes",
+			"mode": "When a published note is deleted",
+			"modeDesc": "What to do with its post on Leaflet.",
+			"ask": "Ask",
+			"delete": "Delete the post",
+			"keep": "Keep the post"
 		}
 	},
 	"network": {
@@ -186,5 +196,30 @@
 		"denied": "{{host}} refused the request (HTTP {{status}}). A proxy or firewall on your network may block it.",
 		"notPds": "{{host}} does not look like an AT Protocol server (HTTP {{status}}). Check the PDS URL in the settings, or leave it empty.",
 		"unexpected": "Unexpected answer from {{host}} (HTTP {{status}}). Check the PDS URL in the settings, or leave it empty."
+	},
+	"manager": {
+		"title": "Leaflet posts",
+		"search": "Search posts…",
+		"allPublications": "All publications",
+		"personalPage": "Personal page",
+		"onlyOrphans": "Without note",
+		"refresh": "Refresh",
+		"deleteSelected": "Delete ({{count}})",
+		"empty": "No post found",
+		"loading": "Loading posts…",
+		"noNote": "No note in the vault",
+		"openNote": "Open note",
+		"openPost": "Open post",
+		"delete": "Delete",
+		"selectAll": "Select all",
+		"count": "{{count}} post(s)",
+		"deleteTitle": "Delete {{count}} post(s) from Leaflet?",
+		"deleteDesc": "These posts will be removed from your PDS: {{list}}. Linked notes stay in the vault, without their link. A post written in the Leaflet editor keeps its draft there.",
+		"deleted": "{{count}} post(s) deleted from Leaflet",
+		"failed": "Could not delete: {{list}}"
+	},
+	"deletion": {
+		"title": "Delete the posts of the deleted notes?",
+		"desc": "These notes were deleted from the vault, but their posts are still on Leaflet: {{list}}."
 	}
 }

@@ -5,6 +5,7 @@ export type EmbedMode = "inline" | "link" | "page";
 export type TableMode = "html" | "code";
 export type MermaidMode = "image" | "code";
 export type CalloutMode = "quote" | "html" | "page";
+export type DeletedNoteMode = "ask" | "delete" | "keep";
 
 export interface LeafletAtmosphereSettings {
 	identifier: string;
@@ -46,6 +47,7 @@ export interface LeafletAtmosphereSettings {
 
 	writeFrontmatter: boolean;
 	confirmBatch: boolean;
+	onNoteDeleted: DeletedNoteMode;
 	copyLinkAfterPublish: boolean;
 	openAfterPublish: boolean;
 }
@@ -90,6 +92,7 @@ export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
 
 	writeFrontmatter: true,
 	confirmBatch: true,
+	onNoteDeleted: "ask",
 	copyLinkAfterPublish: false,
 	openAfterPublish: false,
 };

@@ -12,7 +12,8 @@
 		"updateMenu": "Mettre à jour sur Leaflet",
 		"folderMenu": "Publier le dossier sur Leaflet ({{count}})",
 		"filesMenu": "Publier {{count}} notes sur Leaflet",
-		"pull": "Récupérer le lien Leaflet de la note actuelle"
+		"pull": "Récupérer le lien Leaflet de la note actuelle",
+		"manage": "Gérer les articles Leaflet"
 	},
 	"notice": {
 		"published": "Publié sur Leaflet",
@@ -42,7 +43,8 @@
 		"publishDisabled": "La publication est désactivée pour cette note ({{key}}: false)",
 		"notMarked": "Cette note n'est pas marquée pour publication ({{key}}: true)",
 		"unknownHandle": "Identifiant « {{handle}} » introuvable. Utilisez votre handle complet, par exemple alice.bsky.social.",
-		"badCredentials": "Identifiant ou mot de passe d'application incorrect pour {{identifier}}."
+		"badCredentials": "Identifiant ou mot de passe d'application incorrect pour {{identifier}}.",
+		"notOwnPost": "Cet article n'appartient pas au compte connecté"
 	},
 	"modal": {
 		"choosePublication": "Choisissez où publier",
@@ -169,6 +171,14 @@
 			"contentDesc": "Comment le Markdown d'Obsidian devient un article Leaflet.",
 			"properties": "Propriétés",
 			"propertiesDesc": "Propriétés des notes lues et écrites par le plugin."
+		},
+		"deleted": {
+			"heading": "Notes supprimées",
+			"mode": "Quand une note publiée est supprimée",
+			"modeDesc": "Que faire de son article sur Leaflet.",
+			"ask": "Demander",
+			"delete": "Supprimer l'article",
+			"keep": "Garder l'article"
 		}
 	},
 	"network": {
@@ -186,5 +196,30 @@
 		"denied": "{{host}} a refusé la requête (HTTP {{status}}). Un proxy ou un pare-feu de votre réseau la bloque peut-être.",
 		"notPds": "{{host}} ne semble pas être un serveur AT Protocol (HTTP {{status}}). Vérifiez l'URL du PDS dans les réglages, ou laissez-la vide.",
 		"unexpected": "Réponse inattendue de {{host}} (HTTP {{status}}). Vérifiez l'URL du PDS dans les réglages, ou laissez-la vide."
+	},
+	"manager": {
+		"title": "Articles Leaflet",
+		"search": "Rechercher…",
+		"allPublications": "Toutes les publications",
+		"personalPage": "Page personnelle",
+		"onlyOrphans": "Sans note",
+		"refresh": "Actualiser",
+		"deleteSelected": "Supprimer ({{count}})",
+		"empty": "Aucun article",
+		"loading": "Chargement des articles…",
+		"noNote": "Aucune note dans le coffre",
+		"openNote": "Ouvrir la note",
+		"openPost": "Ouvrir l'article",
+		"delete": "Supprimer",
+		"selectAll": "Tout sélectionner",
+		"count": "{{count}} article(s)",
+		"deleteTitle": "Supprimer {{count}} article(s) de Leaflet ?",
+		"deleteDesc": "Ces articles seront supprimés de votre PDS : {{list}}. Les notes liées restent dans le coffre, sans leur lien. Un article écrit dans l'éditeur Leaflet y garde son brouillon.",
+		"deleted": "{{count}} article(s) supprimé(s) de Leaflet",
+		"failed": "Échec de la suppression : {{list}}"
+	},
+	"deletion": {
+		"title": "Supprimer les articles des notes supprimées ?",
+		"desc": "Ces notes ont été supprimées du coffre, mais leurs articles sont toujours sur Leaflet : {{list}}."
 	}
 }
