@@ -32,7 +32,6 @@
 		"unknownPublication": "Publication « {{name}} » inconnue, actualisez la liste dans les réglages",
 		"publishDisabled": "La publication est désactivée pour cette note ({{key}}: false)",
 		"notMarked": "Cette note n'est pas marquée pour publication ({{key}}: true)",
-		"notJson": "{{host}} n'a pas répondu comme un serveur AT Protocol (HTTP {{status}}). Vérifiez votre identifiant et l'URL du PDS dans les réglages.",
 		"unknownHandle": "Identifiant « {{handle}} » introuvable. Utilisez votre handle complet, par exemple alice.bsky.social.",
 		"badCredentials": "Identifiant ou mot de passe d'application incorrect pour {{identifier}}."
 	},
@@ -160,5 +159,12 @@
 		"connection": "La connexion à {{host}} a échoué ({{code}}). Le serveur est peut-être indisponible, ou un pare-feu le bloque. Réessayez plus tard.",
 		"blocked": "La requête vers {{host}} a été bloquée ({{code}}), sans doute par un pare-feu ou une extension de filtrage.",
 		"generic": "Erreur réseau en contactant {{host}} ({{code}})."
+	},
+	"http": {
+		"unavailable": "{{host}} ne répond pas pour le moment (HTTP {{status}}). Le serveur est peut-être en panne, ou un proxy de votre réseau bloque la connexion. Réessayez plus tard.",
+		"rateLimited": "Trop de requêtes vers {{host}} (HTTP {{status}}). Patientez quelques minutes avant de réessayer.",
+		"denied": "{{host}} a refusé la requête (HTTP {{status}}). Un proxy ou un pare-feu de votre réseau la bloque peut-être.",
+		"notPds": "{{host}} ne semble pas être un serveur AT Protocol (HTTP {{status}}). Vérifiez l'URL du PDS dans les réglages, ou laissez-la vide.",
+		"unexpected": "Réponse inattendue de {{host}} (HTTP {{status}}). Vérifiez l'URL du PDS dans les réglages, ou laissez-la vide."
 	}
 }

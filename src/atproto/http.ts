@@ -29,7 +29,7 @@ export class NetworkError extends Error {
 	}
 }
 
-function hostOf(url: string): string {
+export function hostOf(url: string): string {
 	return /^https?:\/\/([^/?#]+)/.exec(url)?.[1] ?? url;
 }
 
@@ -47,4 +47,15 @@ export async function request(params: RequestUrlParam): Promise<RequestUrlRespon
 			cause: e,
 		});
 	}
+}
+
+/** Message for an HTTP failure that the server did not explain itself. */
+export function httpErrorMessage(status: number, url: string): string {
+	const host = hostOf(url);
+	if (status === 429) return i18next.t("http.rateLimited", { host, status });
+	if (status >= 500) return i18next.t("http.unavailable", { host, status });
+	if (status === 401 || status === 403 || status === 407)
+		return i18next.t("http.denied", { host, status });
+	if (status === 404 || status === 405) return i18next.t("http.notPds", { host, status });
+	return i18next.t("http.unexpected", { host, status });
 }

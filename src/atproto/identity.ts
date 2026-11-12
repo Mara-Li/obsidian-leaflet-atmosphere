@@ -1,6 +1,6 @@
 import i18next from "i18next";
 import type { RequestUrlResponse } from "obsidian";
-import { NetworkError, request } from "./http";
+import { httpErrorMessage, NetworkError, request } from "./http";
 
 const PUBLIC_API = "https://public.api.bsky.app";
 const PLC_DIRECTORY = "https://plc.directory";
@@ -20,8 +20,7 @@ export function readJson<T>(res: RequestUrlResponse, url: string): T {
 	try {
 		return JSON.parse(text) as T;
 	} catch {
-		const host = /^https?:\/\/([^/]+)/.exec(url)?.[1] ?? url;
-		throw new Error(i18next.t("error.notJson", { host, status: res.status }));
+		throw new Error(httpErrorMessage(res.status, url));
 	}
 }
 

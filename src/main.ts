@@ -21,6 +21,8 @@ export default class LeafletAtmosphere extends Plugin {
 			resources,
 			returnNull: false,
 			returnEmptyString: false,
+			// Notices show plain text: no HTML escaping of interpolated values
+			interpolation: { escapeValue: false },
 		});
 		registerCommands(this);
 		this.addSettingTab(new LeafletAtmosphereSettingTab(this.app, this));

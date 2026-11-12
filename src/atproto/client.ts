@@ -1,6 +1,6 @@
 import i18next from "i18next";
 import type { BlobRef } from "../leaflet/types";
-import { request } from "./http";
+import { httpErrorMessage, request } from "./http";
 import {
 	type DidDocument,
 	normalizeIdentifier,
@@ -14,9 +14,10 @@ export class XrpcError extends Error {
 	constructor(
 		public status: number,
 		public error: string,
-		message: string
+		message: string,
+		options?: ErrorOptions
 	) {
-		super(error ? `${error}: ${message}` : message);
+		super(error ? `${error}: ${message}` : message, options);
 	}
 }
 
@@ -132,14 +133,13 @@ export class AtpClient {
 			try {
 				json = readJson(res, url);
 			} catch (e) {
-				// An HTML page or a proxy error: not an AT Protocol server
-				throw new XrpcError(res.status, "", (e as Error).message);
+				// An HTML page from a proxy or a website, not an AT Protocol answer
+				throw new XrpcError(res.status, "", (e as Error).message, { cause: e });
 			}
-			throw new XrpcError(
-				res.status,
-				json.error ?? "",
-				json.message ?? `HTTP ${res.status}`
-			);
+			// Outages and rate limits get a plain explanation, whatever the server said
+			if (res.status >= 500 || res.status === 429 || !json.error)
+				throw new XrpcError(res.status, "", httpErrorMessage(res.status, url));
+			throw new XrpcError(res.status, json.error, json.message ?? `HTTP ${res.status}`);
 		}
 		return readJson<T>(res, url);
 	}

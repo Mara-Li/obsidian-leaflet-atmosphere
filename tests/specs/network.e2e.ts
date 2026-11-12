@@ -1,6 +1,7 @@
 import { browser, expect } from "@wdio/globals";
 import * as http from "http";
 import type { AddressInfo } from "net";
+import { clearNotices, waitNotice } from "../helpers/obsidian";
 
 /** Set the proxy of Obsidian's Electron session ("system" to restore it). */
 async function setProxy(rules: string | null): Promise<void> {
@@ -56,5 +57,56 @@ describe("Network errors", function () {
 		expect(message).toContain("ERR_TUNNEL_CONNECTION_FAILED");
 		expect(message).toContain("public.api.bsky.app");
 		expect(message).toContain("proxy");
+	});
+});
+
+describe("HTTP errors", function () {
+	let server: http.Server;
+	let pdsUrl = "";
+	let answer: (res: http.ServerResponse) => void = () => undefined;
+
+	before(async function () {
+		server = http.createServer((_, res) => answer(res));
+		await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+		pdsUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+	});
+
+	after(function () {
+		server.close();
+	});
+
+	/** Run the Connect button and return the notice it shows. */
+	async function connectNotice(identifier: string): Promise<string> {
+		await clearNotices();
+		await browser.executeObsidian(
+			async ({ app, plugins }, { identifier, pdsUrl }) => {
+				const plugin = plugins.leafletAtmosphere;
+				app.secretStorage.setSecret("leaflet-network-test", "not-a-password");
+				Object.assign(plugin.settings, {
+					identifier,
+					appPasswordSecret: "leaflet-network-test",
+					pdsUrl,
+				});
+				await plugin.connect();
+			},
+			{ identifier, pdsUrl }
+		);
+		return waitNotice(/^Leaflet: /);
+	}
+
+	it("explains a server or proxy outage", async function () {
+		answer = (res) =>
+			res.writeHead(502, { "Content-Type": "text/html" }).end("<h1>Bad gateway</h1>");
+		const notice = await connectNotice("alice.example.com");
+		expect(notice).toContain("is not answering right now (HTTP 502)");
+	});
+
+	it("shows special characters without HTML escaping", async function () {
+		answer = (res) =>
+			res
+				.writeHead(401, { "Content-Type": "application/json" })
+				.end(JSON.stringify({ error: "AuthenticationRequired", message: "Invalid" }));
+		const notice = await connectNotice("o'brien&co.example.com");
+		expect(notice).toBe("Leaflet: Wrong handle or app password for o'brien&co.example.com.");
 	});
 });
