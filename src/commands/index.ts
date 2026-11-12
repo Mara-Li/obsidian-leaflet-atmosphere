@@ -1,5 +1,6 @@
 import i18next from "i18next";
-import { Notice, TFile } from "obsidian";
+import { type Menu, Notice, type TAbstractFile, TFile } from "obsidian";
+import { getBoolean } from "../publish/frontmatter";
 import type LeafletAtmosphere from "../main";
 import {
 	isPublished,
@@ -13,6 +14,25 @@ import {
 function markdownFile(plugin: LeafletAtmosphere): TFile | null {
 	const file = plugin.app.workspace.getActiveFile();
 	return file?.extension === "md" ? file : null;
+}
+
+/** "Publish" entry of the file and editor menus, hidden for notes that cannot be published. */
+function addPublishItem(
+	plugin: LeafletAtmosphere,
+	menu: Menu,
+	file: TAbstractFile | null
+) {
+	if (!(file instanceof TFile) || file.extension !== "md") return;
+	const fm = plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+	if (getBoolean(fm, plugin.settings.publishKey) === false) return;
+	const published = isPublished(plugin, file);
+	menu.addItem((item) =>
+		item
+			.setTitle(i18next.t(published ? "commands.updateMenu" : "commands.fileMenu"))
+			.setIcon("send")
+			.setSection("action")
+			.onClick(() => void publishFile(plugin, file))
+	);
 }
 
 export function registerCommands(plugin: LeafletAtmosphere) {
@@ -98,15 +118,14 @@ export function registerCommands(plugin: LeafletAtmosphere) {
 	});
 
 	plugin.registerEvent(
-		plugin.app.workspace.on("file-menu", (menu, file) => {
-			if (!(file instanceof TFile) || file.extension !== "md") return;
-			menu.addItem((item) =>
-				item
-					.setTitle(t("commands.fileMenu"))
-					.setIcon("send")
-					.onClick(() => void publishFile(plugin, file))
-			);
-		})
+		plugin.app.workspace.on("file-menu", (menu, file) =>
+			addPublishItem(plugin, menu, file)
+		)
+	);
+	plugin.registerEvent(
+		plugin.app.workspace.on("editor-menu", (menu, _editor, info) =>
+			addPublishItem(plugin, menu, info.file)
+		)
 	);
 
 	plugin.addRibbonIcon("send", t("commands.ribbon"), () => {

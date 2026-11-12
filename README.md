@@ -19,7 +19,7 @@ The other settings are grouped in sub-pages: **Publication** (default publicatio
 | Command | Description |
 | --- | --- |
 | **Publish all marked notes** | Publish or update every note with `leaflet_publish: true`, after confirmation. |
-| **Publish current note** | Create or update the Leaflet post of the note. Also available in the file menu and the ribbon. |
+| **Publish current note** | Create or update the Leaflet post of the note. Also available in the ribbon and in the right-click menus of the file and of the editor (hidden for notes with `leaflet_publish: false`). |
 | **Publish current note to…** | Choose the publication (or your personal page) before publishing. |
 | **Delete current note from Leaflet** | Delete the record from your PDS. The note is kept. |
 | **Copy Leaflet link** / **Open published note in browser** | Use the URL saved in the note. |

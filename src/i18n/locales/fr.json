@@ -8,7 +8,8 @@
 		"refreshPublications": "Actualiser les publications",
 		"fileMenu": "Publier sur Leaflet",
 		"ribbon": "Publier sur Leaflet",
-		"publishMarked": "Publier toutes les notes marquées"
+		"publishMarked": "Publier toutes les notes marquées",
+		"updateMenu": "Mettre à jour sur Leaflet"
 	},
 	"notice": {
 		"publishing": "Publication sur Leaflet…",
