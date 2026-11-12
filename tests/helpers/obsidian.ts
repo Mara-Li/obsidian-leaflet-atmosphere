@@ -145,10 +145,14 @@ export async function getFrontmatter(file: string): Promise<Record<string, unkno
 /** Wait until the metadata cache sees a frontmatter value. */
 export async function waitFrontmatter(file: string, key: string): Promise<unknown> {
 	let value: unknown;
-	await browser.waitUntil(async () => {
-		value = (await getFrontmatter(file))[key];
-		return value !== undefined;
-	});
+	// The metadata cache can be slow to catch up when several Obsidian instances run
+	await browser.waitUntil(
+		async () => {
+			value = (await getFrontmatter(file))[key];
+			return value !== undefined;
+		},
+		{ timeout: 15000, timeoutMsg: `${key} never appeared in ${file}` }
+	);
 	return value;
 }
 

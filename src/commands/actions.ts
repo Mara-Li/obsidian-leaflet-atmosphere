@@ -66,11 +66,10 @@ export function unpublishFile(plugin: LeafletAtmosphere, file: TFile) {
 	).open();
 }
 
-/** A reserved note has a URI and a URL but no publication date yet. */
+/** The URI is only written by a real publication; a reserved note has just a URL. */
 export function isPublished(plugin: LeafletAtmosphere, file: TFile): boolean {
 	const fm = plugin.app.metadataCache.getFileCache(file)?.frontmatter;
-	const s = plugin.settings;
-	return !!getString(fm, s.uriKey) && !!getString(fm, s.lastPublishedKey);
+	return !!getString(fm, plugin.settings.uriKey);
 }
 
 export function publishedUrl(plugin: LeafletAtmosphere, file: TFile): string | undefined {

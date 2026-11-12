@@ -296,14 +296,6 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 						...this.keyField("urlKey", t("settings.frontmatter.url")),
 						visible: () => this.plugin.settings.writeFrontmatter,
 					},
-					{
-						...this.keyField(
-							"lastPublishedKey",
-							t("settings.frontmatter.lastPublished"),
-							t("settings.frontmatter.lastPublishedDesc")
-						),
-						visible: () => this.plugin.settings.writeFrontmatter,
-					},
 				],
 			},
 			{

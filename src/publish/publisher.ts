@@ -51,9 +51,10 @@ export class Publisher {
 	/** Notes published by this instance; the metadata cache may lag behind. */
 	readonly published = new Map<string, { uri: string; url: string }>();
 	/** Future addresses of linked notes that are marked but not published yet. */
-	private reservations = new Map<string, Promise<{ uri: string; url: string } | null>>();
+	private reservations = new Map<string, Promise<{ url: string } | null>>();
 	private reserved = new Map<string, string>();
-	private usedRkeys = new Set<string>();
+	/** Record keys handed out by this instance, with the note that owns them. */
+	private owners = new Map<string, string>();
 
 	constructor(private plugin: LeafletAtmosphere) {}
 
@@ -73,7 +74,6 @@ export class Publisher {
 	existingRkey(file: TFile, did: string): string | undefined {
 		const uri =
 			this.published.get(file.path)?.uri ??
-			this.reserved.get(file.path) ??
 			getString(this.frontmatter(file), this.settings.uriKey);
 		const parsed = uri ? parseAtUri(uri) : null;
 		if (!parsed || parsed.collection !== DOCUMENT_COLLECTION || parsed.repo !== did)
@@ -92,10 +92,10 @@ export class Publisher {
 		const existing = rkey
 			? await client.getRecord<StandardDocument>(DOCUMENT_COLLECTION, rkey)
 			: null;
-		if (!rkey) rkey = await this.newRecordKey(client, file, fm);
+		rkey ??= await this.reservedOrNewRkey(client, file, fm);
 
 		const site = this.resolveSite(fm, options, existing?.value.site, did);
-		this.usedRkeys.add(rkey);
+		this.owners.set(rkey, file.path);
 		const selfUrl = documentUrl(site, `/${rkey}`, this.publicationsFor(site));
 
 		const images = new ImageUploader(
@@ -163,8 +163,6 @@ export class Publisher {
 				(front: Record<string, unknown>) => {
 					if (s.uriKey) front[s.uriKey] = result.uri;
 					if (s.urlKey) front[s.urlKey] = url;
-					// Only a real publication sets it: reserved notes only have a URI and a URL
-					if (s.lastPublishedKey) front[s.lastPublishedKey] = new Date().toISOString();
 				}
 			);
 
@@ -182,7 +180,6 @@ export class Publisher {
 			(front: Record<string, unknown>) => {
 				delete front[this.settings.uriKey];
 				delete front[this.settings.urlKey];
-				delete front[this.settings.lastPublishedKey];
 				const key = this.settings.publishKey;
 				if (key && front[key] === true) front[key] = false;
 			}
@@ -208,28 +205,45 @@ export class Publisher {
 		return (await pending)?.url ?? null;
 	}
 
-	/** Pick the record key and URL of a note before it is published. */
-	private async reserve(
-		client: AtpClient,
-		file: TFile
-	): Promise<{ uri: string; url: string }> {
+	/**
+	 * Pick the record key and URL of a note before it is published. Only the URL is
+	 * saved: the URI stays the mark of a published note.
+	 */
+	private async reserve(client: AtpClient, file: TFile): Promise<{ url: string }> {
 		const fm = this.frontmatter(file);
 		const did = client.did;
-		const rkey =
-			this.existingRkey(file, did) ?? (await this.newRecordKey(client, file, fm));
-		this.usedRkeys.add(rkey);
+		const rkey = await this.newRecordKey(client, file, fm);
+		this.owners.set(rkey, file.path);
+		this.reserved.set(file.path, rkey);
 		const site = this.resolveSite(fm, {}, undefined, did);
-		const uri = `at://${did}/${DOCUMENT_COLLECTION}/${rkey}`;
 		const url = documentUrl(site, `/${rkey}`, this.publicationsFor(site));
-		this.reserved.set(file.path, uri);
 		await this.app.fileManager.processFrontMatter(
 			file,
 			(front: Record<string, unknown>) => {
-				if (this.settings.uriKey) front[this.settings.uriKey] = uri;
 				if (this.settings.urlKey) front[this.settings.urlKey] = url;
 			}
 		);
-		return { uri, url };
+		return { url };
+	}
+
+	/** Record key of a reserved note (its URL ends with it), or a new one. */
+	private async reservedOrNewRkey(
+		client: AtpClient,
+		file: TFile,
+		fm: FrontMatterCache | undefined
+	): Promise<string> {
+		const url = getString(fm, this.settings.urlKey);
+		const reserved =
+			this.reserved.get(file.path) ??
+			(url ? decodeURIComponent(url.replace(/\/+$/, "").split("/").pop() ?? "") : "");
+		if (reserved && isValidRecordKey(reserved)) {
+			const owner = this.owners.get(reserved);
+			const free =
+				(!owner || owner === file.path) &&
+				!(await client.getRecord(DOCUMENT_COLLECTION, reserved));
+			if (free) return reserved;
+		}
+		return this.newRecordKey(client, file, fm);
 	}
 
 	isMarked(file: TFile): boolean {
@@ -260,7 +274,7 @@ export class Publisher {
 		const slug = slugify(explicit ?? file.basename);
 		if (!slug || !isValidRecordKey(slug)) return nextTid();
 		const taken =
-			this.usedRkeys.has(slug) || (await client.getRecord(DOCUMENT_COLLECTION, slug));
+			this.owners.has(slug) || (await client.getRecord(DOCUMENT_COLLECTION, slug));
 		if (taken) throw new Error(i18next.t("error.slugTaken", { slug }));
 		return slug;
 	}

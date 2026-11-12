@@ -24,7 +24,6 @@ export interface LeafletAtmosphereSettings {
 	slugKey: string;
 	uriKey: string;
 	urlKey: string;
-	lastPublishedKey: string;
 
 	showInDiscover: boolean;
 	showComments: boolean;
@@ -67,7 +66,6 @@ export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
 	slugKey: "slug",
 	uriKey: "leaflet_uri",
 	urlKey: "leaflet_url",
-	lastPublishedKey: "leaflet_last_published",
 
 	showInDiscover: true,
 	showComments: true,

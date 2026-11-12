@@ -96,9 +96,7 @@
 			"publish": "Publish property",
 			"publishDesc": "Set it to true to mark a note for publishing, false to block it.",
 			"requireFlag": "Only publish marked notes",
-			"requireFlagDesc": "Refuse to publish a note unless its publish property is true.",
-			"lastPublished": "Last publication property",
-			"lastPublishedDesc": "Date of the last publication. Notes without it are only reserved, not published."
+			"requireFlagDesc": "Refuse to publish a note unless its publish property is true."
 		},
 		"content": {
 			"heading": "Content",

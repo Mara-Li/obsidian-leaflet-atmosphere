@@ -40,20 +40,19 @@ describe("Links between notes", function () {
 
 	it("publishes the linked note at its reserved address", async function () {
 		await publish("Linker.md");
-		const reservedUri = await waitFrontmatter("Target.md", "leaflet_uri");
-		const reservedUrl = (await getFrontmatter("Target.md")).leaflet_url;
+		const reservedUrl = await waitFrontmatter("Target.md", "leaflet_url");
 
-		// Only reserved: no publication date, so no link to copy and nothing to delete
-		expect((await getFrontmatter("Target.md")).leaflet_last_published).toBeUndefined();
+		// Only reserved: a URL but no URI, so no link to copy and nothing to delete
+		expect((await getFrontmatter("Target.md")).leaflet_uri).toBeUndefined();
 		for (const command of ["copy-link", "open-in-browser", "unpublish-note"])
 			expect(await commandAvailable(command, "Target.md")).toBe(false);
 
 		const notice = await publish("Target.md");
 		expect(notice).toContain("Published to Leaflet");
-		await waitFrontmatter("Target.md", "leaflet_last_published");
+		await waitFrontmatter("Target.md", "leaflet_uri");
 		for (const command of ["copy-link", "open-in-browser", "unpublish-note"])
 			expect(await commandAvailable(command, "Target.md")).toBe(true);
-		const rkey = String(reservedUri).split("/").pop();
+		const rkey = String(reservedUrl).split("/").pop();
 		expect(Object.keys(await getRecords())).toContain(`site.standard.document/${rkey}`);
 		expect((await getFrontmatter("Target.md")).leaflet_url).toBe(reservedUrl);
 	});

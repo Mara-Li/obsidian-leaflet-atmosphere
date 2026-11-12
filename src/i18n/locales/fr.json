@@ -96,9 +96,7 @@
 			"publish": "Propriété de publication",
 			"publishDesc": "À true pour marquer une note à publier, à false pour la bloquer.",
 			"requireFlag": "Publier uniquement les notes marquées",
-			"requireFlagDesc": "Refuse de publier une note dont la propriété de publication n'est pas à true.",
-			"lastPublished": "Propriété de la dernière publication",
-			"lastPublishedDesc": "Date de la dernière publication. Une note sans cette date est seulement réservée, pas publiée."
+			"requireFlagDesc": "Refuse de publier une note dont la propriété de publication n'est pas à true."
 		},
 		"content": {
 			"heading": "Contenu",
