@@ -97,7 +97,8 @@ export async function setup(
 					Object.entries(store.records)
 						.filter(([key]) => key.startsWith(`${collection}/`))
 						.map(([key, value]) => ({ uri: uri(collection, key.split("/")[1]!), cid, value })),
-				getBskyPost: async (postUri: string) => ({ uri: postUri, cid }),
+				getBskyPost: async (postUri: string) =>
+					postUri.endsWith("/3notfound2222") ? null : { uri: postUri, cid },
 				resolveHandle: async (handle: string) =>
 					handle === "alice.bsky.social" ? "did:plc:alicetest" : null,
 			};

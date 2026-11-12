@@ -75,7 +75,9 @@ The keys of the first seven properties can be changed in the settings. Deleting 
 | Footnotes `[^1]` and inline footnotes `^[note]` | Leaflet footnotes |
 | `---` | Horizontal rule |
 | Tables | HTML block (with the fonts of the publication) or code block |
-| A Bluesky post, YouTube or web link alone on its line | Bluesky post embed, video embed or link card |
+| A Bluesky post alone on its line: bare or labelled link (`bsky.app` or another client), `at://` URI, or the embed code copied from Bluesky | Bluesky post embed (a post that cannot be found becomes a link card, with a warning) |
+| A YouTube link alone on its line, or `![](youtube url)` | Video embed |
+| A web address alone on its line | Link card |
 | `<iframe src="…">` | Embed block |
 | `%%comments%%`, `<!-- comments -->`, block IDs, frontmatter | Removed |
 

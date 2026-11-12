@@ -55,8 +55,20 @@ const link = (uri: string): FacetFeature => ({
 const MENTION =
 	/(^|[^\w@./])@([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z][a-z0-9-]*[a-z0-9])(?![\w-]|\.[a-z0-9])/gi;
 
-const BSKY_POST =
-	/^https?:\/\/(?:www\.)?bsky\.app\/profile\/([^/\s]+)\/post\/([a-z0-9]+)\/?$/i;
+/** Author and record key of a Bluesky post link, from any client or an at:// URI. */
+function parseBskyPost(url: string): { actor: string; rkey: string } | null {
+	const at = /^at:\/\/([^/\s]+)\/app\.bsky\.feed\.post\/([a-z0-9]+)$/i.exec(url);
+	if (at) return { actor: at[1]!, rkey: at[2]! };
+	// bsky.app, or another client using the same paths (deer.social, blacksky…)
+	const web =
+		/^https?:\/\/([^/\s]+)\/profile\/([^/\s?#]+)\/post\/([a-z0-9]+)\/?(?:[?#].*)?$/i.exec(
+			url
+		);
+	if (!web) return null;
+	const official = /(^|\.)bsky\.app$/i.test(web[1]!);
+	if (!official && !/^[2-7a-z]{13}$/.test(web[3]!)) return null;
+	return { actor: decodeURIComponent(web[2]!), rkey: web[3]! };
+}
 const YOUTUBE =
 	/^https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})/i;
 
@@ -232,15 +244,20 @@ export class MarkdownConverter {
 		);
 	}
 
+	/** Embed of a link alone in its paragraph: Bluesky post, YouTube video or link card. */
 	private async standaloneEmbed(token: Generic): Promise<LeafletBlock | null> {
 		let url: string | undefined;
+		// A link written as its own label becomes a card; any link can become an embed
+		let bare = false;
 		if (token.type === "link") {
-			const label = (token as Tokens.Link).text.trim();
-			const href = (token as Tokens.Link).href;
-			if (label === href || token.raw === href || (token as Tokens.Link).autolink)
-				url = href;
+			const link = token as Tokens.Link;
+			url = link.href;
+			bare = link.text.trim() === url || token.raw === url || !!link.autolink;
 		} else if (token.type === "image") url = (token as Tokens.Image).href;
-		if (!url || !/^https?:\/\//i.test(url)) return null;
+		// at:// URIs are not links for Markdown
+		else if (token.type === "text" && /^at:\/\/\S+$/.test(str(token.text).trim()))
+			url = str(token.text).trim();
+		if (!url || !/^(https?|at):\/\//i.test(url)) return null;
 
 		const youtube = YOUTUBE.exec(url);
 		if (youtube && (token.type === "image" || this.deps.settings.linkCards))
@@ -250,15 +267,20 @@ export class MarkdownConverter {
 				height: 360,
 			};
 		if (!this.deps.settings.linkCards) return null;
-		const bsky = BSKY_POST.exec(url);
+		const bsky = parseBskyPost(url);
 		if (bsky) {
-			const postRef = await this.deps
-				.resolveBskyPost(bsky[1]!, bsky[2]!)
-				.catch(() => null);
-			if (postRef) return { $type: "pub.leaflet.blocks.bskyPost", postRef };
+			const block = await this.bskyPost(bsky.actor, bsky.rkey);
+			if (block) return block;
+			this.warnings.push(url);
 		}
-		if (token.type === "link") return { $type: "pub.leaflet.blocks.website", src: url };
+		if (token.type === "link" && bare && /^https?:/i.test(url))
+			return { $type: "pub.leaflet.blocks.website", src: url };
 		return null;
+	}
+
+	private async bskyPost(actor: string, rkey: string): Promise<LeafletBlock | null> {
+		const postRef = await this.deps.resolveBskyPost(actor, rkey).catch(() => null);
+		return postRef ? { $type: "pub.leaflet.blocks.bskyPost", postRef } : null;
 	}
 
 	private async blockquote(token: Tokens.Blockquote): Promise<LeafletBlock[]> {
@@ -463,6 +485,14 @@ export class MarkdownConverter {
 		const raw = token.raw.trim();
 		const embed = /^<leaflet-embed data-id="(\d+)">/.exec(raw);
 		if (embed) return this.embedPage(embed[1]!);
+		// Embed code copied from Bluesky
+		const bskyUri = getAttribute(raw, "data-bluesky-uri");
+		const bsky = bskyUri ? parseBskyPost(bskyUri) : null;
+		if (bsky && this.deps.settings.linkCards) {
+			const block = await this.bskyPost(bsky.actor, bsky.rkey);
+			if (block) return [block];
+			this.warnings.push(bskyUri!);
+		}
 		if (/^<iframe\b/i.test(raw)) {
 			const url = getAttribute(raw, "src");
 			const height = Number.parseInt(getAttribute(raw, "height") ?? "", 10);

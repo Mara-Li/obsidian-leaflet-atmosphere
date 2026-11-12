@@ -1,7 +1,6 @@
 import i18next from "i18next";
 import type { FrontMatterCache, TFile } from "obsidian";
 import type { AtpClient, ListedRecord } from "../atproto/client";
-import { resolveHandle } from "../atproto/identity";
 import { isValidRecordKey, nextTid, parseAtUri } from "../atproto/tid";
 import type { PostTheme } from "../leaflet/fonts";
 import { ImageUploader } from "../leaflet/images";
@@ -494,8 +493,10 @@ export class Publisher {
 		actor: string,
 		rkey: string
 	): Promise<StrongRef | null> {
-		const did = actor.startsWith("did:") ? actor : await resolveHandle(actor);
-		return client.getBskyPost(`at://${did}/app.bsky.feed.post/${rkey}`);
+		const did = actor.startsWith("did:")
+			? actor
+			: await this.resolveMention(client, actor.toLowerCase());
+		return did ? client.getBskyPost(`at://${did}/app.bsky.feed.post/${rkey}`) : null;
 	}
 }
 

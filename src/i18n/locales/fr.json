@@ -21,7 +21,7 @@
 		"unpublished": "Supprimé de Leaflet",
 		"notPublished": "Cette note n'a pas encore été publiée",
 		"linkCopied": "Lien Leaflet copié",
-		"missingImages": "Certaines images n'ont pas pu être envoyées : {{list}}",
+		"missingImages": "Certaines images ou intégrations n'ont pas pu être converties : {{list}}",
 		"publicationsRefreshed": "{{count}} publication(s) trouvée(s)",
 		"connected": "Connecté en tant que {{handle}}",
 		"batchProgress": "Publication {{current}}/{{total}} : {{name}}",
