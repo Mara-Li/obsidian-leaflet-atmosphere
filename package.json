@@ -1,7 +1,7 @@
 {
   "name": "leaflet-atmosphere",
   "version": "0.0.0",
-  "description": "Publish to your atmosphere blog without leaving Obsidian!",
+  "description": "Publish your notes to Leaflet, the AT Protocol blogging platform.",
   "main": "main.js",
   "private": true,
   "scripts": {
@@ -53,6 +53,7 @@
     "commit-and-tag-version": "^13.3.0",
     "dedent": "^1.5.3",
     "dotenv-cli": "^11.1.0",
+    "marked": "^18.2.0",
     "obsidian-typings": "^6.59.0",
     "wdio-obsidian-reporter": "^3.5.0",
     "wdio-obsidian-service": "^3.5.0"

@@ -1,14 +1,74 @@
 # Leaflet Atmosphere
 
-Publish to your atmosphere blog without leaving Obsidian!
+Publish your Obsidian notes to [Leaflet](https://leaflet.pub), straight to your AT Protocol repository (PDS). Works on desktop and mobile.
 
-## ⚙️ Usage
+Documents are written as [`site.standard.document`](https://standard.site) records with Leaflet content (`pub.leaflet.content`), exactly like the posts written in the Leaflet editor, so they show up in your publication, in the Leaflet reader and in any standard.site compatible app.
 
-This plugin demonstrates some of the basic functionality the plugin API can do.
+## ⚙️ Setup
 
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds the command "Replace selected content" which edits the current selection.
-- Adds a plugin setting tab to the settings page.
+1. Create an app password in Bluesky: **Settings → Privacy and security → App passwords**.
+2. In **Settings → Leaflet Atmosphere**, fill in your handle (or DID) and select the app password (it is kept in Obsidian's secret storage, not in `data.json`).
+3. Select **Connect**: your publications are loaded and the first one becomes the default publication.
+
+If your account is not hosted on Bluesky, the PDS is resolved from your handle. You can also set it manually.
+
+## 🚀 Usage
+
+| Command | Description |
+| --- | --- |
+| **Publish current note** | Create or update the Leaflet post of the note. Also available in the file menu and the ribbon. |
+| **Publish current note to…** | Choose the publication (or your personal page) before publishing. |
+| **Delete current note from Leaflet** | Delete the record from your PDS. The note is kept. |
+| **Copy Leaflet link** / **Open published note in browser** | Use the URL saved in the note. |
+| **Refresh publications** | Reload the publications of your account. |
+
+After the first publication, the record URI (`leaflet_uri`) and the URL (`leaflet_url`) are saved in the note properties. Publishing again updates the same post (its publication date and Bluesky post are kept).
+
+### Properties
+
+| Property | Default key | Usage |
+| --- | --- | --- |
+| Title | `title` | Falls back to the first `# heading` (removed from the body), then to the file name. |
+| Description | `description` | Post subtitle. |
+| Tags | `tags` | Leading `#` are removed. |
+| Cover image | `cover` | Vault path, `[[wikilink]]` or URL. |
+| Publication date | `date` | Defaults to the first publication date. |
+| Slug | `slug` | Record key used in the URL on first publish (`https://you.leaflet.pub/<slug>`). |
+| Publication | `leaflet_publication` | Name, URL or AT-URI of a publication, or `none` for your personal page. |
+| Preferences | `leaflet_discover`, `leaflet_comments`, `leaflet_mentions`, `leaflet_recommends` | `true` / `false`, override the defaults of the settings. |
+
+The keys of the first six properties can be changed in the settings.
+
+### Markdown support
+
+| Obsidian | Leaflet |
+| --- | --- |
+| Headings, paragraphs, line breaks (follows the **Strict line breaks** option) | Header and text blocks |
+| `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, `` `code` ``, `<u>underline</u>`, links | Rich text facets |
+| `[[wikilinks]]`, links to notes | Link to the published note when it has a `leaflet_url`, plain text otherwise |
+| `![[image.png\|alt\|300]]`, `![alt](url)` | Image blocks, uploaded to your PDS (resized and compressed under 1 MB) |
+| `![[note]]`, `![[note#heading]]`, `![[note#^block]]` | Content inserted in place (or converted to a link) |
+| Bullet, numbered and task lists (nested) | List blocks with checkboxes |
+| Blockquotes and callouts `> [!note] Title` | Blockquote blocks, callout title in bold |
+| Code blocks | Code blocks with language and theme |
+| `$$ math $$` / `$inline$` | Math blocks / inline code |
+| Footnotes `[^1]` and inline footnotes `^[note]` | Leaflet footnotes |
+| `---` | Horizontal rule |
+| Tables | HTML block or code block |
+| A Bluesky post, YouTube or web link alone on its line | Bluesky post embed, video embed or link card |
+| `<iframe src="…">` | Embed block |
+| `%%comments%%`, `<!-- comments -->`, block IDs, frontmatter | Removed |
+
+## 🔒 Network and privacy
+
+The plugin only contacts the services needed to publish, and only when you run a command:
+
+- your PDS (login, records and image uploads);
+- `public.api.bsky.app`, `plc.directory` or your domain, to resolve your handle and your PDS;
+- `public.api.bsky.app` to fetch Bluesky posts embedded in a note;
+- the remote images of the note, when **Upload remote images** is enabled.
+
+Nothing else is collected or sent.
 
 ## 📥 Installation
 
@@ -39,7 +99,7 @@ This plugin demonstrates some of the basic functionality the plugin API can do.
 ### 🎼 Languages
 
 - [x] English
-- [ ] French
+- [x] French
 
 To add a translation:
 1. Fork the repository

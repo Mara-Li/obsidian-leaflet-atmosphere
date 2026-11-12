@@ -1,9 +1,84 @@
+import type { PublicationInfo } from "./leaflet/types";
+
+export type WikilinkMode = "text" | "published";
+export type EmbedMode = "inline" | "link";
+export type TableMode = "html" | "code";
 
 export interface LeafletAtmosphereSettings {
-	greeting: string;
+	identifier: string;
+	appPasswordSecret: string;
+	pdsUrl: string;
+	did: string;
+
+	publications: PublicationInfo[];
+	defaultPublication: string;
+
+	titleKey: string;
+	descriptionKey: string;
+	tagsKey: string;
+	coverKey: string;
+	publishedAtKey: string;
+	slugKey: string;
+	uriKey: string;
+	urlKey: string;
+
+	showInDiscover: boolean;
+	showComments: boolean;
+	showMentions: boolean;
+	showRecommends: boolean;
+
+	useSlugAsRecordKey: boolean;
+	firstHeadingAsTitle: boolean;
+	wikilinkMode: WikilinkMode;
+	embedMode: EmbedMode;
+	tableMode: TableMode;
+	linkCards: boolean;
+	uploadRemoteImages: boolean;
+	codeTheme: string;
+	maxImageWidth: number;
+
+	writeFrontmatter: boolean;
+	copyLinkAfterPublish: boolean;
+	openAfterPublish: boolean;
 }
 
 export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
-	greeting: "Hello",
+	identifier: "",
+	appPasswordSecret: "",
+	pdsUrl: "",
+	did: "",
+
+	publications: [],
+	defaultPublication: "",
+
+	titleKey: "title",
+	descriptionKey: "description",
+	tagsKey: "tags",
+	coverKey: "cover",
+	publishedAtKey: "date",
+	slugKey: "slug",
+	uriKey: "leaflet_uri",
+	urlKey: "leaflet_url",
+
+	showInDiscover: true,
+	showComments: true,
+	showMentions: true,
+	showRecommends: true,
+
+	useSlugAsRecordKey: false,
+	firstHeadingAsTitle: true,
+	wikilinkMode: "published",
+	embedMode: "inline",
+	tableMode: "html",
+	linkCards: true,
+	uploadRemoteImages: true,
+	codeTheme: "github-light",
+	maxImageWidth: 2000,
+
+	writeFrontmatter: true,
+	copyLinkAfterPublish: false,
+	openAfterPublish: false,
 };
 
+/** Leaflet personal page used as `site` for documents outside a publication. */
+export const STANDALONE = "";

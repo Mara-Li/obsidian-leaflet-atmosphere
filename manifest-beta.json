@@ -2,8 +2,8 @@
 	"id": "leaflet-atmosphere",
 	"name": "Leaflet Atmosphere",
 	"version": "0.0.0",
-	"minAppVersion": "1.13.0",
-	"description": "Publish to your atmosphere blog without leaving Obsidian!",
+	"minAppVersion": "1.13.2",
+	"description": "Publish your notes to Leaflet, the AT Protocol blogging platform.",
 	"author": "Mara-Li",
 	"authorUrl": "https://github.com/Mara-Li",
 	"isDesktopOnly": false

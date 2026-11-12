@@ -1,16 +1,20 @@
-import { type Editor, Notice, Plugin } from "obsidian";
 import i18next from "i18next";
+import { Notice, Plugin } from "obsidian";
+import { AtpClient } from "./atproto/client";
+import { registerCommands } from "./commands";
+import { showError } from "./commands/actions";
 import { resources, translationLanguage } from "./i18n";
 import { DEFAULT_SETTINGS, type LeafletAtmosphereSettings } from "./interfaces";
+import { fetchPublications } from "./leaflet/publications";
 import { LeafletAtmosphereSettingTab } from "./settings";
 
 export default class LeafletAtmosphere extends Plugin {
 	settings: LeafletAtmosphereSettings = { ...DEFAULT_SETTINGS };
+	private client: AtpClient | null = null;
+	private clientKey = "";
 
 	async onload() {
 		await this.loadSettings();
-
-		//load i18next
 		await i18next.init({
 			lng: translationLanguage,
 			fallbackLng: "en",
@@ -18,32 +22,13 @@ export default class LeafletAtmosphere extends Plugin {
 			returnNull: false,
 			returnEmptyString: false,
 		});
-
-		// This creates an icon in the left ribbon.
-		this.addRibbonIcon("dice", "Sample", () => {
-			// Called when the user clicks the icon.
-			new Notice("This is a notice!");
-		});
-
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText("Status bar text");
-
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: "replace-selected",
-			name: "Replace selected content",
-			editorCallback: (editor: Editor) => {
-				editor.replaceSelection("Sample editor command");
-			},
-		});
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
+		registerCommands(this);
 		this.addSettingTab(new LeafletAtmosphereSettingTab(this.app, this));
-
 	}
 
-	onunload() {}
+	onunload() {
+		this.client = null;
+	}
 
 	async loadSettings() {
 		this.settings = Object.assign(
@@ -55,5 +40,63 @@ export default class LeafletAtmosphere extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	/** Logged-in client, recreated when the credentials change. */
+	async getClient(): Promise<AtpClient> {
+		const { identifier, pdsUrl, appPasswordSecret } = this.settings;
+		const password = appPasswordSecret
+			? this.app.secretStorage.getSecret(appPasswordSecret)
+			: null;
+		if (!identifier.trim() || !password)
+			throw new Error(i18next.t("error.missingCredentials"));
+		const key = [identifier.trim(), pdsUrl.trim(), password].join("\n");
+		if (this.client && key === this.clientKey) return this.client;
+
+		const client = new AtpClient({
+			identifier: identifier.trim(),
+			password,
+			pdsUrl: pdsUrl.trim(),
+		});
+		await client.login();
+		this.client = client;
+		this.clientKey = key;
+		if (this.settings.did !== client.did) {
+			this.settings.did = client.did;
+			await this.saveSettings();
+		}
+		return client;
+	}
+
+	async connect() {
+		try {
+			this.client = null;
+			const client = await this.getClient();
+			new Notice(i18next.t("notice.connected", { handle: client.handle || client.did }));
+			await this.refreshPublications();
+		} catch (e) {
+			showError(e);
+		}
+	}
+
+	async refreshPublications() {
+		try {
+			const client = await this.getClient();
+			const firstLoad = this.settings.publications.length === 0;
+			this.settings.publications = await fetchPublications(client);
+			const current = this.settings.defaultPublication;
+			if (current && !this.settings.publications.some((p) => p.uri === current))
+				this.settings.defaultPublication = "";
+			if (firstLoad && !current)
+				this.settings.defaultPublication = this.settings.publications[0]?.uri ?? "";
+			await this.saveSettings();
+			new Notice(
+				i18next.t("notice.publicationsRefreshed", {
+					count: this.settings.publications.length,
+				})
+			);
+		} catch (e) {
+			showError(e);
+		}
 	}
 }

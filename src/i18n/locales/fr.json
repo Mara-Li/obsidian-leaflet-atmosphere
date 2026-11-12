@@ -1,0 +1,120 @@
+{
+	"commands": {
+		"publish": "Publier la note actuelle",
+		"publishTo": "Publier la note actuelle dans…",
+		"unpublish": "Supprimer la note actuelle de Leaflet",
+		"copyLink": "Copier le lien Leaflet",
+		"open": "Ouvrir la note publiée dans le navigateur",
+		"refreshPublications": "Actualiser les publications",
+		"fileMenu": "Publier sur Leaflet",
+		"ribbon": "Publier sur Leaflet"
+	},
+	"notice": {
+		"publishing": "Publication sur Leaflet…",
+		"published": "Publié sur Leaflet",
+		"updated": "Mis à jour sur Leaflet",
+		"unpublished": "Supprimé de Leaflet",
+		"notPublished": "Cette note n'a pas encore été publiée",
+		"linkCopied": "Lien Leaflet copié",
+		"missingImages": "Certaines images n'ont pas pu être envoyées : {{list}}",
+		"publicationsRefreshed": "{{count}} publication(s) trouvée(s)",
+		"connected": "Connecté en tant que {{handle}}"
+	},
+	"error": {
+		"prefix": "Leaflet : {{message}}",
+		"missingCredentials": "Renseignez votre identifiant et votre mot de passe d'application dans les réglages du plugin",
+		"slugTaken": "Un document avec la clé « {{slug}} » existe déjà",
+		"unknownPublication": "Publication « {{name}} » inconnue, actualisez la liste dans les réglages"
+	},
+	"modal": {
+		"choosePublication": "Choisissez où publier",
+		"standalone": "Page personnelle (sans publication)",
+		"unpublishTitle": "Supprimer de Leaflet ?",
+		"unpublishDesc": "Le document « {{title}} » sera supprimé de votre PDS. La note reste dans votre coffre.",
+		"confirm": "Supprimer",
+		"cancel": "Annuler"
+	},
+	"settings": {
+		"account": {
+			"heading": "Compte",
+			"identifier": "Identifiant",
+			"identifierDesc": "Votre handle Bluesky / atproto ou votre DID.",
+			"password": "Mot de passe d'application",
+			"passwordDesc": "À créer dans Bluesky → Paramètres → Confidentialité et sécurité → Mots de passe d'application.",
+			"pds": "URL du PDS",
+			"pdsDesc": "Laisser vide pour le déduire de votre identifiant.",
+			"test": "Tester la connexion",
+			"testDesc": "Se connecter et charger vos publications.",
+			"testButton": "Connexion"
+		},
+		"publication": {
+			"heading": "Publication",
+			"default": "Publication par défaut",
+			"defaultDesc": "Où publier les nouvelles notes. Modifiable par note avec la propriété « leaflet_publication ».",
+			"refresh": "Actualiser les publications",
+			"refreshDesc": "Recharger les publications de votre compte.",
+			"refreshButton": "Actualiser",
+			"standalone": "Page personnelle"
+		},
+		"preferences": {
+			"heading": "Préférences des articles",
+			"discover": "Afficher dans Discover",
+			"discoverDesc": "Modifiable par note avec « leaflet_discover ».",
+			"comments": "Autoriser les commentaires",
+			"commentsDesc": "Modifiable par note avec « leaflet_comments ».",
+			"mentions": "Afficher les mentions",
+			"mentionsDesc": "Modifiable par note avec « leaflet_mentions ».",
+			"recommends": "Afficher les recommandations",
+			"recommendsDesc": "Modifiable par note avec « leaflet_recommends »."
+		},
+		"frontmatter": {
+			"heading": "Propriétés",
+			"title": "Propriété du titre",
+			"titleDesc": "À défaut, le premier titre puis le nom du fichier sont utilisés.",
+			"description": "Propriété de la description",
+			"tags": "Propriété des tags",
+			"cover": "Propriété de l'image de couverture",
+			"coverDesc": "Chemin, wikilien ou URL de l'image de couverture.",
+			"date": "Propriété de la date de publication",
+			"slug": "Propriété du slug",
+			"slugDesc": "Clé utilisée dans l'URL lors de la première publication.",
+			"uri": "Propriété de l'URI du record",
+			"url": "Propriété de l'URL",
+			"write": "Enregistrer le lien dans les propriétés",
+			"writeDesc": "Stocke l'URI et l'URL dans la note après publication. Nécessaire pour mettre à jour un article.",
+			"noSpaces": "Le nom de propriété ne peut pas contenir d'espaces"
+		},
+		"content": {
+			"heading": "Contenu",
+			"slugAsKey": "Utiliser le slug comme clé",
+			"slugAsKeyDesc": "Construire l'URL à partir du slug ou du nom de fichier plutôt que d'un identifiant aléatoire.",
+			"firstHeading": "Utiliser le premier titre comme titre",
+			"firstHeadingDesc": "Retire le H1 initial du contenu et l'utilise comme titre.",
+			"wikilinks": "Liens internes",
+			"wikilinksDesc": "Conversion des liens vers d'autres notes.",
+			"wikilinksText": "Texte simple",
+			"wikilinksPublished": "Lien vers la note publiée si elle existe",
+			"embeds": "Notes intégrées",
+			"embedsDesc": "Conversion des intégrations ![[note]].",
+			"embedsInline": "Insérer le contenu",
+			"embedsLink": "Convertir en lien",
+			"tables": "Tableaux",
+			"tablesDesc": "Leaflet n'a pas de bloc tableau.",
+			"tablesHtml": "Bloc HTML",
+			"tablesCode": "Bloc de code",
+			"linkCards": "Cartes de lien",
+			"linkCardsDesc": "Transforme un lien seul sur sa ligne en carte, post Bluesky ou vidéo YouTube.",
+			"remoteImages": "Envoyer les images distantes",
+			"remoteImagesDesc": "Télécharge les images des URL et les envoie sur votre PDS.",
+			"codeTheme": "Thème du code",
+			"codeThemeDesc": "Thème de coloration syntaxique utilisé par Leaflet.",
+			"maxWidth": "Largeur maximale des images",
+			"maxWidthDesc": "Les images plus larges sont redimensionnées. Les images sont compressées sous 1 Mo."
+		},
+		"after": {
+			"heading": "Après publication",
+			"copy": "Copier le lien",
+			"open": "Ouvrir dans le navigateur"
+		}
+	}
+}
