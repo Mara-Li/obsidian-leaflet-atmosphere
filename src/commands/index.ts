@@ -1,13 +1,15 @@
 import i18next from "i18next";
-import { type Menu, Notice, type TAbstractFile, TFile } from "obsidian";
-import { getBoolean } from "../publish/frontmatter";
+import { type Menu, Notice, type TAbstractFile, TFile, TFolder } from "obsidian";
 import type LeafletAtmosphere from "../main";
 import {
+	canPublish,
 	isPublished,
 	publishedUrl,
 	publishFile,
 	publishFileTo,
+	publishableNotes,
 	publishMarkedFiles,
+	publishSelection,
 	unpublishFile,
 } from "./actions";
 
@@ -22,9 +24,9 @@ function addPublishItem(
 	menu: Menu,
 	file: TAbstractFile | null
 ) {
-	if (!(file instanceof TFile) || file.extension !== "md") return;
-	const fm = plugin.app.metadataCache.getFileCache(file)?.frontmatter;
-	if (getBoolean(fm, plugin.settings.publishKey) === false) return;
+	if (file instanceof TFolder)
+		return addSelectionItem(plugin, menu, [file], "commands.folderMenu");
+	if (!(file instanceof TFile) || !canPublish(plugin, file)) return;
 	const published = isPublished(plugin, file);
 	menu.addItem((item) =>
 		item
@@ -32,6 +34,23 @@ function addPublishItem(
 			.setIcon("send")
 			.setSection("action")
 			.onClick(() => void publishFile(plugin, file))
+	);
+}
+
+function addSelectionItem(
+	plugin: LeafletAtmosphere,
+	menu: Menu,
+	items: TAbstractFile[],
+	title: "commands.folderMenu" | "commands.filesMenu"
+) {
+	const count = publishableNotes(plugin, items).length;
+	if (count === 0) return;
+	menu.addItem((item) =>
+		item
+			.setTitle(i18next.t(title, { count }))
+			.setIcon("send")
+			.setSection("action")
+			.onClick(() => publishSelection(plugin, items))
 	);
 }
 
@@ -120,6 +139,11 @@ export function registerCommands(plugin: LeafletAtmosphere) {
 	plugin.registerEvent(
 		plugin.app.workspace.on("file-menu", (menu, file) =>
 			addPublishItem(plugin, menu, file)
+		)
+	);
+	plugin.registerEvent(
+		plugin.app.workspace.on("files-menu", (menu, files) =>
+			addSelectionItem(plugin, menu, files, "commands.filesMenu")
 		)
 	);
 	plugin.registerEvent(

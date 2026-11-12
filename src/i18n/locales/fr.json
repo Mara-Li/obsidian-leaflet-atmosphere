@@ -9,7 +9,9 @@
 		"fileMenu": "Publier sur Leaflet",
 		"ribbon": "Publier sur Leaflet",
 		"publishMarked": "Publier toutes les notes marquées",
-		"updateMenu": "Mettre à jour sur Leaflet"
+		"updateMenu": "Mettre à jour sur Leaflet",
+		"folderMenu": "Publier le dossier sur Leaflet ({{count}})",
+		"filesMenu": "Publier {{count}} notes sur Leaflet"
 	},
 	"notice": {
 		"publishing": "Publication sur Leaflet…",
@@ -24,7 +26,8 @@
 		"batchProgress": "Publication {{current}}/{{total}} : {{name}}",
 		"batchDone": "Leaflet : {{created}} publiée(s), {{updated}} mise(s) à jour, {{failed}} en échec",
 		"batchFailed": "Échecs : {{list}}",
-		"noMarked": "Aucune note n'a « {{key}}: true »"
+		"noMarked": "Aucune note n'a « {{key}}: true »",
+		"noSelection": "Aucune note à publier dans cette sélection"
 	},
 	"error": {
 		"prefix": "Leaflet : {{message}}",
@@ -45,7 +48,10 @@
 		"cancel": "Annuler",
 		"batchTitle": "Publier les notes marquées ?",
 		"batchDesc": "{{count}} note(s) avec « {{key}}: true » seront publiées ou mises à jour sur Leaflet.",
-		"publish": "Publier"
+		"publish": "Publier",
+		"selectionTitle": "Publier {{count}} notes ?",
+		"selectionDesc": "Ces notes seront publiées ou mises à jour sur Leaflet : {{list}}.",
+		"more": "et {{count}} autres"
 	},
 	"settings": {
 		"account": {

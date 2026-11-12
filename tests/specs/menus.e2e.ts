@@ -1,6 +1,13 @@
 import { browser, expect } from "@wdio/globals";
 import { obsidianPage } from "wdio-obsidian-service";
-import { publish, setup, waitFrontmatter } from "../helpers/obsidian";
+import {
+	confirmModal,
+	getRecords,
+	publish,
+	setup,
+	waitFrontmatter,
+	waitNotice,
+} from "../helpers/obsidian";
 
 /** Titles of the editor context menu of a note. */
 async function editorMenu(file: string): Promise<string[]> {
@@ -35,5 +42,55 @@ describe("Editor menu", function () {
 	it("hides the entry for a note with leaflet_publish: false", async function () {
 		const items = await editorMenu("Blocked.md");
 		expect(items.filter((i) => i.includes("Leaflet"))).toEqual([]);
+	});
+});
+
+/** Titles of the menu shown for a folder or a selection, and run the Leaflet entry if asked. */
+async function selectionMenu(
+	paths: string[],
+	run = false
+): Promise<string[]> {
+	return browser.executeObsidian(
+		({ app, obsidian }, { paths, run }) => {
+			const items = paths.map((p) => app.vault.getAbstractFileByPath(p)!);
+			const menu = new obsidian.Menu();
+			if (items.length === 1) app.workspace.trigger("file-menu", menu, items[0], "file-explorer");
+			else app.workspace.trigger("files-menu", menu, items, "file-explorer");
+			const entries = (menu as unknown as {
+				items: { titleEl?: HTMLElement; callback?: () => void }[];
+			}).items;
+			if (run) entries.find((i) => i.titleEl?.textContent?.includes("Leaflet"))?.callback?.();
+			return entries.map((i) => i.titleEl?.textContent ?? "");
+		},
+		{ paths, run }
+	);
+}
+
+describe("Folder and selection menus", function () {
+	beforeEach(async function () {
+		await setup();
+	});
+
+	it("publishes the publishable notes of a folder", async function () {
+		const titles = await selectionMenu(["Series"]);
+		expect(titles).toContain("Publish folder to Leaflet (2)");
+
+		await selectionMenu(["Series"], true);
+		await confirmModal();
+		const notice = await waitNotice(/failed/, 30000);
+		expect(notice).toContain("2 published, 0 updated, 0 failed");
+		const titlesPublished = Object.values(await getRecords()).map((r) => r.title).sort();
+		expect(titlesPublished).toEqual(["Part 1", "Part 2"]);
+	});
+
+	it("publishes a selection of notes", async function () {
+		const titles = await selectionMenu(["Target.md", "Unmarked.md", "Blocked.md"]);
+		expect(titles).toContain("Publish 2 notes to Leaflet");
+	});
+
+	it("hides the entry when nothing can be published", async function () {
+		await setup({ requirePublishFlag: true });
+		const titles = await selectionMenu(["Series"]);
+		expect(titles.filter((t) => t.includes("Leaflet"))).toEqual([]);
 	});
 });

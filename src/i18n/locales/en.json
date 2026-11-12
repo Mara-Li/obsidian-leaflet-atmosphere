@@ -9,7 +9,9 @@
 		"fileMenu": "Publish to Leaflet",
 		"ribbon": "Publish to Leaflet",
 		"publishMarked": "Publish all marked notes",
-		"updateMenu": "Update on Leaflet"
+		"updateMenu": "Update on Leaflet",
+		"folderMenu": "Publish folder to Leaflet ({{count}})",
+		"filesMenu": "Publish {{count}} notes to Leaflet"
 	},
 	"notice": {
 		"publishing": "Publishing to Leaflet…",
@@ -24,7 +26,8 @@
 		"batchProgress": "Publishing {{current}}/{{total}}: {{name}}",
 		"batchDone": "Leaflet: {{created}} published, {{updated}} updated, {{failed}} failed",
 		"batchFailed": "Failed: {{list}}",
-		"noMarked": "No note has \"{{key}}: true\""
+		"noMarked": "No note has \"{{key}}: true\"",
+		"noSelection": "No note to publish in this selection"
 	},
 	"error": {
 		"prefix": "Leaflet: {{message}}",
@@ -45,7 +48,10 @@
 		"cancel": "Cancel",
 		"batchTitle": "Publish marked notes?",
 		"batchDesc": "{{count}} note(s) with \"{{key}}: true\" will be published or updated on Leaflet.",
-		"publish": "Publish"
+		"publish": "Publish",
+		"selectionTitle": "Publish {{count}} notes?",
+		"selectionDesc": "These notes will be published or updated on Leaflet: {{list}}.",
+		"more": "and {{count}} more"
 	},
 	"settings": {
 		"account": {

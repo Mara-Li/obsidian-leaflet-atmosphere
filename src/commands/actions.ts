@@ -1,7 +1,8 @@
 import i18next from "i18next";
-import { Notice, type TFile } from "obsidian";
+import { Notice, type TAbstractFile, TFile, TFolder } from "obsidian";
+import { isExcalidraw } from "../markdown/compilers/excalidraw";
 import type LeafletAtmosphere from "../main";
-import { getString } from "../publish/frontmatter";
+import { getBoolean, getString } from "../publish/frontmatter";
 import { Publisher } from "../publish/publisher";
 import { ConfirmModal } from "../ui/confirmModal";
 import { PublicationModal } from "../ui/publicationModal";
@@ -93,6 +94,50 @@ export function publishMarkedFiles(plugin: LeafletAtmosphere) {
 		i18next.t("modal.batchTitle"),
 		i18next.t("modal.batchDesc", { count: files.length, key }),
 		() => void runBatch(plugin, publisher, files),
+		i18next.t("modal.publish"),
+		false
+	).open();
+}
+
+/** Whether a note may be published: not blocked, marked when required, not a drawing. */
+export function canPublish(plugin: LeafletAtmosphere, file: TFile): boolean {
+	if (file.extension !== "md" || isExcalidraw(plugin.app, file)) return false;
+	const { publishKey, requirePublishFlag } = plugin.settings;
+	const fm = plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+	const flag = getBoolean(fm, publishKey);
+	if (flag === false) return false;
+	return !(publishKey && requirePublishFlag && flag !== true);
+}
+
+/** Publishable notes of a selection, folders included. */
+export function publishableNotes(
+	plugin: LeafletAtmosphere,
+	items: TAbstractFile[]
+): TFile[] {
+	const notes = new Map<string, TFile>();
+	const visit = (item: TAbstractFile) => {
+		if (item instanceof TFolder) item.children.forEach(visit);
+		else if (item instanceof TFile && canPublish(plugin, item))
+			notes.set(item.path, item);
+	};
+	items.forEach(visit);
+	return [...notes.values()].sort((a, b) => a.path.localeCompare(b.path));
+}
+
+export function publishSelection(plugin: LeafletAtmosphere, items: TAbstractFile[]) {
+	const files = publishableNotes(plugin, items);
+	if (files.length === 0) {
+		new Notice(i18next.t("notice.noSelection"));
+		return;
+	}
+	const shown = files.slice(0, 5).map((f) => f.basename);
+	if (files.length > shown.length)
+		shown.push(i18next.t("modal.more", { count: files.length - shown.length }));
+	new ConfirmModal(
+		plugin.app,
+		i18next.t("modal.selectionTitle", { count: files.length }),
+		i18next.t("modal.selectionDesc", { list: shown.join(", ") }),
+		() => void runBatch(plugin, new Publisher(plugin), files),
 		i18next.t("modal.publish"),
 		false
 	).open();

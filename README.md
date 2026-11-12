@@ -19,6 +19,7 @@ The other settings are grouped in sub-pages: **Publication** (default publicatio
 | Command | Description |
 | --- | --- |
 | **Publish all marked notes** | Publish or update every note with `leaflet_publish: true`, after confirmation. |
+| **Publish folder to Leaflet** / **Publish N notes to Leaflet** | Right-click a folder, or several selected files, to publish all their notes after confirmation. Notes with `leaflet_publish: false` and Excalidraw drawings are skipped; with **Only publish marked notes**, only marked notes are kept. |
 | **Publish current note** | Create or update the Leaflet post of the note. Also available in the ribbon and in the right-click menus of the file and of the editor (hidden for notes with `leaflet_publish: false`). |
 | **Publish current note to…** | Choose the publication (or your personal page) before publishing. |
 | **Delete current note from Leaflet** | Delete the record from your PDS. The note is kept. |
