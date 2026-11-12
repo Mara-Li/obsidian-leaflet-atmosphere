@@ -151,5 +151,14 @@
 			"properties": "Propriétés",
 			"propertiesDesc": "Propriétés des notes lues et écrites par le plugin."
 		}
+	},
+	"network": {
+		"proxy": "Impossible de joindre {{host}} via le proxy ({{code}}). Vérifiez les réglages proxy ou VPN de votre système, ou essayez un autre réseau.",
+		"offline": "Pas de connexion internet ({{code}}). Vérifiez votre réseau puis réessayez.",
+		"dns": "{{host}} est introuvable ({{code}}). Vérifiez l'identifiant et l'URL du PDS, ou vos réglages DNS.",
+		"certificate": "La connexion sécurisée à {{host}} a échoué ({{code}}). Un proxy, un antivirus ou une date système erronée peuvent en être la cause.",
+		"connection": "La connexion à {{host}} a échoué ({{code}}). Le serveur est peut-être indisponible, ou un pare-feu le bloque. Réessayez plus tard.",
+		"blocked": "La requête vers {{host}} a été bloquée ({{code}}), sans doute par un pare-feu ou une extension de filtrage.",
+		"generic": "Erreur réseau en contactant {{host}} ({{code}})."
 	}
 }

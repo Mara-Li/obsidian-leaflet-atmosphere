@@ -1,5 +1,6 @@
-import { type App, requestUrl, TFile } from "obsidian";
+import { type App, TFile } from "obsidian";
 import type { AtpClient } from "../atproto/client";
+import { request } from "../atproto/http";
 import { exportExcalidraw, isExcalidraw } from "../markdown/compilers/excalidraw";
 import type { AspectRatio, BlobRef } from "./types";
 
@@ -144,7 +145,7 @@ export class ImageUploader {
 			};
 		}
 		if (!isRemote || !this.allowRemote) return null;
-		const res = await requestUrl({ url: link, throw: false });
+		const res = await request({ url: link });
 		if (res.status >= 400) return null;
 		const header = Object.entries(res.headers).find(
 			([k]) => k.toLowerCase() === "content-type"

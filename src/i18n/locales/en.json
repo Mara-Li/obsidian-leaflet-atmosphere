@@ -151,5 +151,14 @@
 			"properties": "Properties",
 			"propertiesDesc": "Note properties read and written by the plugin."
 		}
+	},
+	"network": {
+		"proxy": "Cannot reach {{host}} through the proxy ({{code}}). Check the proxy or VPN settings of your system, or try another network.",
+		"offline": "No internet connection ({{code}}). Check your network and try again.",
+		"dns": "{{host}} cannot be found ({{code}}). Check the handle and the PDS URL, or your DNS settings.",
+		"certificate": "The secure connection to {{host}} failed ({{code}}). A proxy, antivirus or wrong system date can cause this.",
+		"connection": "The connection to {{host}} failed ({{code}}). The server may be down, or a firewall blocks it. Try again later.",
+		"blocked": "The request to {{host}} was blocked ({{code}}), probably by a firewall or a filtering extension.",
+		"generic": "Network error while contacting {{host}} ({{code}})."
 	}
 }

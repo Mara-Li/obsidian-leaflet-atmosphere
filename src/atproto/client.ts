@@ -1,6 +1,6 @@
 import i18next from "i18next";
-import { requestUrl } from "obsidian";
 import type { BlobRef } from "../leaflet/types";
+import { request } from "./http";
 import {
 	type DidDocument,
 	normalizeIdentifier,
@@ -117,7 +117,7 @@ export class AtpClient {
 		const headers: Record<string, string> = {};
 		if (opts.token) headers.Authorization = `Bearer ${opts.token}`;
 		const url = `${this.pds}/xrpc/${nsid}${query ? `?${query}` : ""}`;
-		const res = await requestUrl({
+		const res = await request({
 			url,
 			method,
 			headers,
@@ -227,7 +227,7 @@ export class AtpClient {
 
 	async getBskyPost(uri: string): Promise<{ uri: string; cid: string } | null> {
 		const url = `https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=${encodeURIComponent(uri)}`;
-		const res = await requestUrl({ url, throw: false });
+		const res = await request({ url });
 		if (res.status >= 400) return null;
 		const post = readJson<{ posts?: { uri: string; cid: string }[] }>(res, url)
 			.posts?.[0];

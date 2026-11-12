@@ -1,5 +1,6 @@
 import i18next from "i18next";
-import { type RequestUrlResponse, requestUrl } from "obsidian";
+import type { RequestUrlResponse } from "obsidian";
+import { NetworkError, request } from "./http";
 
 const PUBLIC_API = "https://public.api.bsky.app";
 const PLC_DIRECTORY = "https://plc.directory";
@@ -25,7 +26,7 @@ export function readJson<T>(res: RequestUrlResponse, url: string): T {
 }
 
 async function getJson<T>(url: string): Promise<T | null> {
-	const res = await requestUrl({ url, throw: false });
+	const res = await request({ url });
 	if (res.status >= 400) return null;
 	try {
 		return readJson<T>(res, url);
@@ -62,10 +63,13 @@ export async function resolveHandle(handle: string): Promise<string> {
 		`${PUBLIC_API}/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(clean)}`
 	);
 	if (res?.did) return res.did;
-	const wellKnown = await requestUrl({
+	const wellKnown = await request({
 		url: `https://${clean}/.well-known/atproto-did`,
-		throw: false,
-	}).catch(() => null);
+	}).catch((e: unknown) => {
+		// A handle that is not a domain fails here; only network trouble is worth reporting
+		if (e instanceof NetworkError && e.code !== "ERR_NAME_NOT_RESOLVED") throw e;
+		return null;
+	});
 	const did = wellKnown && wellKnown.status < 400 ? wellKnown.text.trim() : "";
 	if (did.startsWith("did:")) return did;
 	throw new Error(i18next.t("error.unknownHandle", { handle: clean }));
