@@ -31,7 +31,8 @@
 		"publishingNote": "Publication de {{name}}…",
 		"recovered": "Cette note avait perdu son lien avec Leaflet : son article existant a été retrouvé et mis à jour.",
 		"pulled": "Lien Leaflet restauré :",
-		"pullNotFound": "Aucun article Leaflet ne correspond à cette note"
+		"pullNotFound": "Aucun article Leaflet ne correspond à cette note",
+		"dataviewJsDisabled": "{{count}} requête(s) DataviewJS ignorée(s) : les requêtes JavaScript sont désactivées dans les réglages de Dataview."
 	},
 	"error": {
 		"prefix": "Leaflet : {{message}}",

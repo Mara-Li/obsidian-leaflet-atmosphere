@@ -12,6 +12,10 @@ interface DataviewApi {
 		inlineQueryPrefix?: string;
 		inlineJsQueryPrefix?: string;
 		renderNullAs?: string;
+		enableDataviewJs?: boolean;
+		enableInlineDataviewJs?: boolean;
+		defaultDateFormat?: string;
+		defaultDateTimeFormat?: string;
 	};
 	tryQueryMarkdown(query: string, originFile?: string): Promise<string>;
 	executeJs(
@@ -30,9 +34,38 @@ function escapeRegex(text: string): string {
 	return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-/** Dataview literals: keep meaningful toString() (links, dates), stringify the rest. */
-function literalToString(value: unknown): string {
+interface LuxonDateTime {
+	isLuxonDateTime: true;
+	hour: number;
+	minute: number;
+	second: number;
+	toFormat(format: string): string;
+}
+
+interface LuxonDuration {
+	isLuxonDuration: true;
+	toHuman?(): string;
+	toISO(): string;
+}
+
+/** Dataview literals as Dataview shows them: dates with its formats, lists joined. */
+function literalToString(value: unknown, settings: DataviewApi["settings"]): string {
 	if (value === null || value === undefined) return "";
+	if (Array.isArray(value))
+		return value.map((v) => literalToString(v, settings)).join(", ");
+	if (typeof value === "object" && "isLuxonDateTime" in value) {
+		const date = value as LuxonDateTime;
+		const midnight = date.hour === 0 && date.minute === 0 && date.second === 0;
+		return date.toFormat(
+			midnight
+				? (settings.defaultDateFormat ?? "MMMM dd, yyyy")
+				: (settings.defaultDateTimeFormat ?? "h:mm a - MMMM dd, yyyy")
+		);
+	}
+	if (typeof value === "object" && "isLuxonDuration" in value) {
+		const duration = value as LuxonDuration;
+		return duration.toHuman?.() ?? duration.toISO();
+	}
 	if (typeof value === "object") {
 		const custom = value.toString !== Object.prototype.toString;
 		// eslint-disable-next-line @typescript-eslint/no-base-to-string -- checked above
@@ -66,6 +99,9 @@ const delay = (ms: number) =>
 	new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 
 export class DataviewCompiler {
+	/** DataviewJS queries left out because DataviewJS is disabled in Dataview. */
+	skippedJs = 0;
+
 	private constructor(
 		private api: DataviewApi | null,
 		private enabled: boolean
@@ -85,26 +121,31 @@ export class DataviewCompiler {
 		const jsKeyword = escapeRegex(api.settings.dataviewJsKeyword || "dataviewjs");
 		const inlinePrefix = escapeRegex(api.settings.inlineQueryPrefix || "=");
 		const inlineJsPrefix = escapeRegex(api.settings.inlineJsQueryPrefix || "$=");
+		const jsBlocks = new RegExp(`\`\`\`${jsKeyword}\\s(.+?)\`\`\``, "gsm");
+		const inlineJs = new RegExp(`\`${inlineJsPrefix}(.+?)\``, "gsm");
+
+		// DataviewJS disabled in Dataview: drop the queries rather than publish its warning
+		if (this.enabled && api.settings.enableDataviewJs === false) {
+			this.skippedJs += [...text.matchAll(jsBlocks)].length;
+			text = text.replace(jsBlocks, "");
+		}
+		if (this.enabled && api.settings.enableInlineDataviewJs === false) {
+			this.skippedJs += [...text.matchAll(inlineJs)].length;
+			text = text.replace(inlineJs, "");
+		}
 
 		text = await this.replace(text, /```dataview\s(.+?)```/gms, async (query) => {
 			const { inCallout: quoted, query: q } = sanitizeQuery(query);
 			const md = await api.tryQueryMarkdown(q, path);
 			return quoted ? inCallout(md) : md;
 		});
-		text = await this.replace(
-			text,
-			new RegExp(`\`\`\`${jsKeyword}\\s(.+?)\`\`\``, "gsm"),
-			async (query) => {
-				const { inCallout: quoted, query: q } = sanitizeQuery(query);
-				const md = await this.executeJs(q, path, 100);
-				return quoted ? inCallout(md) : md;
-			}
-		);
-		text = await this.replace(
-			text,
-			new RegExp(`\`${inlineJsPrefix}(.+?)\``, "gsm"),
-			(query) =>
-				this.executeJs(`const query = ${query.trim()};\ndv.el("div", query);`, path)
+		text = await this.replace(text, jsBlocks, async (query) => {
+			const { inCallout: quoted, query: q } = sanitizeQuery(query);
+			const md = await this.executeJs(q, path, 100);
+			return quoted ? inCallout(md) : md;
+		});
+		text = await this.replace(text, inlineJs, (query) =>
+			this.executeJs(`const query = ${query.trim()};\ndv.el("div", query);`, path)
 		);
 		text = await this.replace(
 			text,
@@ -113,8 +154,8 @@ export class DataviewCompiler {
 				const result = api.evaluateInline(query.trim(), path);
 				return Promise.resolve(
 					result.successful
-						? literalToString(result.value)
-						: literalToString(api.settings.renderNullAs)
+						? literalToString(result.value, api.settings)
+						: literalToString(api.settings.renderNullAs, api.settings)
 				);
 			}
 		);

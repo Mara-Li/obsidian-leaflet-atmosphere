@@ -219,4 +219,6 @@ export interface PublicationInfo {
 	bodyFont?: string;
 	headingFont?: string;
 	textColor?: string;
+	backgroundColor?: string;
+	accentColor?: string;
 }

@@ -105,7 +105,7 @@ export function blocksToHtml(
 ): { html: string; lines: number } {
 	let lines = 0;
 	// Characters per line in a ~620px wide post, for this font size
-	const perLine = Math.round(1150 / fontSize);
+	const perLine = Math.round(980 / fontSize);
 	const count = (text: string) =>
 		text
 			.split("\n")
@@ -155,7 +155,7 @@ export function calloutHtml(
 		`.callout{background:rgba(${r},${g},${b},.1);border-radius:6px;padding:12px 16px}` +
 		`.title{color:rgb(${r},${g},${b});font-weight:700;margin-bottom:4px}` +
 		"p{margin:0 0 8px}p:last-child{margin:0}ul,ol{margin:0 0 8px;padding-left:22px}" +
-		"pre{background:rgba(0,0,0,.05);padding:8px;border-radius:4px;overflow:auto;margin:0 0 8px}" +
+		"pre{background:rgba(128,128,128,.15);padding:8px;border-radius:4px;overflow:auto;margin:0 0 8px}" +
 		`a{color:rgb(${r},${g},${b})}`;
 	const html =
 		`<style>${css}</style><div class="callout"><div class="title heading">${style.emoji} ${titleHtml}</div>` +

@@ -15,6 +15,10 @@ interface Theme {
 	bodyFont?: string;
 	headingFont?: string;
 	primary?: Color;
+	backgroundColor?: Color;
+	pageBackground?: Color;
+	showPageBackground?: boolean;
+	accentBackground?: Color;
 }
 
 interface StandardPublication {
@@ -37,14 +41,34 @@ function toCss(color: Color | undefined): string | undefined {
 		: `rgb(${color.r},${color.g},${color.b})`;
 }
 
-/** Fonts and text color of a publication theme, without empty values. */
-function themeOf(theme: Theme | undefined): Partial<PublicationInfo> {
+/** Fonts and colors of a publication theme, without empty values. */
+export function themeOf(theme: Theme | undefined): Partial<PublicationInfo> {
 	const out: Partial<PublicationInfo> = {};
 	if (theme?.bodyFont) out.bodyFont = theme.bodyFont;
 	if (theme?.headingFont) out.headingFont = theme.headingFont;
 	const textColor = toCss(theme?.primary);
 	if (textColor) out.textColor = textColor;
+	// The page has its own background only when the theme shows it
+	const background = toCss(
+		theme?.showPageBackground ? theme.pageBackground : theme?.backgroundColor
+	);
+	if (background) out.backgroundColor = background;
+	const accent = toCss(theme?.accentBackground);
+	if (accent) out.accentColor = accent;
 	return out;
+}
+
+/** Theme of a publication read from its record, for an up-to-date look. */
+export async function fetchPublicationTheme(
+	client: AtpClient,
+	uri: string
+): Promise<Partial<PublicationInfo> | null> {
+	const parsed = parseAtUri(uri);
+	if (!parsed) return null;
+	const record = await client
+		.getRecord<{ theme?: Theme }>(parsed.collection, parsed.rkey, parsed.repo)
+		.catch(() => null);
+	return record ? themeOf(record.value.theme) : null;
 }
 
 export async function fetchPublications(client: AtpClient): Promise<PublicationInfo[]> {

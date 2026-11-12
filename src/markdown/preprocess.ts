@@ -84,6 +84,11 @@ function subpathRange(
 export class Preprocessor {
 	private dataview: DataviewCompiler | null;
 
+	/** DataviewJS queries left out because DataviewJS is disabled in Dataview. */
+	get skippedDataviewJs(): number {
+		return this.dataview?.skippedJs ?? 0;
+	}
+
 	constructor(
 		private app: App,
 		private embedMode: EmbedMode,

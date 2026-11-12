@@ -60,8 +60,22 @@ function fontConfig(id: string | undefined): FontConfig {
 export interface PostTheme {
 	bodyFont?: string;
 	headingFont?: string;
-	/** Text color of the publication, as CSS. */
+	/** Colors of the publication, as CSS. */
 	textColor?: string;
+	backgroundColor?: string;
+	accentColor?: string;
+}
+
+/** Whether a CSS rgb()/rgba() color is dark. */
+function isDark(color: string | undefined): boolean {
+	const [r, g, b] = (color?.match(/\d+(?:\.\d+)?/g) ?? []).slice(0, 3).map(Number);
+	if (r === undefined || g === undefined || b === undefined) return false;
+	return 0.2126 * r + 0.7152 * g + 0.0722 * b < 128;
+}
+
+/** Text color of the publication, or one readable on its background. */
+export function textColorOf(theme: PostTheme): string {
+	return theme.textColor ?? (isDark(theme.backgroundColor) ? "#ececec" : "#272727");
 }
 
 function fontImports(fonts: FontConfig[]): string {
@@ -96,7 +110,8 @@ export function themeCss(theme: PostTheme = {}): {
 		fontImports(unique) +
 		fontFaces(unique) +
 		`body{margin:0;font-family:'${body.family}',${body.fallback};font-size:${body.size}px;` +
-		`line-height:${lineHeight}px;color:${theme.textColor ?? "#272727"}}` +
+		`line-height:${lineHeight}px;color:${textColorOf(theme)}}` +
+		`a{color:${theme.accentColor ?? (isDark(theme.backgroundColor) ? "#8ab4f8" : "#1d5fb4")}}` +
 		`.heading{font-family:'${heading.family}',${heading.fallback}}` +
 		"code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.875em}";
 	return { css, fontSize: body.size, lineHeight };

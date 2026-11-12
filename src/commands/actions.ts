@@ -33,6 +33,11 @@ export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?:
 			result.url
 		);
 		if (result.recovered) new Notice(i18next.t("notice.recovered"), 8000);
+		if (result.skippedDataviewJs > 0)
+			new Notice(
+				i18next.t("notice.dataviewJsDisabled", { count: result.skippedDataviewJs }),
+				8000
+			);
 		if (result.warnings.length > 0)
 			new Notice(
 				i18next.t("notice.missingImages", { list: result.warnings.join(", ") }),
@@ -178,6 +183,7 @@ async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: 
 	const created = new Set<string>();
 	const failed: string[] = [];
 	let updated = 0;
+	let skippedJs = 0;
 	for (const [i, file] of files.entries()) {
 		progress.update(
 			i18next.t("notice.batchProgress", {
@@ -190,6 +196,7 @@ async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: 
 		);
 		try {
 			const result = await publisher.publish(file);
+			skippedJs += result.skippedDataviewJs;
 			if (result.created) created.add(file.path);
 			else updated++;
 		} catch (e) {
@@ -209,4 +216,6 @@ async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: 
 	);
 	if (failed.length > 0)
 		new Notice(i18next.t("notice.batchFailed", { list: failed.join(", ") }), 10000);
+	if (skippedJs > 0)
+		new Notice(i18next.t("notice.dataviewJsDisabled", { count: skippedJs }), 8000);
 }

@@ -76,6 +76,33 @@ describe("Callouts", function () {
 		expect(box.html).not.toContain("iaw-quattro");
 	});
 
+	it("stay readable on a dark publication", async function () {
+		await setup({ calloutMode: "html", publishKey: "", publications: [PUBLICATION] });
+		// The theme changed on Leaflet after the last refresh: it is read again on publish
+		await browser.executeObsidian((_, uri) => {
+			const store = (window as unknown as { leafletTest: { records: Record<string, unknown> } })
+				.leafletTest;
+			store.records[`site.standard.publication/${uri.split("/").pop()}`] = {
+				$type: "site.standard.publication",
+				name: "Test garden",
+				url: "https://garden.example.com",
+				theme: {
+					$type: "pub.leaflet.publication#theme",
+					backgroundColor: { $type: "pub.leaflet.theme.color#rgb", r: 28, g: 27, b: 28 },
+				},
+			};
+		}, PUBLICATION.uri);
+		await publish("Callouts.md");
+		const record = Object.values(await getRecords()).find(
+			(r) => r.$type === "site.standard.document"
+		)!;
+		const box = blocksOf(record).find(
+			(b): b is HtmlBlock => b.$type === "pub.leaflet.blocks.html"
+		)!;
+		expect(box.html).toContain("color:#ececec");
+		expect(box.html).toContain("a{color:#8ab4f8}");
+	});
+
 	it("reads the theme of the publications", async function () {
 		await setup();
 		const pub = await browser.executeObsidian(async ({ plugins }, uri) => {

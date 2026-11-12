@@ -8,6 +8,7 @@ import { ImageUploader } from "../leaflet/images";
 import {
 	DOCUMENT_COLLECTION,
 	documentUrl,
+	fetchPublicationTheme,
 	standaloneSite,
 } from "../leaflet/publications";
 import { utf8Length } from "../leaflet/richtext";
@@ -44,6 +45,8 @@ export interface PublishResult {
 	created: boolean;
 	/** The note had lost its link: the existing post was found and updated. */
 	recovered: boolean;
+	/** DataviewJS queries left out because DataviewJS is disabled in Dataview. */
+	skippedDataviewJs: number;
 	warnings: string[];
 }
 
@@ -61,6 +64,7 @@ export class Publisher {
 	/** Record keys handed out by this instance, with the note that owns them. */
 	private owners = new Map<string, string>();
 	private documents: Promise<ListedRecord<StandardDocument>[]> | null = null;
+	private themes = new Map<string, Promise<Partial<PublicationInfo> | null>>();
 
 	constructor(private plugin: LeafletAtmosphere) {}
 
@@ -120,7 +124,8 @@ export class Publisher {
 			s.maxImageWidth,
 			s.uploadRemoteImages
 		);
-		const markdown = await new Preprocessor(this.app, s.embedMode, s.dataview).run(file);
+		const preprocessor = new Preprocessor(this.app, s.embedMode, s.dataview);
+		const markdown = await preprocessor.run(file);
 		const converter = new MarkdownConverter({
 			app: this.app,
 			settings: s,
@@ -129,7 +134,7 @@ export class Publisher {
 			strictLineBreaks: this.strictLineBreaks(),
 			resolveBskyPost: (actor, postRkey) => this.resolveBskyPost(client, actor, postRkey),
 			renderDiagram: (source) => renderMermaid(this.app, source, file.path),
-			theme: this.themeOf(site),
+			theme: await this.themeOf(client, site),
 			noteUrl: (target) =>
 				target.path === file.path
 					? Promise.resolve(selfUrl)
@@ -189,6 +194,7 @@ export class Publisher {
 			url,
 			created: !existing,
 			recovered,
+			skippedDataviewJs: preprocessor.skippedDataviewJs,
 			warnings: converted.warnings,
 		};
 	}
@@ -375,13 +381,18 @@ export class Publisher {
 	}
 
 	/** Fonts and text color of the publication, for HTML blocks. */
-	private themeOf(site: string): PostTheme {
-		const pub = this.settings.publications.find((p) => p.uri === site);
-		return {
-			...(pub?.bodyFont && { bodyFont: pub.bodyFont }),
-			...(pub?.headingFont && { headingFont: pub.headingFont }),
-			...(pub?.textColor && { textColor: pub.textColor }),
-		};
+	private async themeOf(client: AtpClient, site: string): Promise<PostTheme> {
+		if (!site.startsWith("at://")) return {};
+		// Read the publication again: its theme may have changed since the last refresh
+		let pending = this.themes.get(site);
+		if (!pending) {
+			pending = fetchPublicationTheme(client, site);
+			this.themes.set(site, pending);
+		}
+		const fresh = await pending;
+		const { bodyFont, headingFont, textColor, backgroundColor, accentColor } =
+			fresh ?? this.settings.publications.find((p) => p.uri === site) ?? {};
+		return { bodyFont, headingFont, textColor, backgroundColor, accentColor };
 	}
 
 	private publicationsFor(site: string): PublicationInfo[] {
