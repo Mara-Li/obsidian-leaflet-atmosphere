@@ -19,6 +19,7 @@ describe("Plugin", function () {
 				"publish-marked-notes",
 				"publish-note",
 				"publish-note-to",
+				"pull-note",
 				"refresh-publications",
 				"unpublish-note",
 			].map((id) => `leaflet-atmosphere:${id}`)

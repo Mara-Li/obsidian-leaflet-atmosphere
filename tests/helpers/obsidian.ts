@@ -89,7 +89,10 @@ export async function setup(
 					store.blobs.push({ mime: mimeType, size: data.byteLength });
 					return { $type: "blob", ref: { $link: cid }, mimeType, size: data.byteLength };
 				},
-				listRecords: async () => [],
+				listRecords: async (collection: string) =>
+					Object.entries(store.records)
+						.filter(([key]) => key.startsWith(`${collection}/`))
+						.map(([key, value]) => ({ uri: uri(collection, key.split("/")[1]!), cid, value })),
 				getBskyPost: async (postUri: string) => ({ uri: postUri, cid }),
 			};
 			(window as unknown as { leafletTest: unknown }).leafletTest = store;
@@ -206,5 +209,18 @@ export async function statusBar(): Promise<{ text: string; value: number | null 
 			text: el.textContent,
 			value: bar?.hasAttribute("value") ? bar.value : null,
 		};
+	});
+}
+
+/** Remove the link of a note, as when its properties were lost. */
+export async function forgetLink(file: string): Promise<void> {
+	await browser.executeObsidian(async ({ app }, path) => {
+		await app.fileManager.processFrontMatter(app.vault.getFileByPath(path)!, (fm: Record<string, unknown>) => {
+			delete fm.leaflet_uri;
+			delete fm.leaflet_url;
+		});
+	}, file);
+	await browser.waitUntil(async () => (await getFrontmatter(file)).leaflet_uri === undefined, {
+		timeout: 15000,
 	});
 }

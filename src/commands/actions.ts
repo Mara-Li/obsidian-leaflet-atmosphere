@@ -32,6 +32,7 @@ export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?:
 			i18next.t(result.created ? "notice.published" : "notice.updated"),
 			result.url
 		);
+		if (result.recovered) new Notice(i18next.t("notice.recovered"), 8000);
 		if (result.warnings.length > 0)
 			new Notice(
 				i18next.t("notice.missingImages", { list: result.warnings.join(", ") }),
@@ -42,6 +43,16 @@ export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?:
 		if (plugin.settings.openAfterPublish) window.open(result.url);
 	} catch (e) {
 		progress.done();
+		showError(e);
+	}
+}
+
+export async function pullFile(plugin: LeafletAtmosphere, file: TFile) {
+	try {
+		const found = await new Publisher(plugin).pull(file);
+		if (found) linkNotice(i18next.t("notice.pulled"), found.url);
+		else new Notice(i18next.t("notice.pullNotFound"));
+	} catch (e) {
 		showError(e);
 	}
 }

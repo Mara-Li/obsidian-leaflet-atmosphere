@@ -11,7 +11,8 @@
 		"publishMarked": "Publier toutes les notes marquées",
 		"updateMenu": "Mettre à jour sur Leaflet",
 		"folderMenu": "Publier le dossier sur Leaflet ({{count}})",
-		"filesMenu": "Publier {{count}} notes sur Leaflet"
+		"filesMenu": "Publier {{count}} notes sur Leaflet",
+		"pull": "Récupérer le lien Leaflet de la note actuelle"
 	},
 	"notice": {
 		"published": "Publié sur Leaflet",
@@ -27,7 +28,10 @@
 		"batchFailed": "Échecs : {{list}}",
 		"noMarked": "Aucune note n'a « {{key}}: true »",
 		"noSelection": "Aucune note à publier dans cette sélection",
-		"publishingNote": "Publication de {{name}}…"
+		"publishingNote": "Publication de {{name}}…",
+		"recovered": "Cette note avait perdu son lien avec Leaflet : son article existant a été retrouvé et mis à jour.",
+		"pulled": "Lien Leaflet restauré :",
+		"pullNotFound": "Aucun article Leaflet ne correspond à cette note"
 	},
 	"error": {
 		"prefix": "Leaflet : {{message}}",

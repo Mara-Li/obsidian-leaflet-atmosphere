@@ -10,6 +10,7 @@ import {
 	publishableNotes,
 	publishMarkedFiles,
 	publishSelection,
+	pullFile,
 	unpublishFile,
 } from "./actions";
 
@@ -86,6 +87,18 @@ export function registerCommands(plugin: LeafletAtmosphere) {
 		name: t("commands.publishMarked"),
 		icon: "send",
 		callback: () => publishMarkedFiles(plugin),
+	});
+
+	plugin.addCommand({
+		id: "pull-note",
+		name: t("commands.pull"),
+		icon: "download",
+		checkCallback: (checking) => {
+			const file = markdownFile(plugin);
+			if (!file) return false;
+			if (!checking) void pullFile(plugin, file);
+			return true;
+		},
 	});
 
 	plugin.addCommand({

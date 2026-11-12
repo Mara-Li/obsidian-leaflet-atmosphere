@@ -1,6 +1,6 @@
 import i18next from "i18next";
 import type { FrontMatterCache, TFile } from "obsidian";
-import type { AtpClient } from "../atproto/client";
+import type { AtpClient, ListedRecord } from "../atproto/client";
 import { resolveHandle } from "../atproto/identity";
 import { isValidRecordKey, nextTid, parseAtUri } from "../atproto/tid";
 import { ImageUploader } from "../leaflet/images";
@@ -24,6 +24,7 @@ import type LeafletAtmosphere from "../main";
 import { renderMermaid } from "../markdown/compilers/mermaid";
 import { MarkdownConverter } from "../markdown/convert";
 import { Preprocessor } from "../markdown/preprocess";
+import { findExistingPost, type RecoveryContext } from "./recovery";
 import {
 	getBoolean,
 	getDate,
@@ -40,6 +41,8 @@ export interface PublishResult {
 	uri: string;
 	url: string;
 	created: boolean;
+	/** The note had lost its link: the existing post was found and updated. */
+	recovered: boolean;
 	warnings: string[];
 }
 
@@ -56,6 +59,7 @@ export class Publisher {
 	private reserved = new Map<string, string>();
 	/** Record keys handed out by this instance, with the note that owns them. */
 	private owners = new Map<string, string>();
+	private documents: Promise<ListedRecord<StandardDocument>[]> | null = null;
 
 	constructor(private plugin: LeafletAtmosphere) {}
 
@@ -90,9 +94,19 @@ export class Publisher {
 		this.checkPublishFlag(fm);
 
 		let rkey = this.existingRkey(file, did);
-		const existing = rkey
+		let existing = rkey
 			? await client.getRecord<StandardDocument>(DOCUMENT_COLLECTION, rkey)
 			: null;
+		let recovered = false;
+		if (!rkey) {
+			// No link in the note: its post may still exist (sync issue, failed write…)
+			const found = await findExistingPost(this.recoveryContext(client), file, fm);
+			if (found) {
+				rkey = found.rkey;
+				existing = found.record;
+				recovered = true;
+			}
+		}
 		rkey ??= await this.reservedOrNewRkey(client, file, fm);
 
 		const site = this.resolveSite(fm, options, existing?.value.site, did);
@@ -168,7 +182,59 @@ export class Publisher {
 				}
 			);
 
-		return { uri: result.uri, url, created: !existing, warnings: converted.warnings };
+		return {
+			uri: result.uri,
+			url,
+			created: !existing,
+			recovered,
+			warnings: converted.warnings,
+		};
+	}
+
+	/**
+	 * Restore the link of a note to its existing post without publishing it.
+	 * Returns null when no post matches.
+	 */
+	async pull(file: TFile): Promise<{ uri: string; url: string; by: string } | null> {
+		const client = await this.plugin.getClient();
+		const fm = this.frontmatter(file);
+		const rkey = this.existingRkey(file, client.did);
+		let found: {
+			rkey: string;
+			record: ListedRecord<StandardDocument>;
+			by: string;
+		} | null = null;
+		if (rkey) {
+			const record = await client.getRecord<StandardDocument>(DOCUMENT_COLLECTION, rkey);
+			if (record) found = { rkey, record, by: "uri" };
+		}
+		found ??= await findExistingPost(this.recoveryContext(client), file, fm);
+		if (!found) return null;
+		const { site, path } = found.record.value;
+		const url = documentUrl(site, path ?? `/${found.rkey}`, this.publicationsFor(site));
+		await this.app.fileManager.processFrontMatter(
+			file,
+			(front: Record<string, unknown>) => {
+				if (this.settings.uriKey) front[this.settings.uriKey] = found.record.uri;
+				if (this.settings.urlKey) front[this.settings.urlKey] = url;
+			}
+		);
+		return { uri: found.record.uri, url, by: found.by };
+	}
+
+	private recoveryContext(client: AtpClient): RecoveryContext {
+		return {
+			app: this.app,
+			client,
+			settings: this.settings,
+			listDocuments: () => {
+				this.documents ??= client
+					.listRecords<StandardDocument>(DOCUMENT_COLLECTION)
+					.catch(() => []);
+				return this.documents;
+			},
+			ownerOf: (rkey) => this.owners.get(rkey),
+		};
 	}
 
 	async unpublish(file: TFile): Promise<boolean> {

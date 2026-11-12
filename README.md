@@ -22,6 +22,7 @@ The other settings are grouped in sub-pages: **Publication** (default publicatio
 | **Publish folder to Leaflet** / **Publish N notes to Leaflet** | Right-click a folder, or several selected files, to publish all their notes after confirmation (optional, see **When publishing** in the settings). Notes with `leaflet_publish: false` and Excalidraw drawings are skipped; with **Only publish marked notes**, only marked notes are kept. |
 | **Publish current note** | Create or update the Leaflet post of the note. Also available in the ribbon and in the right-click menus of the file and of the editor (hidden for notes with `leaflet_publish: false`). |
 | **Publish current note to…** | Choose the publication (or your personal page) before publishing. |
+| **Retrieve the Leaflet link of current note** | Restore `leaflet_uri` and `leaflet_url` of a note that lost them, without publishing it. |
 | **Delete current note from Leaflet** | Delete the record from your PDS. The note is kept. |
 | **Copy Leaflet link** / **Open published note in browser** | Use the URL saved in the note. |
 | **Refresh publications** | Reload the publications of your account. |
@@ -29,6 +30,8 @@ The other settings are grouped in sub-pages: **Publication** (default publicatio
 On desktop, the progress is shown in the status bar; on mobile, in a notice.
 
 After the first publication, the record URI (`leaflet_uri`) and the URL (`leaflet_url`) are saved in the note properties. Publishing again updates the same post (its publication date and Bluesky post are kept).
+
+If a note lost its properties (sync issue, failed write…), publishing it again does not create a duplicate nor fail: the plugin looks for its post at the key it should use (reserved address or slug), then by title when a single post matches, and updates it. A post already linked to another note of the vault is never taken.
 
 Links to another note point to its published post. When the linked note is marked with `leaflet_publish: true` but not published yet, its future address is reserved: only `leaflet_url` is saved in its properties (`leaflet_uri` is written by the publication itself), so the link works as soon as that note is published. The commands that need a published post (copy, open, delete) are not offered on a reserved note. Links to unmarked notes become plain text.
 
