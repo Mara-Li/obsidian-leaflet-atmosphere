@@ -64,6 +64,7 @@ export class Publisher {
 	/** Record keys handed out by this instance, with the note that owns them. */
 	private owners = new Map<string, string>();
 	private documents: Promise<ListedRecord<StandardDocument>[]> | null = null;
+	private mentions = new Map<string, Promise<string | null>>();
 	private themes = new Map<string, Promise<Partial<PublicationInfo> | null>>();
 
 	constructor(private plugin: LeafletAtmosphere) {}
@@ -133,6 +134,7 @@ export class Publisher {
 			sourcePath: file.path,
 			strictLineBreaks: this.strictLineBreaks(),
 			resolveBskyPost: (actor, postRkey) => this.resolveBskyPost(client, actor, postRkey),
+			resolveMention: (handle) => this.resolveMention(client, handle),
 			renderDiagram: (source) => renderMermaid(this.app, source, file.path),
 			theme: await this.themeOf(client, site),
 			embeds: preprocessor.embeds,
@@ -393,6 +395,16 @@ export class Publisher {
 		}
 		choice ??= options.site ?? existingSite ?? this.settings.defaultPublication;
 		return choice && choice.startsWith("at://") ? choice : choice || standaloneSite(did);
+	}
+
+	/** DID of a mentioned handle, resolved once per run. */
+	private resolveMention(client: AtpClient, handle: string): Promise<string | null> {
+		let pending = this.mentions.get(handle);
+		if (!pending) {
+			pending = client.resolveHandle(handle);
+			this.mentions.set(handle, pending);
+		}
+		return pending;
 	}
 
 	/** Fonts and text color of the publication, for HTML blocks. */

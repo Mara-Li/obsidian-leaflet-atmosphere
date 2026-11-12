@@ -41,6 +41,7 @@ export interface LeafletAtmosphereSettings {
 	calloutMode: CalloutMode;
 	dataview: boolean;
 	linkCards: boolean;
+	mentions: boolean;
 	uploadRemoteImages: boolean;
 	codeTheme: string;
 	maxImageWidth: number;
@@ -86,6 +87,7 @@ export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
 	calloutMode: "quote",
 	dataview: true,
 	linkCards: true,
+	mentions: true,
 	uploadRemoteImages: true,
 	codeTheme: "github-light",
 	maxImageWidth: 2000,

@@ -51,6 +51,10 @@ const link = (uri: string): FacetFeature => ({
 	uri,
 });
 
+/** "@handle.domain" not glued to a word, an email or a path. */
+const MENTION =
+	/(^|[^\w@./])@([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z][a-z0-9-]*[a-z0-9])(?![\w-]|\.[a-z0-9])/gi;
+
 const BSKY_POST =
 	/^https?:\/\/(?:www\.)?bsky\.app\/profile\/([^/\s]+)\/post\/([a-z0-9]+)\/?$/i;
 const YOUTUBE =
@@ -65,6 +69,8 @@ export interface ConverterDeps {
 	resolveBskyPost(handleOrDid: string, rkey: string): Promise<StrongRef | null>;
 	/** SVG markup of a rendered Mermaid diagram. */
 	renderDiagram?: (source: string) => Promise<string | null>;
+	/** DID of a mentioned handle, or null when it does not exist. */
+	resolveMention?: (handle: string) => Promise<string | null>;
 	/** Notes embedded as sub-pages by the preprocessor. */
 	embeds?: Map<string, EmbeddedNote>;
 	/** Fonts and colors of the publication, for HTML blocks. */
@@ -561,7 +567,11 @@ export class MarkdownConverter {
 		switch (token.type) {
 			case "text":
 				if (token.tokens?.length) return this.renderInline(token.tokens, col, features);
-				return col.append(this.softBreaks(decodeEntities(str(token.text))), features);
+				return this.renderText(
+					this.softBreaks(decodeEntities(str(token.text))),
+					col,
+					features
+				);
 			case "escape":
 				return col.append(str(token.text), features);
 			case "strong":
@@ -618,6 +628,28 @@ export class MarkdownConverter {
 				if (typeof token.text === "string")
 					col.append(decodeEntities(token.text), features);
 		}
+	}
+
+	/** Plain text, with "@handle" turned into Bluesky mentions. */
+	private async renderText(text: string, col: InlineCollector, features: FacetFeature[]) {
+		const resolve = this.deps.resolveMention;
+		// No mention inside a link: the link wins
+		if (!resolve || !this.deps.settings.mentions || features.some((f) => "uri" in f))
+			return col.append(text, features);
+		let last = 0;
+		for (const match of text.matchAll(MENTION)) {
+			const handle = match[2]!.toLowerCase();
+			const start = match.index + match[1]!.length;
+			const did = await resolve(handle);
+			if (!did) continue;
+			col.append(text.slice(last, start), features);
+			col.append(`@${match[2]}`, [
+				...features,
+				{ $type: "pub.leaflet.richtext.facet#didMention", did },
+			]);
+			last = start + match[2]!.length + 1;
+		}
+		col.append(text.slice(last), features);
 	}
 
 	private softBreaks(text: string) {

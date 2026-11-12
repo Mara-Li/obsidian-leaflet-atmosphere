@@ -317,6 +317,11 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 						control: { type: "toggle", key: "dataview" },
 					},
 					{
+						name: t("settings.content.mentions"),
+						desc: t("settings.content.mentionsDesc"),
+						control: { type: "toggle", key: "mentions" },
+					},
+					{
 						name: t("settings.content.linkCards"),
 						desc: t("settings.content.linkCardsDesc"),
 						control: { type: "toggle", key: "linkCards" },

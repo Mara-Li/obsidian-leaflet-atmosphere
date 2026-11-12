@@ -7,6 +7,7 @@ import {
 	normalizePdsUrl,
 	pdsFromDidDocument,
 	readJson,
+	resolveHandle,
 	resolvePds,
 } from "./identity";
 
@@ -223,6 +224,11 @@ export class AtpClient {
 			}
 		);
 		return res.blob;
+	}
+
+	/** DID of a handle, or null when it does not exist. */
+	async resolveHandle(handle: string): Promise<string | null> {
+		return resolveHandle(handle).catch(() => null);
 	}
 
 	async getBskyPost(uri: string): Promise<{ uri: string; cid: string } | null> {

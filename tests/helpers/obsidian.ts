@@ -98,6 +98,8 @@ export async function setup(
 						.filter(([key]) => key.startsWith(`${collection}/`))
 						.map(([key, value]) => ({ uri: uri(collection, key.split("/")[1]!), cid, value })),
 				getBskyPost: async (postUri: string) => ({ uri: postUri, cid }),
+				resolveHandle: async (handle: string) =>
+					handle === "alice.bsky.social" ? "did:plc:alicetest" : null,
 			};
 			(window as unknown as { leafletTest: unknown }).leafletTest = store;
 			(plugin as unknown as { getClient: () => Promise<unknown> }).getClient = async () =>

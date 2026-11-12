@@ -60,6 +60,7 @@ The keys of the first seven properties can be changed in the settings. Deleting 
 | --- | --- |
 | Headings, paragraphs, line breaks (follows the **Strict line breaks** option) | Header and text blocks |
 | `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, `` `code` ``, `<u>underline</u>`, links | Rich text facets |
+| `@handle.bsky.social` | Mention of the Bluesky account (shown by Leaflet as a link to the profile); unknown handles stay text |
 | `[[wikilinks]]`, links to notes | Link to the published note when it has a `leaflet_url`, plain text otherwise |
 | `![[image.png\|alt\|300]]`, `![alt](url)` | Image blocks, uploaded to your PDS (resized and compressed under 1 MB) |
 | `![[note]]`, `![[note#heading]]`, `![[note#^block]]` | Configurable in **Conversion → Embedded notes**: content inserted in place (also inside lists and quotes), a card opening a sub-page holding only the embedded part (whole note, section or block; the alias of `![[note\|alias]]` becomes its heading), or a link |
