@@ -580,11 +580,13 @@ export class MarkdownConverter {
 		col: InlineCollector,
 		features: FacetFeature[]
 	) {
-		if (this.deps.images.resolveFile(token.target, this.deps.sourcePath)) {
+		const file = this.deps.images.resolveFile(token.target, this.deps.sourcePath);
+		if (file) {
 			const [alt, size] = splitAltSize(token.alias ?? "");
 			const image = await this.image(token.target, alt || undefined, size);
 			if (image) col.pushImage(image);
-			return;
+			// A drawing that cannot be exported (Excalidraw missing) stays a link
+			if (image || file.extension !== "md") return;
 		}
 		this.renderWikilink({ ...token, type: "wikilink" }, col, features);
 	}
