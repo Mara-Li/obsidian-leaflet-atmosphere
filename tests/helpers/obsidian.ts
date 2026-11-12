@@ -1,0 +1,153 @@
+import { browser } from "@wdio/globals";
+import * as fs from "fs";
+import * as path from "path";
+import { obsidianPage } from "wdio-obsidian-service";
+import { DEFAULT_SETTINGS, type LeafletAtmosphereSettings } from "../../src/interfaces";
+import type { StandardDocument } from "../../src/leaflet/types";
+
+export const DID = "did:plc:leaflettest";
+export const PUBLICATION = {
+	uri: `at://${DID}/site.standard.publication/3garden`,
+	name: "Test garden",
+	url: "https://garden.example.com",
+};
+const PLUGIN_ID = "leaflet-atmosphere";
+
+export interface FakeStore {
+	records: Record<string, StandardDocument>;
+	blobs: { mime: string; size: number }[];
+}
+
+const TEST_VAULT = path.resolve(process.env.VAULT_TEST || "tests/vault");
+
+/**
+ * Notes of a vault as UTF-8 strings: resetVault garbles non-ASCII characters when it
+ * restores a modified file from a vault path (wdio-obsidian-service 3.5.0).
+ */
+function notesOf(vault: string, dir = vault, out: Record<string, string> = {}) {
+	for (const name of fs.readdirSync(dir)) {
+		const full = path.join(dir, name);
+		if (name === ".obsidian") continue;
+		if (fs.statSync(full).isDirectory()) notesOf(vault, full, out);
+		else if (name.endsWith(".md"))
+			out[path.relative(vault, full).split(path.sep).join("/")] = fs.readFileSync(full, "utf8");
+	}
+	return out;
+}
+
+/** Reset the vault and replace the PDS client of the plugin by an in-memory fake. */
+export async function setup(
+	settings: Partial<LeafletAtmosphereSettings> = {},
+	vault = TEST_VAULT
+): Promise<void> {
+	await obsidianPage.resetVault(vault, notesOf(vault));
+	await browser.executeObsidian(
+		({ plugins }, { did, defaults, overrides }) => {
+			const plugin = plugins.leafletAtmosphere;
+			const store = { records: {} as Record<string, unknown>, blobs: [] as unknown[] };
+			const cid = "bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy";
+			const uri = (collection: string, rkey: string) => `at://${did}/${collection}/${rkey}`;
+			const fake = {
+				did,
+				handle: "tester.example.com",
+				getRecord: async (collection: string, rkey: string) => {
+					const value = store.records[`${collection}/${rkey}`];
+					return value ? { uri: uri(collection, rkey), cid, value } : null;
+				},
+				putRecord: async (collection: string, rkey: string, record: unknown) => {
+					store.records[`${collection}/${rkey}`] = JSON.parse(JSON.stringify(record));
+					return { uri: uri(collection, rkey), cid };
+				},
+				deleteRecord: async (collection: string, rkey: string) => {
+					delete store.records[`${collection}/${rkey}`];
+				},
+				uploadBlob: async (data: ArrayBuffer, mimeType: string) => {
+					store.blobs.push({ mime: mimeType, size: data.byteLength });
+					return { $type: "blob", ref: { $link: cid }, mimeType, size: data.byteLength };
+				},
+				listRecords: async () => [],
+				getBskyPost: async (postUri: string) => ({ uri: postUri, cid }),
+			};
+			(window as unknown as { leafletTest: unknown }).leafletTest = store;
+			(plugin as unknown as { getClient: () => Promise<unknown> }).getClient = async () =>
+				fake;
+			Object.assign(plugin.settings, JSON.parse(JSON.stringify(defaults)), overrides);
+		},
+		{
+			did: DID,
+			defaults: DEFAULT_SETTINGS,
+			overrides: {
+				publications: [PUBLICATION],
+				defaultPublication: PUBLICATION.uri,
+				...settings,
+			},
+		}
+	);
+}
+
+export async function getStore(): Promise<FakeStore> {
+	return browser.executeObsidian(
+		() => (window as unknown as { leafletTest: FakeStore }).leafletTest
+	);
+}
+
+export async function getRecords(): Promise<Record<string, StandardDocument>> {
+	return (await getStore()).records;
+}
+
+/** Wait for a notice matching the pattern, then return its text. */
+export async function waitNotice(pattern: RegExp, timeout = 20000): Promise<string> {
+	let found = "";
+	await browser.waitUntil(
+		async () => {
+			const texts = await browser.executeObsidian(() =>
+				Array.from(activeDocument.querySelectorAll(".notice")).map((n) => n.textContent ?? "")
+			);
+			found = texts.find((t) => pattern.test(t)) ?? "";
+			return found !== "";
+		},
+		{ timeout, timeoutMsg: `No notice matching ${pattern}` }
+	);
+	return found;
+}
+
+export async function clearNotices(): Promise<void> {
+	await browser.executeObsidian(() => {
+		activeDocument.querySelectorAll(".notice").forEach((n) => n.remove());
+	});
+}
+
+export async function runCommand(command: string, file?: string): Promise<void> {
+	await clearNotices();
+	if (file) await obsidianPage.openFile(file);
+	await browser.executeObsidianCommand(`${PLUGIN_ID}:${command}`);
+}
+
+/** Publish a note with the command palette and wait for the result notice. */
+export async function publish(file: string): Promise<string> {
+	await runCommand("publish-note", file);
+	return waitNotice(/Published to Leaflet|Updated on Leaflet|^Leaflet: /);
+}
+
+export async function confirmModal(): Promise<void> {
+	const button = await browser.$(".modal-container .setting-item-control button:last-child");
+	await button.waitForClickable();
+	await button.click();
+}
+
+export async function getFrontmatter(file: string): Promise<Record<string, unknown>> {
+	return browser.executeObsidian(({ app }, path) => {
+		const target = app.vault.getFileByPath(path);
+		return (target && app.metadataCache.getFileCache(target)?.frontmatter) ?? {};
+	}, file);
+}
+
+/** Wait until the metadata cache sees a frontmatter value. */
+export async function waitFrontmatter(file: string, key: string): Promise<unknown> {
+	let value: unknown;
+	await browser.waitUntil(async () => {
+		value = (await getFrontmatter(file))[key];
+		return value !== undefined;
+	});
+	return value;
+}

@@ -62,8 +62,8 @@ export interface ConverterDeps {
 	resolveBskyPost(handleOrDid: string, rkey: string): Promise<StrongRef | null>;
 	/** SVG markup of a rendered Mermaid diagram. */
 	renderDiagram?: (source: string) => Promise<string | null>;
-	/** URLs published during the current run, by file path. */
-	publishedUrls?: Map<string, string>;
+	/** Published (or reserved) URL of a note, used for internal links. */
+	noteUrl?: (file: TFile) => Promise<string | null>;
 }
 
 export interface ConvertResult {
@@ -170,7 +170,7 @@ export class MarkdownConverter {
 			case "hr":
 				return [{ $type: "pub.leaflet.blocks.horizontalRule" }];
 			case "table":
-				return [this.table(token as Tokens.Table)];
+				return [await this.table(token as Tokens.Table)];
 			case "html":
 				return this.htmlBlock(token as Tokens.HTML);
 			default:
@@ -344,7 +344,7 @@ export class MarkdownConverter {
 		return { content, nested };
 	}
 
-	private table(token: Tokens.Table): LeafletBlock {
+	private async table(token: Tokens.Table): Promise<LeafletBlock> {
 		if (this.deps.settings.tableMode === "code")
 			return {
 				$type: "pub.leaflet.blocks.code",
@@ -352,7 +352,11 @@ export class MarkdownConverter {
 				language: "markdown",
 			};
 		const align = (a: string | null) => (a ? ` style="text-align:${a}"` : "");
-		const resolve = (target: string) => this.publishedUrl(target);
+		const urls = new Map<string, string | null>();
+		const cells = [...token.header, ...token.rows.flat()];
+		for (const target of cells.flatMap((c) => wikilinkTargets(c.tokens)))
+			if (!urls.has(target)) urls.set(target, await this.publishedUrl(target));
+		const resolve = (target: string) => urls.get(target) ?? null;
 		const head = token.header
 			.map((c) => `<th${align(c.align)}>${htmlInline(c.tokens, resolve)}</th>`)
 			.join("");
@@ -550,7 +554,7 @@ export class MarkdownConverter {
 	) {
 		let href = token.href;
 		if (!/^[a-z][a-z0-9+.-]*:/i.test(href) && !href.startsWith("#")) {
-			const url = this.publishedUrl(decodeURIComponent(href));
+			const url = await this.publishedUrl(decodeURIComponent(href));
 			if (!url) return this.renderInline(token.tokens, col, features);
 			href = url;
 		}
@@ -558,7 +562,7 @@ export class MarkdownConverter {
 		return this.renderInline(token.tokens, col, withFeature(features, link(href)));
 	}
 
-	private renderWikilink(
+	private async renderWikilink(
 		token: WikilinkToken,
 		col: InlineCollector,
 		features: FacetFeature[]
@@ -571,7 +575,7 @@ export class MarkdownConverter {
 					? `${basename(path)} > ${sub.replace(/^\^/, "")}`
 					: basename(path)
 				: (sub ?? ""));
-		const url = path ? this.publishedUrl(token.target) : null;
+		const url = path ? await this.publishedUrl(token.target) : null;
 		col.append(display, url ? withFeature(features, link(url)) : features);
 	}
 
@@ -588,7 +592,7 @@ export class MarkdownConverter {
 			// A drawing that cannot be exported (Excalidraw missing) stays a link
 			if (image || file.extension !== "md") return;
 		}
-		this.renderWikilink({ ...token, type: "wikilink" }, col, features);
+		await this.renderWikilink({ ...token, type: "wikilink" }, col, features);
 	}
 
 	private async renderFootnote(token: FootnoteRefToken, col: InlineCollector) {
@@ -609,8 +613,7 @@ export class MarkdownConverter {
 		]);
 	}
 
-	/** URL of an already published note, used for internal links. */
-	private publishedUrl(target: string): string | null {
+	private async publishedUrl(target: string): Promise<string | null> {
 		if (this.deps.settings.wikilinkMode !== "published") return null;
 		const [path] = splitSubpath(target);
 		const file = this.deps.app.metadataCache.getFirstLinkpathDest(
@@ -618,8 +621,7 @@ export class MarkdownConverter {
 			this.deps.sourcePath
 		);
 		if (!(file instanceof TFile)) return null;
-		const known = this.deps.publishedUrls?.get(file.path);
-		if (known) return known;
+		if (this.deps.noteUrl) return this.deps.noteUrl(file);
 		const fm = this.deps.app.metadataCache.getFileCache(file)?.frontmatter;
 		const url = fm?.[this.deps.settings.urlKey] as unknown;
 		return typeof url === "string" && /^https?:\/\//.test(url) ? url : null;
@@ -680,6 +682,14 @@ function extractCallout(children: Token[]): Callout | null {
 		(t) => (t.text as string | undefined)?.trim() || t.type !== "text"
 	);
 	return { type: match[1]!.toLowerCase(), title: hasTitle ? title : null };
+}
+
+function wikilinkTargets(tokens: Token[]): string[] {
+	return tokens.flatMap((token) => {
+		const t = token as Generic;
+		if (t.type === "wikilink") return [str(t.target)];
+		return t.tokens ? wikilinkTargets(t.tokens) : [];
+	});
 }
 
 function htmlInline(tokens: Token[], resolve: (target: string) => string | null): string {

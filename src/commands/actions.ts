@@ -119,19 +119,6 @@ async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: 
 		}
 	}
 
-	// Notes linking to a note created in this run get its URL on a second pass
-	if (plugin.settings.wikilinkMode === "published" && created.size > 0) {
-		const links = plugin.app.metadataCache.resolvedLinks;
-		for (const file of files) {
-			if (failed.includes(file.basename) || !publisher.published.has(file.path)) continue;
-			const targets = Object.keys(links[file.path] ?? {});
-			if (!targets.some((t) => t !== file.path && created.has(t))) continue;
-			await publisher
-				.publish(file)
-				.catch((e) => console.error("[Leaflet]", file.path, e));
-		}
-	}
-
 	progress.hide();
 	new Notice(
 		i18next.t("notice.batchDone", {

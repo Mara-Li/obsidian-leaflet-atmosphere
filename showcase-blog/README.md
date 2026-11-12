@@ -20,6 +20,6 @@ The notes in `Books`, `Snippets`, `Drafts` and the drawing have `leaflet_publish
 2. Connect your account in **Settings → Leaflet Atmosphere** and choose a publication.
 3. Run **Publish all marked notes** from the command palette.
 
-The seven posts are published, then the ones linking to each other are updated so that internal links point to the published posts. Run the command again after editing a note to update the posts.
+The seven posts are published with working links between them: a post linking to a note that is not published yet reserves its future address. Run the command again after editing a note to update the posts.
 
 To clean up, run **Delete current note from Leaflet** on each post.

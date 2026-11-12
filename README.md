@@ -25,6 +25,8 @@ If your account is not hosted on Bluesky, the PDS is resolved from your handle. 
 
 After the first publication, the record URI (`leaflet_uri`) and the URL (`leaflet_url`) are saved in the note properties. Publishing again updates the same post (its publication date and Bluesky post are kept).
 
+Links to another note point to its published post. When the linked note is marked with `leaflet_publish: true` but not published yet, its future address is reserved and saved in its properties, so the link works as soon as that note is published. Links to unmarked notes become plain text.
+
 ### Properties
 
 | Property | Default key | Usage |
@@ -93,6 +95,7 @@ Nothing else is collected or sent.
 ## 🛠️ Development
 
 - Make sure your NodeJS is at least v18 (`node --version`).
+- Run `pnpm run e2e` to build the plugin and run the end-to-end tests in Obsidian with [wdio-obsidian-service](https://github.com/jesse-r-s-hines/wdio-obsidian-service). The tests use the fixtures of `tests/vault` and the `showcase-blog`, replace the PDS by an in-memory fake and validate every record against the Leaflet lexicons (`tests/lexicons`, MIT).
 - Run `pnpm install` to install dependencies.
 - Run `pnpm run dev` to compile `src/main.ts` to `main.js` in watch mode.
 - Reload Obsidian to load the new version of the plugin, then enable it in **Settings → Community plugins**.

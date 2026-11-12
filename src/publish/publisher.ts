@@ -50,6 +50,10 @@ export interface PublishOptions {
 export class Publisher {
 	/** Notes published by this instance; the metadata cache may lag behind. */
 	readonly published = new Map<string, { uri: string; url: string }>();
+	/** Future addresses of linked notes that are marked but not published yet. */
+	private reservations = new Map<string, Promise<{ uri: string; url: string } | null>>();
+	private reserved = new Map<string, string>();
+	private usedRkeys = new Set<string>();
 
 	constructor(private plugin: LeafletAtmosphere) {}
 
@@ -69,6 +73,7 @@ export class Publisher {
 	existingRkey(file: TFile, did: string): string | undefined {
 		const uri =
 			this.published.get(file.path)?.uri ??
+			this.reserved.get(file.path) ??
 			getString(this.frontmatter(file), this.settings.uriKey);
 		const parsed = uri ? parseAtUri(uri) : null;
 		if (!parsed || parsed.collection !== DOCUMENT_COLLECTION || parsed.repo !== did)
@@ -90,6 +95,8 @@ export class Publisher {
 		if (!rkey) rkey = await this.newRecordKey(client, file, fm);
 
 		const site = this.resolveSite(fm, options, existing?.value.site, did);
+		this.usedRkeys.add(rkey);
+		const selfUrl = documentUrl(site, `/${rkey}`, this.publicationsFor(site));
 
 		const images = new ImageUploader(
 			this.app,
@@ -106,7 +113,10 @@ export class Publisher {
 			strictLineBreaks: this.strictLineBreaks(),
 			resolveBskyPost: (actor, postRkey) => this.resolveBskyPost(client, actor, postRkey),
 			renderDiagram: (source) => renderMermaid(this.app, source, file.path),
-			publishedUrls: new Map([...this.published].map(([path, v]) => [path, v.url])),
+			noteUrl: (target) =>
+				target.path === file.path
+					? Promise.resolve(selfUrl)
+					: this.noteUrl(client, target),
 		});
 		const converted = await converter.convert(markdown);
 
@@ -177,6 +187,48 @@ export class Publisher {
 		return true;
 	}
 
+	/** URL of a linked note: published, or reserved when it is marked for publishing. */
+	private async noteUrl(client: AtpClient, file: TFile): Promise<string | null> {
+		const known =
+			this.published.get(file.path)?.url ??
+			getString(this.frontmatter(file), this.settings.urlKey);
+		if (known && /^https?:\/\//.test(known)) return known;
+		if (!this.settings.writeFrontmatter || !this.isMarked(file)) return null;
+		let pending = this.reservations.get(file.path);
+		if (!pending) {
+			pending = this.reserve(client, file).catch((e) => {
+				console.warn("[Leaflet] cannot reserve a link for", file.path, e);
+				return null;
+			});
+			this.reservations.set(file.path, pending);
+		}
+		return (await pending)?.url ?? null;
+	}
+
+	/** Pick the record key and URL of a note before it is published. */
+	private async reserve(
+		client: AtpClient,
+		file: TFile
+	): Promise<{ uri: string; url: string }> {
+		const fm = this.frontmatter(file);
+		const did = client.did;
+		const rkey =
+			this.existingRkey(file, did) ?? (await this.newRecordKey(client, file, fm));
+		this.usedRkeys.add(rkey);
+		const site = this.resolveSite(fm, {}, undefined, did);
+		const uri = `at://${did}/${DOCUMENT_COLLECTION}/${rkey}`;
+		const url = documentUrl(site, `/${rkey}`, this.publicationsFor(site));
+		this.reserved.set(file.path, uri);
+		await this.app.fileManager.processFrontMatter(
+			file,
+			(front: Record<string, unknown>) => {
+				if (this.settings.uriKey) front[this.settings.uriKey] = uri;
+				if (this.settings.urlKey) front[this.settings.urlKey] = url;
+			}
+		);
+		return { uri, url };
+	}
+
 	isMarked(file: TFile): boolean {
 		return getBoolean(this.frontmatter(file), this.settings.publishKey) === true;
 	}
@@ -204,7 +256,8 @@ export class Publisher {
 		if (!this.settings.useSlugAsRecordKey && !explicit) return nextTid();
 		const slug = slugify(explicit ?? file.basename);
 		if (!slug || !isValidRecordKey(slug)) return nextTid();
-		const taken = await client.getRecord(DOCUMENT_COLLECTION, slug);
+		const taken =
+			this.usedRkeys.has(slug) || (await client.getRecord(DOCUMENT_COLLECTION, slug));
 		if (taken) throw new Error(i18next.t("error.slugTaken", { slug }));
 		return slug;
 	}
