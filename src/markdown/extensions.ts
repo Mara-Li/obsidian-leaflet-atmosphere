@@ -33,9 +33,13 @@ export interface FootnoteDefToken extends Tokens.Generic {
 }
 
 function splitWikilink(inner: string): { target: string; alias?: string } {
-	const pipe = inner.indexOf("|");
-	if (pipe === -1) return { target: inner.trim() };
-	return { target: inner.slice(0, pipe).trim(), alias: inner.slice(pipe + 1).trim() };
+	// Dataview escapes the pipe of links written in tables
+	const match = /\\?\|/.exec(inner);
+	if (!match) return { target: inner.trim() };
+	return {
+		target: inner.slice(0, match.index).trim(),
+		alias: inner.slice(match.index + match[0].length).trim(),
+	};
 }
 
 const embed: TokenizerExtension = {

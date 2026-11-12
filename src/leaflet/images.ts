@@ -1,5 +1,6 @@
 import { type App, requestUrl, TFile } from "obsidian";
 import type { AtpClient } from "../atproto/client";
+import { exportExcalidraw, isExcalidraw } from "../markdown/compilers/excalidraw";
 import type { AspectRatio, BlobRef } from "./types";
 
 const MAX_BLOB_SIZE = 1_000_000;
@@ -23,7 +24,7 @@ export interface UploadedImage {
 	aspectRatio: AspectRatio;
 }
 
-interface RawImage {
+export interface RawImage {
 	data: ArrayBuffer;
 	mime: string;
 }
@@ -46,10 +47,11 @@ function canvasToBlob(canvas: HTMLCanvasElement, mime: string, quality: number) 
 
 async function reencode(
 	img: HTMLImageElement,
-	maxWidth: number
+	maxWidth: number,
+	scale = 1
 ): Promise<{ blob: Blob; width: number; height: number }> {
-	let width = img.naturalWidth || img.width;
-	let height = img.naturalHeight || img.height;
+	let width = (img.naturalWidth || img.width) * scale;
+	let height = (img.naturalHeight || img.height) * scale;
 	if (width > maxWidth) {
 		height = Math.round((height * maxWidth) / width);
 		width = maxWidth;
@@ -95,7 +97,9 @@ export class ImageUploader {
 		const file =
 			this.app.metadataCache.getFirstLinkpathDest(path, sourcePath) ??
 			this.app.vault.getAbstractFileByPath(path);
-		return file instanceof TFile && IMAGE_EXTENSIONS.has(file.extension.toLowerCase())
+		if (!(file instanceof TFile)) return null;
+		return IMAGE_EXTENSIONS.has(file.extension.toLowerCase()) ||
+			isExcalidraw(this.app, file)
 			? file
 			: null;
 	}
@@ -114,11 +118,25 @@ export class ImageUploader {
 		return pending;
 	}
 
+	/** Upload generated image data (e.g. a rendered diagram), cached by key. */
+	uploadData(
+		key: string,
+		data: () => Promise<RawImage | null>
+	): Promise<UploadedImage | null> {
+		let pending = this.cache.get(key);
+		if (!pending) {
+			pending = data().then((raw) => (raw ? this.send(raw) : null));
+			this.cache.set(key, pending);
+		}
+		return pending;
+	}
+
 	private async load(
 		link: string,
 		file: TFile | null,
 		isRemote: boolean
 	): Promise<RawImage | null> {
+		if (file && isExcalidraw(this.app, file)) return exportExcalidraw(this.app, file);
 		if (file) {
 			return {
 				data: await this.app.vault.readBinary(file),
@@ -150,7 +168,9 @@ export class ImageUploader {
 			raw.data.byteLength > MAX_BLOB_SIZE ||
 			width > this.maxWidth
 		) {
-			const encoded = await reencode(img, this.maxWidth);
+			// Vector images are rasterized at twice their size to stay sharp
+			const scale = mime === "image/svg+xml" ? 2 : 1;
+			const encoded = await reencode(img, this.maxWidth, scale);
 			data = await encoded.blob.arrayBuffer();
 			mime = encoded.blob.type;
 			ratio = { width: encoded.width, height: encoded.height };

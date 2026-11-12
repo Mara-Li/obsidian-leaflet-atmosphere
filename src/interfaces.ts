@@ -3,6 +3,7 @@ import type { PublicationInfo } from "./leaflet/types";
 export type WikilinkMode = "text" | "published";
 export type EmbedMode = "inline" | "link";
 export type TableMode = "html" | "code";
+export type MermaidMode = "image" | "code";
 
 export interface LeafletAtmosphereSettings {
 	identifier: string;
@@ -34,6 +35,8 @@ export interface LeafletAtmosphereSettings {
 	wikilinkMode: WikilinkMode;
 	embedMode: EmbedMode;
 	tableMode: TableMode;
+	mermaidMode: MermaidMode;
+	dataview: boolean;
 	linkCards: boolean;
 	uploadRemoteImages: boolean;
 	codeTheme: string;
@@ -74,6 +77,8 @@ export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
 	wikilinkMode: "published",
 	embedMode: "inline",
 	tableMode: "html",
+	mermaidMode: "image",
+	dataview: true,
 	linkCards: true,
 	uploadRemoteImages: true,
 	codeTheme: "github-light",

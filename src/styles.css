@@ -1,3 +1,11 @@
 .leaflet-atmosphere-muted {
 	color: var(--text-muted);
 }
+
+.leaflet-atmosphere-offscreen {
+	position: fixed;
+	left: -10000px;
+	top: 0;
+	width: 1000px;
+	pointer-events: none;
+}

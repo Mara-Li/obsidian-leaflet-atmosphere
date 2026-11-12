@@ -123,7 +123,13 @@
 			"codeTheme": "Thème du code",
 			"codeThemeDesc": "Thème de coloration syntaxique utilisé par Leaflet.",
 			"maxWidth": "Largeur maximale des images",
-			"maxWidthDesc": "Les images plus larges sont redimensionnées. Les images sont compressées sous 1 Mo."
+			"maxWidthDesc": "Les images plus larges sont redimensionnées. Les images sont compressées sous 1 Mo.",
+			"mermaid": "Diagrammes Mermaid",
+			"mermaidDesc": "Leaflet n'a pas de bloc diagramme.",
+			"mermaidImage": "Image rendue par Obsidian",
+			"mermaidCode": "Bloc de code",
+			"dataview": "Convertir les requêtes Dataview",
+			"dataviewDesc": "Remplace les requêtes par leur résultat. Désactivé, les requêtes sont retirées. Nécessite le plugin Dataview."
 		},
 		"after": {
 			"heading": "Après publication",

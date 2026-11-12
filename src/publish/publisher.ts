@@ -20,6 +20,7 @@ import type {
 	StrongRef,
 } from "../leaflet/types";
 import type LeafletAtmosphere from "../main";
+import { renderMermaid } from "../markdown/compilers/mermaid";
 import { MarkdownConverter } from "../markdown/convert";
 import { Preprocessor } from "../markdown/preprocess";
 import {
@@ -96,10 +97,7 @@ export class Publisher {
 			s.maxImageWidth,
 			s.uploadRemoteImages
 		);
-		const markdown = await new Preprocessor(this.app, s.embedMode).run(
-			await this.app.vault.cachedRead(file),
-			file.path
-		);
+		const markdown = await new Preprocessor(this.app, s.embedMode, s.dataview).run(file);
 		const converter = new MarkdownConverter({
 			app: this.app,
 			settings: s,
@@ -107,6 +105,7 @@ export class Publisher {
 			sourcePath: file.path,
 			strictLineBreaks: this.strictLineBreaks(),
 			resolveBskyPost: (actor, postRkey) => this.resolveBskyPost(client, actor, postRkey),
+			renderDiagram: (source) => renderMermaid(this.app, source, file.path),
 			publishedUrls: new Map([...this.published].map(([path, v]) => [path, v.url])),
 		});
 		const converted = await converter.convert(markdown);

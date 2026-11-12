@@ -123,7 +123,13 @@
 			"codeTheme": "Code theme",
 			"codeThemeDesc": "Syntax highlighting theme used by Leaflet.",
 			"maxWidth": "Maximum image width",
-			"maxWidthDesc": "Larger images are resized. Images are compressed under 1 MB."
+			"maxWidthDesc": "Larger images are resized. Images are compressed under 1 MB.",
+			"mermaid": "Mermaid diagrams",
+			"mermaidDesc": "Leaflet has no diagram block.",
+			"mermaidImage": "Image rendered by Obsidian",
+			"mermaidCode": "Code block",
+			"dataview": "Convert Dataview queries",
+			"dataviewDesc": "Replace the queries with their result. When disabled, queries are removed. Requires the Dataview plugin."
 		},
 		"after": {
 			"heading": "After publishing",

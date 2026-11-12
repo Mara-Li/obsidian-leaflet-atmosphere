@@ -60,6 +60,8 @@ export interface ConverterDeps {
 	sourcePath: string;
 	strictLineBreaks: boolean;
 	resolveBskyPost(handleOrDid: string, rkey: string): Promise<StrongRef | null>;
+	/** SVG markup of a rendered Mermaid diagram. */
+	renderDiagram?: (source: string) => Promise<string | null>;
 	/** URLs published during the current run, by file path. */
 	publishedUrls?: Map<string, string>;
 }
@@ -148,6 +150,10 @@ export class MarkdownConverter {
 			case "code": {
 				const code = token as Tokens.Code;
 				const language = code.lang?.trim().split(/\s+/)[0];
+				if (language === "mermaid" && this.deps.settings.mermaidMode === "image") {
+					const diagram = await this.diagram(code.text);
+					if (diagram) return [diagram];
+				}
 				return [
 					{
 						$type: "pub.leaflet.blocks.code",
@@ -346,13 +352,14 @@ export class MarkdownConverter {
 				language: "markdown",
 			};
 		const align = (a: string | null) => (a ? ` style="text-align:${a}"` : "");
+		const resolve = (target: string) => this.publishedUrl(target);
 		const head = token.header
-			.map((c) => `<th${align(c.align)}>${htmlInline(c.tokens)}</th>`)
+			.map((c) => `<th${align(c.align)}>${htmlInline(c.tokens, resolve)}</th>`)
 			.join("");
 		const rows = token.rows
 			.map(
 				(r) =>
-					`<tr>${r.map((c) => `<td${align(c.align)}>${htmlInline(c.tokens)}</td>`).join("")}</tr>`
+					`<tr>${r.map((c) => `<td${align(c.align)}>${htmlInline(c.tokens, resolve)}</td>`).join("")}</tr>`
 			)
 			.join("");
 		const style =
@@ -397,6 +404,33 @@ export class MarkdownConverter {
 			raw.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "")
 		).trim();
 		return text ? [{ $type: "pub.leaflet.blocks.text", plaintext: text }] : [];
+	}
+
+	private async diagram(source: string): Promise<ImageBlock | null> {
+		const render = this.deps.renderDiagram;
+		if (!render) return null;
+		try {
+			const uploaded = await this.deps.images.uploadData(
+				`mermaid:${source}`,
+				async () => {
+					const svg = await render(source);
+					if (!svg) return null;
+					return {
+						data: new TextEncoder().encode(svg).slice().buffer,
+						mime: "image/svg+xml",
+					};
+				}
+			);
+			if (!uploaded) return null;
+			return {
+				$type: "pub.leaflet.blocks.image",
+				image: uploaded.blob,
+				aspectRatio: uploaded.aspectRatio,
+			};
+		} catch (e) {
+			console.error("[Leaflet] diagram rendering failed", e);
+			return null;
+		}
 	}
 
 	private async image(
@@ -646,12 +680,14 @@ function extractCallout(children: Token[]): Callout | null {
 	return { type: match[1]!.toLowerCase(), title: hasTitle ? title : null };
 }
 
-function htmlInline(tokens: Token[]): string {
+function htmlInline(tokens: Token[], resolve: (target: string) => string | null): string {
 	return tokens
 		.map((token) => {
 			const t = token as Generic;
 			const inner = () =>
-				t.tokens ? htmlInline(t.tokens) : escapeHtml(decodeEntities(str(t.text)));
+				t.tokens
+					? htmlInline(t.tokens, resolve)
+					: escapeHtml(decodeEntities(str(t.text)));
 			switch (t.type) {
 				case "strong":
 					return `<strong>${inner()}</strong>`;
@@ -669,8 +705,15 @@ function htmlInline(tokens: Token[]): string {
 						? `<a href="${escapeHtml(str(t.href))}" target="_blank">${inner()}</a>`
 						: inner();
 				case "wikilink":
-				case "embed":
-					return escapeHtml(str(t.alias) || str(t.target));
+				case "embed": {
+					const label = escapeHtml(
+						str(t.alias) || basename(splitSubpath(str(t.target))[0])
+					);
+					const url = t.type === "wikilink" ? resolve(str(t.target)) : null;
+					return url
+						? `<a href="${escapeHtml(url)}" target="_blank">${label}</a>`
+						: label;
+				}
 				case "br":
 					return "<br>";
 				case "html":

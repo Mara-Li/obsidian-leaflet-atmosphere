@@ -206,6 +206,23 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 						},
 					},
 					{
+						name: t("settings.content.mermaid"),
+						desc: t("settings.content.mermaidDesc"),
+						control: {
+							type: "dropdown",
+							key: "mermaidMode",
+							options: {
+								image: t("settings.content.mermaidImage"),
+								code: t("settings.content.mermaidCode"),
+							},
+						},
+					},
+					{
+						name: t("settings.content.dataview"),
+						desc: t("settings.content.dataviewDesc"),
+						control: { type: "toggle", key: "dataview" },
+					},
+					{
 						name: t("settings.content.linkCards"),
 						desc: t("settings.content.linkCardsDesc"),
 						control: { type: "toggle", key: "linkCards" },

@@ -49,7 +49,10 @@ The keys of the first seven properties can be changed in the settings. Deleting 
 | `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, `` `code` ``, `<u>underline</u>`, links | Rich text facets |
 | `[[wikilinks]]`, links to notes | Link to the published note when it has a `leaflet_url`, plain text otherwise |
 | `![[image.png\|alt\|300]]`, `![alt](url)` | Image blocks, uploaded to your PDS (resized and compressed under 1 MB) |
-| `![[note]]`, `![[note#heading]]`, `![[note#^block]]` | Content inserted in place (or converted to a link) |
+| `![[note]]`, `![[note#heading]]`, `![[note#^block]]` | Content inserted in place, also inside lists and quotes (or converted to a link) |
+| Dataview queries (DQL, DataviewJS, inline) | Replaced by their result in Markdown (requires Dataview) |
+| Excalidraw drawings `![[drawing.excalidraw]]` | PNG image exported by Excalidraw (requires Excalidraw) |
+| Mermaid diagrams | Image rendered by Obsidian, or code block |
 | Bullet, numbered and task lists (nested) | List blocks with checkboxes |
 | Blockquotes and callouts `> [!note] Title` | Blockquote blocks, callout title in bold |
 | Code blocks | Code blocks with language and theme |
@@ -60,6 +63,10 @@ The keys of the first seven properties can be changed in the settings. Deleting 
 | A Bluesky post, YouTube or web link alone on its line | Bluesky post embed, video embed or link card |
 | `<iframe src="…">` | Embed block |
 | `%%comments%%`, `<!-- comments -->`, block IDs, frontmatter | Removed |
+
+## 🙏 Credits
+
+- Dataview, Excalidraw and embed conversion come from [Enveloppe](https://github.com/Enveloppe/obsidian-enveloppe), based on [obsidian-digital-garden](https://github.com/oleeskild/obsidian-digital-garden) and [obsidian-easy-bake](https://github.com/mgmeyers/obsidian-easy-bake).
 
 ## 🔒 Network and privacy
 
