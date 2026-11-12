@@ -150,7 +150,8 @@
 			"calloutsDesc": "Leaflet n'a pas de bloc callout.",
 			"calloutsQuote": "Citation avec emoji et titre coloré",
 			"calloutsHtml": "Encadré coloré (bloc HTML)",
-			"calloutsPage": "Carte ouvrant une sous-page"
+			"calloutsPage": "Carte ouvrant une sous-page",
+			"embedsPage": "Carte ouvrant une sous-page"
 		},
 		"after": {
 			"heading": "Lors de la publication",

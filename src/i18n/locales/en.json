@@ -150,7 +150,8 @@
 			"calloutsDesc": "Leaflet has no callout block.",
 			"calloutsQuote": "Quote with emoji and colored title",
 			"calloutsHtml": "Colored box (HTML block)",
-			"calloutsPage": "Card opening a sub-page"
+			"calloutsPage": "Card opening a sub-page",
+			"embedsPage": "Card opening a sub-page"
 		},
 		"after": {
 			"heading": "When publishing",

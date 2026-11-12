@@ -135,6 +135,7 @@ export class Publisher {
 			resolveBskyPost: (actor, postRkey) => this.resolveBskyPost(client, actor, postRkey),
 			renderDiagram: (source) => renderMermaid(this.app, source, file.path),
 			theme: await this.themeOf(client, site),
+			embeds: preprocessor.embeds,
 			noteUrl: (target) =>
 				target.path === file.path
 					? Promise.resolve(selfUrl)

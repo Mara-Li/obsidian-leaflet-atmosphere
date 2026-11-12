@@ -59,7 +59,7 @@ The keys of the first seven properties can be changed in the settings. Deleting 
 | `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, `` `code` ``, `<u>underline</u>`, links | Rich text facets |
 | `[[wikilinks]]`, links to notes | Link to the published note when it has a `leaflet_url`, plain text otherwise |
 | `![[image.png\|alt\|300]]`, `![alt](url)` | Image blocks, uploaded to your PDS (resized and compressed under 1 MB) |
-| `![[note]]`, `![[note#heading]]`, `![[note#^block]]` | Content inserted in place, also inside lists and quotes (or converted to a link) |
+| `![[note]]`, `![[note#heading]]`, `![[note#^block]]` | Configurable in **Conversion → Embedded notes**: content inserted in place (also inside lists and quotes), a card opening a sub-page holding only the embedded part (whole note, section or block; the alias of `![[note\|alias]]` becomes its heading), or a link |
 | Dataview queries (DQL, DataviewJS, inline) | Replaced by their result in Markdown (requires Dataview) |
 | Excalidraw drawings `![[drawing.excalidraw]]` | PNG image exported by Excalidraw (requires Excalidraw) |
 | Mermaid diagrams | Image rendered by Obsidian, or code block |

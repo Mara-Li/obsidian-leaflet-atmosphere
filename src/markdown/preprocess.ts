@@ -97,15 +97,11 @@ export class Preprocessor {
 		this.dataview = DataviewCompiler.create(app, convertDataview);
 	}
 
+	/** Notes embedded as sub-pages, by id ("page" embed mode). */
+	readonly embeds = new Map<string, EmbeddedNote>();
+
 	async run(file: TFile): Promise<string> {
-		const text = await this.expand(file, null, new Set(), 0);
-		return outsideCode(text.replace(/\r\n?/g, "\n"), (chunk) =>
-			chunk
-				.replace(/[ \t]*%%[\s\S]*?%%/g, "")
-				.replace(/<!--[\s\S]*?-->/g, "")
-				.replace(/[ \t]+\^[A-Za-z0-9-]+[ \t]*$/gm, "")
-				.replace(/^\^[A-Za-z0-9-]+[ \t]*$/gm, "")
-		);
+		return cleanUp(await this.expand(file, null, new Set(), 0));
 	}
 
 	/** Content of a note (or of one of its sections) with its embeds baked in. */
@@ -158,10 +154,20 @@ export class Preprocessor {
 				).trim();
 				const listMatch = /(?:^|\n)([ \t]*)(?:[-*+]|[0-9]+[.)]) +$/.exec(before);
 				const quoteMatch = /(?:^|\n)((?:[ \t]*>[ \t]?)+)$/.exec(before);
+				const alone = /(?:^|\n)[ \t]*$/.test(before) && /^[ \t]*(?:\n|$)/.test(after);
+				// A sub-page is a block of its own: only for an embed alone on its line
+				if (this.embedMode === "page" && alone && baked) {
+					const id = String(this.embeds.size + 1);
+					this.embeds.set(id, {
+						markdown: cleanUp(baked),
+						title: this.embedTitle(linked, embed.original, sub, baked),
+					});
+					slice = `${before}\n\n${EMBED_PLACEHOLDER(id)}\n\n${after}`;
+					continue;
+				}
 				if (listMatch) baked = applyIndent(stripFirstBullet(baked), listMatch[1]!);
 				else if (quoteMatch) baked = applyIndent(baked, quoteMatch[1]!);
-				else if (/(?:^|\n)[ \t]*$/.test(before) && /^[ \t]*(?:\n|$)/.test(after))
-					baked = `\n${baked}\n`;
+				else if (alone) baked = `\n${baked}\n`;
 				replacement = baked;
 			}
 			slice = before + replacement + after;
@@ -171,6 +177,45 @@ export class Preprocessor {
 		if (start === 0) slice = stripFrontmatter(slice);
 		return this.dataview ? this.dataview.convert(slice, file.path) : slice;
 	}
+
+	/**
+	 * Heading of an embedded sub-page: the alias, or the note title for a whole note.
+	 * A section starts with its own heading and a block is shown as is.
+	 */
+	private embedTitle(
+		note: TFile,
+		original: string,
+		subpath: string,
+		content: string
+	): string | undefined {
+		const alias = /\|([^\]]+)\]\]$/.exec(original)?.[1]?.trim();
+		if (alias) return alias;
+		if (subpath || /^#{1,6}\s/.test(content)) return undefined;
+		const fm = this.app.metadataCache.getFileCache(note)?.frontmatter;
+		const title = fm?.title as unknown;
+		return typeof title === "string" && title.trim() ? title.trim() : note.basename;
+	}
+}
+
+export interface EmbeddedNote {
+	markdown: string;
+	/** Heading added on top of the sub-page, when the content has none. */
+	title?: string;
+}
+
+/** Line standing for a note embedded as a sub-page (an HTML block: opening tag alone). */
+export const EMBED_PLACEHOLDER = (id: string) =>
+	`<leaflet-embed data-id="${id}">`;
+
+/** Remove comments and block ids outside of code. */
+function cleanUp(text: string): string {
+	return outsideCode(text.replace(/\r\n?/g, "\n"), (chunk) =>
+		chunk
+			.replace(/[ \t]*%%[\s\S]*?%%/g, "")
+			.replace(/<!--[\s\S]*?-->/g, "")
+			.replace(/[ \t]+\^[A-Za-z0-9-]+[ \t]*$/gm, "")
+			.replace(/^\^[A-Za-z0-9-]+[ \t]*$/gm, "")
+	);
 }
 
 export function splitSubpath(link: string): [string, string | undefined] {

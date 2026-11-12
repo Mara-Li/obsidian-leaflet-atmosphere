@@ -1,7 +1,7 @@
 import type { PublicationInfo } from "./leaflet/types";
 
 export type WikilinkMode = "text" | "published";
-export type EmbedMode = "inline" | "link";
+export type EmbedMode = "inline" | "link" | "page";
 export type TableMode = "html" | "code";
 export type MermaidMode = "image" | "code";
 export type CalloutMode = "quote" | "html" | "page";

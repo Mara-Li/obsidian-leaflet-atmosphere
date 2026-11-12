@@ -246,6 +246,7 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 					key: "embedMode",
 					options: {
 						inline: t("settings.content.embedsInline"),
+						page: t("settings.content.embedsPage"),
 						link: t("settings.content.embedsLink"),
 					},
 				},

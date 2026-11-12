@@ -34,7 +34,7 @@ import {
 } from "./inline";
 import { type PostTheme, themeCss } from "../leaflet/fonts";
 import { calloutHtml, calloutStyle, richTextToHtml } from "./callouts";
-import { splitSubpath } from "./preprocess";
+import { type EmbeddedNote, splitSubpath } from "./preprocess";
 
 type Generic = Tokens.Generic;
 
@@ -65,10 +65,18 @@ export interface ConverterDeps {
 	resolveBskyPost(handleOrDid: string, rkey: string): Promise<StrongRef | null>;
 	/** SVG markup of a rendered Mermaid diagram. */
 	renderDiagram?: (source: string) => Promise<string | null>;
+	/** Notes embedded as sub-pages by the preprocessor. */
+	embeds?: Map<string, EmbeddedNote>;
 	/** Fonts and colors of the publication, for HTML blocks. */
 	theme?: PostTheme;
 	/** Published (or reserved) URL of a note, used for internal links. */
 	noteUrl?: (file: TFile) => Promise<string | null>;
+}
+
+interface SharedPages {
+	pages: LinearDocumentPage[];
+	/** Number of secondary pages created, for unique ids. */
+	count: number;
 }
 
 export interface ConvertResult {
@@ -101,9 +109,16 @@ export class MarkdownConverter {
 	private footnotes = new Map<string, Generic[]>();
 	private inlineFootnotes = 0;
 	private warnings: string[] = [];
-	private pages: LinearDocumentPage[] = [];
 
-	constructor(private deps: ConverterDeps) {}
+	/**
+	 * @param shared secondary pages of the whole document, shared with sub-converters
+	 * @param prefix keeps footnote ids unique when converting a sub-page
+	 */
+	constructor(
+		private deps: ConverterDeps,
+		private shared: SharedPages = { pages: [], count: 0 },
+		private prefix = ""
+	) {}
 
 	async convert(markdown: string): Promise<ConvertResult> {
 		const tokens = createLexer(!this.deps.strictLineBreaks).lexer(markdown) as Token[];
@@ -117,6 +132,7 @@ export class MarkdownConverter {
 		const firstIndex = tokens.findIndex((t) => !isBlank(t));
 		const first = tokens[firstIndex] as Tokens.Heading | undefined;
 		if (
+			!this.prefix &&
 			this.deps.settings.firstHeadingAsTitle &&
 			first?.type === "heading" &&
 			first.depth === 1
@@ -126,10 +142,10 @@ export class MarkdownConverter {
 		}
 
 		const blocks = await this.blocks(tokens);
-		const pageBlocks = this.pages.flatMap((p) => p.blocks.map((b) => b.block));
+		const pageBlocks = this.shared.pages.flatMap((p) => p.blocks.map((b) => b.block));
 		return {
 			blocks,
-			pages: this.pages,
+			pages: this.shared.pages,
 			title,
 			textContent: plainText([...blocks, ...pageBlocks]),
 			warnings: this.warnings,
@@ -284,13 +300,13 @@ export class MarkdownConverter {
 		}
 		const heading = new RichText().append(`${style.emoji} `).appendRich(title);
 		if (mode === "page") {
-			const id = `callout-${this.pages.length + 1}`;
+			const id = `callout-${++this.shared.count}`;
 			const header: LeafletBlock = {
 				$type: "pub.leaflet.blocks.header",
 				level: 2,
 				...heading.toBlockFields(),
 			};
-			this.pages.push({
+			this.shared.pages.push({
 				$type: "pub.leaflet.pages.linearDocument",
 				id,
 				blocks: [header, ...inner].map((block) => ({
@@ -414,8 +430,33 @@ export class MarkdownConverter {
 		};
 	}
 
+	/** A note embedded as a sub-page: its content becomes a secondary page. */
+	private async embedPage(key: string): Promise<LeafletBlock[]> {
+		const embed = this.deps.embeds?.get(key);
+		if (!embed) return [];
+		const id = `embed-${++this.shared.count}`;
+		const sub = new MarkdownConverter(this.deps, this.shared, `${id}-`);
+		const markdown = embed.title
+			? `# ${embed.title}\n\n${embed.markdown}`
+			: embed.markdown;
+		const result = await sub.convert(markdown);
+		this.warnings.push(...result.warnings);
+		if (result.blocks.length === 0) return [];
+		this.shared.pages.push({
+			$type: "pub.leaflet.pages.linearDocument",
+			id,
+			blocks: result.blocks.map((block) => ({
+				$type: "pub.leaflet.pages.linearDocument#block",
+				block,
+			})),
+		});
+		return [{ $type: "pub.leaflet.blocks.page", id }];
+	}
+
 	private async htmlBlock(token: Tokens.HTML): Promise<LeafletBlock[]> {
 		const raw = token.raw.trim();
+		const embed = /^<leaflet-embed data-id="(\d+)">/.exec(raw);
+		if (embed) return this.embedPage(embed[1]!);
 		if (/^<iframe\b/i.test(raw)) {
 			const url = getAttribute(raw, "src");
 			const height = Number.parseInt(getAttribute(raw, "height") ?? "", 10);
@@ -567,7 +608,7 @@ export class MarkdownConverter {
 			case "footnoteRef":
 				return this.renderFootnote(token as FootnoteRefToken, col);
 			case "inlineFootnote": {
-				const id = `inline-${++this.inlineFootnotes}`;
+				const id = `${this.prefix}inline-${++this.inlineFootnotes}`;
 				return this.appendFootnote(id, (token as InlineFootnoteToken).tokens, col);
 			}
 			case "checkbox":
@@ -634,7 +675,7 @@ export class MarkdownConverter {
 	private async renderFootnote(token: FootnoteRefToken, col: InlineCollector) {
 		const def = this.footnotes.get(token.id);
 		if (!def) return col.append(token.raw, []);
-		return this.appendFootnote(`fn-${token.id}`, def, col);
+		return this.appendFootnote(`${this.prefix}fn-${token.id}`, def, col);
 	}
 
 	private async appendFootnote(id: string, tokens: Generic[], col: InlineCollector) {
