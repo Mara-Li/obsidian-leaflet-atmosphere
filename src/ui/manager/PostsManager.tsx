@@ -1,5 +1,5 @@
 import i18next from "i18next";
-import { debounce, Notice, setIcon, type TFile } from "obsidian";
+import { debounce, setIcon, type TFile } from "obsidian";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { parseAtUri } from "../../atproto/tid";
 import {
@@ -15,6 +15,7 @@ import { deletePosts } from "../../publish/deletions";
 import { notesByUri } from "../../publish/notes";
 import { linkNote, relinkNotes, unlinkedNotes } from "../../publish/relink";
 import { ConfirmModal } from "../confirmModal";
+import { richNotice } from "../notices";
 import { NoteSuggestModal } from "../noteSuggest";
 
 interface Post {
@@ -169,10 +170,13 @@ export function PostsManager({ plugin }: { plugin: LeafletAtmosphere }) {
 		const orphanPosts = (records ?? []).filter((p) => !notes.has(p.uri));
 		try {
 			const linked = await relinkNotes(plugin, orphanPosts);
-			new Notice(
+			richNotice(
 				linked.length > 0
-					? i18next.t("manager.relinked", { count: linked.length })
-					: i18next.t("manager.nothingToRelink")
+					? {
+							tone: "success",
+							heading: i18next.t("manager.relinked", { count: linked.length }),
+						}
+					: { tone: "info", heading: i18next.t("manager.nothingToRelink") }
 			);
 		} catch (e) {
 			showError(e);
@@ -181,8 +185,11 @@ export function PostsManager({ plugin }: { plugin: LeafletAtmosphere }) {
 
 	const chooseNote = (post: Post) =>
 		new NoteSuggestModal(app, unlinkedNotes(plugin), (file) => {
-			void linkNote(plugin, file, post).then(
-				() => new Notice(i18next.t("manager.linked", { name: file.basename }))
+			void linkNote(plugin, file, post).then(() =>
+				richNotice({
+					tone: "success",
+					heading: i18next.t("manager.linked", { name: file.basename }),
+				})
 			);
 		}).open();
 

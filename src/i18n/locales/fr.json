@@ -31,9 +31,12 @@
 		"noSelection": "Aucune note à publier dans cette sélection",
 		"publishingNote": "Publication de {{name}}…",
 		"recovered": "Cette note avait perdu son lien avec Leaflet : son article existant a été retrouvé et mis à jour.",
-		"pulled": "Lien Leaflet restauré :",
+		"pulled": "Lien Leaflet restauré",
 		"pullNotFound": "Aucun article Leaflet ne correspond à cette note",
-		"dataviewJsDisabled": "{{count}} requête(s) DataviewJS ignorée(s) : les requêtes JavaScript sont désactivées dans les réglages de Dataview."
+		"dataviewJsDisabled": "{{count}} requête(s) DataviewJS ignorée(s) : les requêtes JavaScript sont désactivées dans les réglages de Dataview.",
+		"open": "Ouvrir",
+		"copy": "Copier le lien",
+		"copied": "Copié !"
 	},
 	"error": {
 		"prefix": "Leaflet : {{message}}",

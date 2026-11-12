@@ -1,25 +1,32 @@
 import i18next from "i18next";
-import { Notice, type TAbstractFile, TFile, TFolder } from "obsidian";
+import { type TAbstractFile, TFile, TFolder } from "obsidian";
 import { isExcalidraw } from "../markdown/compilers/excalidraw";
 import type LeafletAtmosphere from "../main";
 import { getBoolean, getString } from "../publish/frontmatter";
 import { Publisher } from "../publish/publisher";
 import { ConfirmModal } from "../ui/confirmModal";
+import { postNotice, richNotice } from "../ui/notices";
 import { PublishProgress } from "../ui/progress";
 import { PublicationModal } from "../ui/publicationModal";
 
 export function showError(error: unknown) {
 	console.error("[Leaflet]", error);
 	const message = error instanceof Error ? error.message : String(error);
-	new Notice(i18next.t("error.prefix", { message }), 8000);
+	richNotice({
+		tone: "error",
+		heading: i18next.t("error.prefix", { message }),
+		duration: 10000,
+	});
 }
 
-function linkNotice(text: string, url: string) {
-	const fragment = createFragment((f) => {
-		f.appendText(`${text} `);
-		f.createEl("a", { text: url, href: url });
-	});
-	new Notice(fragment, 8000);
+const warn = (heading: string) =>
+	richNotice({ tone: "warning", heading, duration: 10000 });
+
+function publicationName(plugin: LeafletAtmosphere, site: string): string {
+	return (
+		plugin.settings.publications.find((p) => p.uri === site)?.name ??
+		i18next.t("manager.personalPage")
+	);
 }
 
 export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?: string) {
@@ -29,21 +36,17 @@ export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?:
 		const result = await new Publisher(plugin).publish(file, { site });
 		progress.done();
 		plugin.notifyPostsChanged();
-		linkNotice(
-			i18next.t(result.created ? "notice.published" : "notice.updated"),
-			result.url
-		);
-		if (result.recovered) new Notice(i18next.t("notice.recovered"), 8000);
+		postNotice(i18next.t(result.created ? "notice.published" : "notice.updated"), {
+			title: result.title,
+			url: result.url,
+			publication: publicationName(plugin, result.site),
+		});
+		if (result.recovered)
+			richNotice({ tone: "info", heading: i18next.t("notice.recovered") });
 		if (result.skippedDataviewJs > 0)
-			new Notice(
-				i18next.t("notice.dataviewJsDisabled", { count: result.skippedDataviewJs }),
-				8000
-			);
+			warn(i18next.t("notice.dataviewJsDisabled", { count: result.skippedDataviewJs }));
 		if (result.warnings.length > 0)
-			new Notice(
-				i18next.t("notice.missingImages", { list: result.warnings.join(", ") }),
-				8000
-			);
+			warn(i18next.t("notice.missingImages", { list: result.warnings.join(", ") }));
 		if (plugin.settings.copyLinkAfterPublish)
 			await navigator.clipboard.writeText(result.url);
 		if (plugin.settings.openAfterPublish) window.open(result.url);
@@ -57,9 +60,13 @@ export async function pullFile(plugin: LeafletAtmosphere, file: TFile) {
 	try {
 		const found = await new Publisher(plugin).pull(file);
 		if (found) {
-			linkNotice(i18next.t("notice.pulled"), found.url);
+			postNotice(i18next.t("notice.pulled"), {
+				title: file.basename,
+				url: found.url,
+				publication: found.url.replace(/^https?:\/\/([^/]+).*$/, "$1"),
+			});
 			plugin.notifyPostsChanged();
-		} else new Notice(i18next.t("notice.pullNotFound"));
+		} else richNotice({ tone: "info", heading: i18next.t("notice.pullNotFound") });
 	} catch (e) {
 		showError(e);
 	}
@@ -80,7 +87,10 @@ export function unpublishFile(plugin: LeafletAtmosphere, file: TFile) {
 			new Publisher(plugin)
 				.unpublish(file)
 				.then((deleted) => {
-					new Notice(i18next.t(deleted ? "notice.unpublished" : "notice.notPublished"));
+					richNotice({
+						tone: deleted ? "success" : "info",
+						heading: i18next.t(deleted ? "notice.unpublished" : "notice.notPublished"),
+					});
 					plugin.notifyPostsChanged();
 				})
 				.catch(showError);
@@ -107,7 +117,7 @@ export function publishMarkedFiles(plugin: LeafletAtmosphere) {
 		? plugin.app.vault.getMarkdownFiles().filter((f) => publisher.isMarked(f))
 		: [];
 	if (files.length === 0) {
-		new Notice(i18next.t("notice.noMarked", { key }));
+		richNotice({ tone: "info", heading: i18next.t("notice.noMarked", { key }) });
 		return;
 	}
 	confirmBatch(
@@ -146,7 +156,7 @@ export function publishableNotes(
 export function publishSelection(plugin: LeafletAtmosphere, items: TAbstractFile[]) {
 	const files = publishableNotes(plugin, items);
 	if (files.length === 0) {
-		new Notice(i18next.t("notice.noSelection"));
+		richNotice({ tone: "info", heading: i18next.t("notice.noSelection") });
 		return;
 	}
 	const shown = files.slice(0, 5).map((f) => f.basename);
@@ -210,16 +220,18 @@ async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: 
 
 	progress.done();
 	plugin.notifyPostsChanged();
-	new Notice(
-		i18next.t("notice.batchDone", {
+	richNotice({
+		tone: failed.length > 0 ? "warning" : "success",
+		heading: i18next.t("notice.batchDone", {
 			created: created.size,
 			updated,
 			failed: failed.length,
 		}),
-		8000
-	);
-	if (failed.length > 0)
-		new Notice(i18next.t("notice.batchFailed", { list: failed.join(", ") }), 10000);
-	if (skippedJs > 0)
-		new Notice(i18next.t("notice.dataviewJsDisabled", { count: skippedJs }), 8000);
+		meta:
+			failed.length > 0
+				? i18next.t("notice.batchFailed", { list: failed.join(", ") })
+				: undefined,
+		duration: failed.length > 0 ? 12000 : 8000,
+	});
+	if (skippedJs > 0) warn(i18next.t("notice.dataviewJsDisabled", { count: skippedJs }));
 }

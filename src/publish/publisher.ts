@@ -42,6 +42,9 @@ const BLOB_PAGES_THRESHOLD = 100 * 1024;
 export interface PublishResult {
 	uri: string;
 	url: string;
+	title: string;
+	/** Publication AT-URI, or the personal page address. */
+	site: string;
 	created: boolean;
 	/** The note had lost its link: the existing post was found and updated. */
 	recovered: boolean;
@@ -197,6 +200,8 @@ export class Publisher {
 		return {
 			uri: result.uri,
 			url,
+			title,
+			site,
 			created: !existing,
 			recovered,
 			skippedDataviewJs: preprocessor.skippedDataviewJs,

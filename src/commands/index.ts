@@ -1,7 +1,8 @@
 import i18next from "i18next";
-import { type Menu, Notice, type TAbstractFile, TFile, TFolder } from "obsidian";
+import { type Menu, type TAbstractFile, TFile, TFolder } from "obsidian";
 import type LeafletAtmosphere from "../main";
 import { openPostsManager } from "../ui/manager/view";
+import { richNotice } from "../ui/notices";
 import {
 	canPublish,
 	isPublished,
@@ -125,7 +126,7 @@ export function registerCommands(plugin: LeafletAtmosphere) {
 			if (!checking)
 				void navigator.clipboard
 					.writeText(url)
-					.then(() => new Notice(t("notice.linkCopied")));
+					.then(() => richNotice({ tone: "success", heading: t("notice.linkCopied") }));
 			return true;
 		},
 	});

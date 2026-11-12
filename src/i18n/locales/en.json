@@ -31,9 +31,12 @@
 		"noSelection": "No note to publish in this selection",
 		"publishingNote": "Publishing {{name}}…",
 		"recovered": "This note had lost its link to Leaflet: its existing post was found and updated.",
-		"pulled": "Leaflet link restored:",
+		"pulled": "Leaflet link restored",
 		"pullNotFound": "No post on Leaflet matches this note",
-		"dataviewJsDisabled": "{{count}} DataviewJS query(ies) left out: JavaScript queries are disabled in the Dataview settings."
+		"dataviewJsDisabled": "{{count}} DataviewJS query(ies) left out: JavaScript queries are disabled in the Dataview settings.",
+		"open": "Open",
+		"copy": "Copy link",
+		"copied": "Copied!"
 	},
 	"error": {
 		"prefix": "Leaflet: {{message}}",

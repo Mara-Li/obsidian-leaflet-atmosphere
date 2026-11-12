@@ -1,7 +1,8 @@
 import i18next from "i18next";
-import { debounce, Notice, TFile } from "obsidian";
+import { debounce, TFile } from "obsidian";
 import type LeafletAtmosphere from "../main";
 import { ConfirmModal } from "../ui/confirmModal";
+import { richNotice } from "../ui/notices";
 import { getString } from "./frontmatter";
 import { Publisher } from "./publisher";
 
@@ -89,8 +90,16 @@ export async function deletePosts(
 	}
 	const deleted = posts.length - failed.length;
 	plugin.notifyPostsChanged();
-	if (deleted > 0) new Notice(i18next.t("manager.deleted", { count: deleted }));
+	if (deleted > 0)
+		richNotice({
+			tone: "success",
+			heading: i18next.t("manager.deleted", { count: deleted }),
+		});
 	if (failed.length > 0)
-		new Notice(i18next.t("manager.failed", { list: failed.join(", ") }), 10000);
+		richNotice({
+			tone: "error",
+			heading: i18next.t("manager.failed", { list: failed.join(", ") }),
+			duration: 10000,
+		});
 	return deleted;
 }

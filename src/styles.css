@@ -141,3 +141,63 @@
 .leaflet-atmosphere-manager-spacer {
 	flex: 1;
 }
+
+.leaflet-atmosphere-notice {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-2-2);
+	min-width: 220px;
+}
+
+.leaflet-atmosphere-notice-header {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+	font-weight: var(--font-semibold);
+}
+
+.leaflet-atmosphere-notice-icon {
+	display: flex;
+	flex-shrink: 0;
+}
+
+.leaflet-atmosphere-notice.is-success .leaflet-atmosphere-notice-icon {
+	color: var(--color-green);
+}
+
+.leaflet-atmosphere-notice.is-info .leaflet-atmosphere-notice-icon {
+	color: var(--text-accent);
+}
+
+.leaflet-atmosphere-notice.is-warning .leaflet-atmosphere-notice-icon {
+	color: var(--color-orange);
+}
+
+.leaflet-atmosphere-notice.is-error .leaflet-atmosphere-notice-icon {
+	color: var(--color-red);
+}
+
+.leaflet-atmosphere-notice-title {
+	font-weight: var(--font-semibold);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.leaflet-atmosphere-notice-meta {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	overflow-wrap: anywhere;
+}
+
+.leaflet-atmosphere-notice-actions {
+	display: flex;
+	gap: var(--size-4-2);
+	margin-top: var(--size-2-2);
+}
+
+.leaflet-atmosphere-notice-actions button {
+	font-size: var(--font-ui-smaller);
+	padding: var(--size-2-1) var(--size-4-2);
+	height: auto;
+}

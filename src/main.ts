@@ -1,5 +1,5 @@
 import i18next from "i18next";
-import { Events, Notice, Platform, Plugin } from "obsidian";
+import { Events, Platform, Plugin } from "obsidian";
 import { AtpClient } from "./atproto/client";
 import { registerCommands } from "./commands";
 import { showError } from "./commands/actions";
@@ -9,6 +9,7 @@ import { fetchPublications } from "./leaflet/publications";
 import { DeletionWatcher } from "./publish/deletions";
 import { LeafletAtmosphereSettingTab } from "./settings";
 import { MANAGER_VIEW, PostsManagerView } from "./ui/manager/view";
+import { richNotice } from "./ui/notices";
 
 export default class LeafletAtmosphere extends Plugin {
 	settings: LeafletAtmosphereSettings = { ...DEFAULT_SETTINGS };
@@ -91,7 +92,10 @@ export default class LeafletAtmosphere extends Plugin {
 		try {
 			this.client = null;
 			const client = await this.getClient();
-			new Notice(i18next.t("notice.connected", { handle: client.handle || client.did }));
+			richNotice({
+				tone: "success",
+				heading: i18next.t("notice.connected", { handle: client.handle || client.did }),
+			});
 			await this.refreshPublications();
 		} catch (e) {
 			showError(e);
@@ -109,11 +113,12 @@ export default class LeafletAtmosphere extends Plugin {
 			if (firstLoad && !current)
 				this.settings.defaultPublication = this.settings.publications[0]?.uri ?? "";
 			await this.saveSettings();
-			new Notice(
-				i18next.t("notice.publicationsRefreshed", {
+			richNotice({
+				tone: "info",
+				heading: i18next.t("notice.publicationsRefreshed", {
 					count: this.settings.publications.length,
-				})
-			);
+				}),
+			});
 		} catch (e) {
 			showError(e);
 		}
