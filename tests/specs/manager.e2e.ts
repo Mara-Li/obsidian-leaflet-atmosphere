@@ -1,6 +1,8 @@
 import { browser, expect } from "@wdio/globals";
 import {
+	clearNotices,
 	confirmModal,
+	forgetLink,
 	getFrontmatter,
 	getRecords,
 	PUBLICATION,
@@ -8,6 +10,7 @@ import {
 	runCommand,
 	setup,
 	waitFrontmatter,
+	waitNotice,
 } from "../helpers/obsidian";
 
 const COLLECTION = "site.standard.document";
@@ -94,6 +97,99 @@ describe("Posts manager", function () {
 		await browser.waitUntil(
 			async () => (await getFrontmatter("Target.md")).leaflet_uri === undefined
 		);
+	});
+});
+
+describe("Publishing and linking from the manager", function () {
+	beforeEach(async function () {
+		await setup({ confirmBatch: false });
+		await closeManager();
+	});
+
+	async function waitMeta(title: string, text: string): Promise<void> {
+		await browser.waitUntil(
+			async () => (await rows()).find((r) => r.title === title)?.meta.includes(text) ?? false,
+			{ timeout: 10000, timeoutMsg: `${title} never showed "${text}"` }
+		);
+	}
+
+	it("opens from the ribbon and follows new publications", async function () {
+		await browser.$(".side-dock-ribbon-action[aria-label='Manage Leaflet posts']").click();
+		await browser.$(".leaflet-atmosphere-manager").waitForExist();
+		await waitRows(0);
+		await publish("Target.md");
+		await waitRows(1);
+		await waitMeta("Target", "Target.md");
+	});
+
+	it("relinks a note that lost its link", async function () {
+		await publish("Slugged.md");
+		const uri = await waitFrontmatter("Slugged.md", "leaflet_uri");
+		await forgetLink("Slugged.md");
+		await runCommand("manage-posts");
+		await waitMeta("Slugged", "No note in the vault");
+
+		await clearNotices();
+		await browser.$("button=Relink notes").click();
+		await waitNotice(/1 note\(s\) linked/);
+		await waitMeta("Slugged", "Slugged.md");
+		expect(await waitFrontmatter("Slugged.md", "leaflet_uri")).toBe(uri);
+	});
+
+	it("does not guess between notes with the same title", async function () {
+		// Target.md and Copies/Same title.md are both titled "Target"
+		await publish("Target.md");
+		await waitFrontmatter("Target.md", "leaflet_uri");
+		await forgetLink("Target.md");
+		await runCommand("manage-posts");
+		await waitMeta("Target", "No note in the vault");
+
+		await clearNotices();
+		await browser.$("button=Relink notes").click();
+		await waitNotice(/No note matches/);
+		expect((await getFrontmatter("Target.md")).leaflet_uri).toBeUndefined();
+	});
+
+	it("links a post to a chosen note", async function () {
+		await addOrphanPost();
+		await runCommand("manage-posts");
+		await waitMeta("Orphan post", "No note in the vault");
+		await browser
+			.$(".leaflet-atmosphere-manager-row button[aria-label='Link to a note']")
+			.click();
+		const input = browser.$(".prompt-input");
+		await input.waitForDisplayed();
+		await input.setValue("Unmarked");
+		await browser.keys("Enter");
+		await waitMeta("Orphan post", "Unmarked.md");
+		expect(await waitFrontmatter("Unmarked.md", "leaflet_uri")).toBe(
+			`at://did:plc:leaflettest/${COLLECTION}/3orphan`
+		);
+	});
+
+	it("publishes a note again from its row", async function () {
+		await publish("Target.md");
+		await waitFrontmatter("Target.md", "leaflet_uri");
+		await runCommand("manage-posts");
+		await waitRows(1);
+		await clearNotices();
+		await browser
+			.$(".leaflet-atmosphere-manager-row button[aria-label='Publish again']")
+			.click();
+		await waitNotice(/Updated on Leaflet/);
+		expect(Object.values(await getRecords())[0]!.updatedAt).toBeDefined();
+	});
+
+	it("publishes the selected notes", async function () {
+		await publish("Target.md");
+		await waitFrontmatter("Target.md", "leaflet_uri");
+		await runCommand("manage-posts");
+		await waitRows(1);
+		await browser.$(".leaflet-atmosphere-manager-row input[type='checkbox']").click();
+		await clearNotices();
+		await browser.$("button=Publish (1)").click();
+		const notice = await waitNotice(/failed/, 30000);
+		expect(notice).toContain("0 published, 1 updated, 0 failed");
 	});
 });
 

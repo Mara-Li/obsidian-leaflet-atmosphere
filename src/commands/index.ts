@@ -146,7 +146,7 @@ export function registerCommands(plugin: LeafletAtmosphere) {
 	plugin.addCommand({
 		id: "manage-posts",
 		name: t("commands.manage"),
-		icon: "layout-list",
+		icon: "newspaper",
 		callback: () => void openPostsManager(plugin),
 	});
 
@@ -172,6 +172,10 @@ export function registerCommands(plugin: LeafletAtmosphere) {
 			addPublishItem(plugin, menu, info.file)
 		)
 	);
+
+	plugin.addRibbonIcon("newspaper", t("commands.manage"), () => {
+		void openPostsManager(plugin);
+	});
 
 	plugin.addRibbonIcon("send", t("commands.ribbon"), () => {
 		const file = markdownFile(plugin);

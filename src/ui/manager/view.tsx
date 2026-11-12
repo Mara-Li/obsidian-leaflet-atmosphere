@@ -23,7 +23,7 @@ export class PostsManagerView extends ItemView {
 	}
 
 	getIcon(): string {
-		return "send";
+		return "newspaper";
 	}
 
 	async onOpen() {

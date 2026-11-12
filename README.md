@@ -25,7 +25,7 @@ The other settings are grouped in sub-pages: **Publication** (default publicatio
 | **Retrieve the Leaflet link of current note** | Restore `leaflet_uri` and `leaflet_url` of a note that lost them, without publishing it. |
 | **Delete current note from Leaflet** | Delete the record from your PDS. The note is kept. |
 | **Copy Leaflet link** / **Open published note in browser** | Use the URL saved in the note. |
-| **Manage Leaflet posts** | Open a view listing every post of your account (including posts without a note, written elsewhere or whose note was deleted): search, filter by publication or by posts without note, open the note or the post, and delete one or several posts. |
+| **Manage Leaflet posts** (also in the ribbon) | Open a view listing every post of your account, including posts without a note (written elsewhere or whose note was deleted). Search, filter by publication or by posts without note, open the note or the post, publish a note again, publish the selection or the marked notes, delete one or several posts. **Relink notes** links posts without note to their notes (by key, then by title when a single note matches); a post can also be linked to a chosen note. The list follows publications and deletions made elsewhere. |
 | **Refresh publications** | Reload the publications of your account. |
 
 On desktop, the progress is shown in the status bar; on mobile, in a notice.

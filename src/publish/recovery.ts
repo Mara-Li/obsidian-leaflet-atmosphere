@@ -23,7 +23,7 @@ export interface RecoveryContext {
 	ownerOf: (rkey: string) => string | undefined;
 }
 
-function normalizeTitle(title: string): string {
+export function normalizeTitle(title: string): string {
 	return title.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
@@ -59,7 +59,7 @@ export function expectedTitle(
 }
 
 /** Record keys the post of a note may already use: reserved address, then slug. */
-function candidateKeys(
+export function candidateKeys(
 	settings: LeafletAtmosphereSettings,
 	file: TFile,
 	fm: FrontMatterCache | undefined

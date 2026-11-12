@@ -216,7 +216,16 @@
 		"deleteTitle": "Delete {{count}} post(s) from Leaflet?",
 		"deleteDesc": "These posts will be removed from your PDS: {{list}}. Linked notes stay in the vault, without their link. A post written in the Leaflet editor keeps its draft there.",
 		"deleted": "{{count}} post(s) deleted from Leaflet",
-		"failed": "Could not delete: {{list}}"
+		"failed": "Could not delete: {{list}}",
+		"chooseNote": "Choose the note of this post",
+		"linkNote": "Link to a note",
+		"publishNote": "Publish again",
+		"relink": "Relink notes",
+		"relinked": "{{count}} note(s) linked to their post",
+		"nothingToRelink": "No note matches the posts without note",
+		"publishMarked": "Publish marked notes",
+		"publishSelected": "Publish ({{count}})",
+		"linked": "{{name}} linked to its post"
 	},
 	"deletion": {
 		"title": "Delete the posts of the deleted notes?",

@@ -1,5 +1,5 @@
 import i18next from "i18next";
-import { Notice, Platform, Plugin } from "obsidian";
+import { Events, Notice, Platform, Plugin } from "obsidian";
 import { AtpClient } from "./atproto/client";
 import { registerCommands } from "./commands";
 import { showError } from "./commands/actions";
@@ -14,6 +14,8 @@ export default class LeafletAtmosphere extends Plugin {
 	settings: LeafletAtmosphereSettings = { ...DEFAULT_SETTINGS };
 	/** Publication progress, desktop only: mobile has no status bar. */
 	statusBarEl: HTMLElement | null = null;
+	/** "changed" is triggered when posts are published, linked or deleted. */
+	readonly events = new Events();
 	private client: AtpClient | null = null;
 	private clientKey = "";
 
@@ -41,6 +43,10 @@ export default class LeafletAtmosphere extends Plugin {
 
 	onunload() {
 		this.client = null;
+	}
+
+	notifyPostsChanged() {
+		this.events.trigger("changed");
 	}
 
 	async loadSettings() {

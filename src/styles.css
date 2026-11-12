@@ -125,3 +125,19 @@
 .leaflet-atmosphere-danger {
 	color: var(--text-error);
 }
+
+.leaflet-atmosphere-manager-toolbar button,
+.leaflet-atmosphere-manager-summary button {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
+}
+
+.leaflet-atmosphere-manager-summary {
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+}
+
+.leaflet-atmosphere-manager-spacer {
+	flex: 1;
+}

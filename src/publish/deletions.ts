@@ -88,6 +88,7 @@ export async function deletePosts(
 		}
 	}
 	const deleted = posts.length - failed.length;
+	plugin.notifyPostsChanged();
 	if (deleted > 0) new Notice(i18next.t("manager.deleted", { count: deleted }));
 	if (failed.length > 0)
 		new Notice(i18next.t("manager.failed", { list: failed.join(", ") }), 10000);

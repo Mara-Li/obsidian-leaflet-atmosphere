@@ -216,7 +216,16 @@
 		"deleteTitle": "Supprimer {{count}} article(s) de Leaflet ?",
 		"deleteDesc": "Ces articles seront supprimés de votre PDS : {{list}}. Les notes liées restent dans le coffre, sans leur lien. Un article écrit dans l'éditeur Leaflet y garde son brouillon.",
 		"deleted": "{{count}} article(s) supprimé(s) de Leaflet",
-		"failed": "Échec de la suppression : {{list}}"
+		"failed": "Échec de la suppression : {{list}}",
+		"chooseNote": "Choisissez la note de cet article",
+		"linkNote": "Lier à une note",
+		"publishNote": "Republier",
+		"relink": "Relier les notes",
+		"relinked": "{{count}} note(s) reliée(s) à leur article",
+		"nothingToRelink": "Aucune note ne correspond aux articles sans note",
+		"publishMarked": "Publier les notes marquées",
+		"publishSelected": "Publier ({{count}})",
+		"linked": "{{name}} reliée à son article"
 	},
 	"deletion": {
 		"title": "Supprimer les articles des notes supprimées ?",

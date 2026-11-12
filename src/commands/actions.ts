@@ -28,6 +28,7 @@ export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?:
 	try {
 		const result = await new Publisher(plugin).publish(file, { site });
 		progress.done();
+		plugin.notifyPostsChanged();
 		linkNotice(
 			i18next.t(result.created ? "notice.published" : "notice.updated"),
 			result.url
@@ -55,8 +56,10 @@ export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?:
 export async function pullFile(plugin: LeafletAtmosphere, file: TFile) {
 	try {
 		const found = await new Publisher(plugin).pull(file);
-		if (found) linkNotice(i18next.t("notice.pulled"), found.url);
-		else new Notice(i18next.t("notice.pullNotFound"));
+		if (found) {
+			linkNotice(i18next.t("notice.pulled"), found.url);
+			plugin.notifyPostsChanged();
+		} else new Notice(i18next.t("notice.pullNotFound"));
 	} catch (e) {
 		showError(e);
 	}
@@ -76,10 +79,10 @@ export function unpublishFile(plugin: LeafletAtmosphere, file: TFile) {
 		() => {
 			new Publisher(plugin)
 				.unpublish(file)
-				.then(
-					(deleted) =>
-						new Notice(i18next.t(deleted ? "notice.unpublished" : "notice.notPublished"))
-				)
+				.then((deleted) => {
+					new Notice(i18next.t(deleted ? "notice.unpublished" : "notice.notPublished"));
+					plugin.notifyPostsChanged();
+				})
 				.catch(showError);
 		}
 	).open();
@@ -206,6 +209,7 @@ async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: 
 	}
 
 	progress.done();
+	plugin.notifyPostsChanged();
 	new Notice(
 		i18next.t("notice.batchDone", {
 			created: created.size,
