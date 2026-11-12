@@ -27,8 +27,8 @@ jobs:
         uses: mara-li/reusable-workflows/.github/workflows/obsidian-plugin-release.yaml@main
 
         with:
-            PLUGIN_NAME: <%= data.id %>
-            CACHE: "<%= data.packageManager %>"
+            PLUGIN_NAME: leaflet-atmosphere
+            CACHE: "pnpm"
         secrets:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -36,8 +36,8 @@ jobs:
         if: ${{ inputs.bump || false }}
         uses: mara-li/reusable-workflows/.github/workflows/obsidian-plugin-bump-version.yaml@main
         with:
-            PLUGIN_NAME: <%= data.id %>
+            PLUGIN_NAME: leaflet-atmosphere
             BETA: ${{ inputs.beta || false}}
-            CACHE: "<%= data.packageManager %>"
+            CACHE: "pnpm"
         secrets:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

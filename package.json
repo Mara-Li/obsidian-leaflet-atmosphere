@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-sample-plugin",
+  "name": "leaflet-atmosphere",
   "version": "0.0.0",
-  "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+  "description": "Publish to your atmosphere blog without leaving Obsidian!",
   "main": "main.js",
   "private": true,
   "scripts": {
@@ -22,8 +22,8 @@
     "node": "^26"
   },
   "keywords": [],
-  "author": "",
-  "license": "MIT",
+  "author": "Mara-Li",
+  "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@biomejs/biome": "^2.0.0-beta.5",
     "@eslint/js": "^10.0.1",
@@ -53,13 +53,7 @@
     "commit-and-tag-version": "^13.3.0",
     "dedent": "^1.5.3",
     "dotenv-cli": "^11.1.0",
-    "ejs": "^7.0.2",
-    "execa": "^10.2.1",
-    "git-user-name": "^2.0.0",
-    "license": "^1.0.3",
     "obsidian-typings": "^6.59.0",
-    "prompts": "^2.4.2",
-    "spdx-license-list": "^6.10.0",
     "wdio-obsidian-reporter": "^3.5.0",
     "wdio-obsidian-service": "^3.5.0"
   },

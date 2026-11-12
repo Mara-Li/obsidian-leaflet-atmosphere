@@ -1,9 +1,9 @@
-<% if (data.settings === true) { %>
-export interface <%= data.interfaceName %>Settings {
+
+export interface LeafletAtmosphereSettings {
 	greeting: string;
 }
 
-export const DEFAULT_SETTINGS: <%= data.interfaceName %>Settings = {
+export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
 	greeting: "Hello",
 };
-<% } %>
+

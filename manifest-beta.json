@@ -1,10 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "leaflet-atmosphere",
+	"name": "Leaflet Atmosphere",
 	"version": "0.0.0",
-	"minAppVersion": "1.5.12",
-	"description": "This is a sample plugin",
-	"author": "Mara",
-	"authorUrl": "https://github.com/Mara",
+	"minAppVersion": "1.13.0",
+	"description": "Publish to your atmosphere blog without leaving Obsidian!",
+	"author": "Mara-Li",
+	"authorUrl": "https://github.com/Mara-Li",
 	"isDesktopOnly": false
 }

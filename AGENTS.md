@@ -18,26 +18,26 @@
 ### Install
 
 ```bash
-<%= data.packageManager %> install
+pnpm install
 ```
 
 ### Dev (watch)
 
 ```bash
-<%= data.packageManager %> run dev
+pnpm run dev
 ```
 
 ### Production build
 
 ```bash
-<%= data.packageManager %> run build
+pnpm run build
 ```
 
 ## Linting & formatting
 
 - ESLint is preconfigured with `eslint-plugin-obsidianmd` for Obsidian-specific rules.
-- Run `<%= data.packageManager %> run lint` to lint the project.
-- Run `<%= data.packageManager %> run format` to format `src/` with Biome.
+- Run `pnpm run lint` to lint the project.
+- Run `pnpm run format` to format `src/` with Biome.
 - A GitHub Action automatically lints every commit on all branches.
 
 ## File & folder conventions

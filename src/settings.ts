@@ -1,10 +1,10 @@
 import { type App, PluginSettingTab, type SettingDefinitionItem } from "obsidian";
-import type <%= data.interfaceName %> from "./main";
+import type LeafletAtmosphere from "./main";
 
-export class <%= data.interfaceName %>SettingTab extends PluginSettingTab {
-	plugin: <%= data.interfaceName %>;
+export class LeafletAtmosphereSettingTab extends PluginSettingTab {
+	plugin: LeafletAtmosphere;
 
-	constructor(app: App, plugin: <%= data.interfaceName %>) {
+	constructor(app: App, plugin: LeafletAtmosphere) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
