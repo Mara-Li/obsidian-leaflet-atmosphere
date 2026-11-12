@@ -151,3 +151,12 @@ export async function waitFrontmatter(file: string, key: string): Promise<unknow
 	});
 	return value;
 }
+
+/** Whether a command of the plugin can run on the given note. */
+export async function commandAvailable(command: string, file: string): Promise<boolean> {
+	await obsidianPage.openFile(file);
+	return browser.executeObsidian(({ app }, id) => {
+		const cmd = app.commands.commands[id];
+		return cmd?.checkCallback ? cmd.checkCallback(true) === true : !!cmd;
+	}, `${PLUGIN_ID}:${command}`);
+}

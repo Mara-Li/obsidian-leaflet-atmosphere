@@ -23,9 +23,9 @@ If your account is not hosted on Bluesky, the PDS is resolved from your handle. 
 | **Copy Leaflet link** / **Open published note in browser** | Use the URL saved in the note. |
 | **Refresh publications** | Reload the publications of your account. |
 
-After the first publication, the record URI (`leaflet_uri`) and the URL (`leaflet_url`) are saved in the note properties. Publishing again updates the same post (its publication date and Bluesky post are kept).
+After the first publication, the record URI (`leaflet_uri`), the URL (`leaflet_url`) and the date of the last publication (`leaflet_last_published`) are saved in the note properties. Publishing again updates the same post (its publication date and Bluesky post are kept).
 
-Links to another note point to its published post. When the linked note is marked with `leaflet_publish: true` but not published yet, its future address is reserved and saved in its properties, so the link works as soon as that note is published. Links to unmarked notes become plain text.
+Links to another note point to its published post. When the linked note is marked with `leaflet_publish: true` but not published yet, its future address is reserved and saved in its properties (without `leaflet_last_published`), so the link works as soon as that note is published. The commands that need a published post (copy, open, delete) are not offered on a reserved note. Links to unmarked notes become plain text.
 
 ### Properties
 

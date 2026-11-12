@@ -43,6 +43,7 @@ describe("Publishing a note", function () {
 		expect(record.textContent).not.toContain("hidden");
 
 		expect(await waitFrontmatter("Rich.md", "leaflet_url")).toBe(`${PUBLICATION.url}/${rkey}`);
+		expect(Date.parse(String(await waitFrontmatter("Rich.md", "leaflet_last_published")))).not.toBeNaN();
 		expect((await getFrontmatter("Rich.md")).leaflet_uri).toBe(
 			`at://did:plc:leaflettest/${COLLECTION}/${rkey}`
 		);
@@ -129,7 +130,7 @@ describe("Publishing a note", function () {
 
 	it("deletes the document and clears the note", async function () {
 		await publish("Target.md");
-		await waitFrontmatter("Target.md", "leaflet_uri");
+		await waitFrontmatter("Target.md", "leaflet_last_published");
 		await runCommand("unpublish-note", "Target.md");
 		await confirmModal();
 		await waitNotice(/Deleted from Leaflet/);
@@ -137,6 +138,7 @@ describe("Publishing a note", function () {
 		expect(await getRecords()).toEqual({});
 		const fm = await getFrontmatter("Target.md");
 		expect(fm.leaflet_uri).toBeUndefined();
+		expect(fm.leaflet_last_published).toBeUndefined();
 		expect(fm.leaflet_publish).toBe(false);
 	});
 });

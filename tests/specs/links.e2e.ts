@@ -1,6 +1,7 @@
 import { expect } from "@wdio/globals";
 import { sliceBytes } from "../helpers/lexicons";
 import {
+	commandAvailable,
 	getFrontmatter,
 	getRecords,
 	PUBLICATION,
@@ -42,8 +43,16 @@ describe("Links between notes", function () {
 		const reservedUri = await waitFrontmatter("Target.md", "leaflet_uri");
 		const reservedUrl = (await getFrontmatter("Target.md")).leaflet_url;
 
+		// Only reserved: no publication date, so no link to copy and nothing to delete
+		expect((await getFrontmatter("Target.md")).leaflet_last_published).toBeUndefined();
+		for (const command of ["copy-link", "open-in-browser", "unpublish-note"])
+			expect(await commandAvailable(command, "Target.md")).toBe(false);
+
 		const notice = await publish("Target.md");
 		expect(notice).toContain("Published to Leaflet");
+		await waitFrontmatter("Target.md", "leaflet_last_published");
+		for (const command of ["copy-link", "open-in-browser", "unpublish-note"])
+			expect(await commandAvailable(command, "Target.md")).toBe(true);
 		const rkey = String(reservedUri).split("/").pop();
 		expect(Object.keys(await getRecords())).toContain(`site.standard.document/${rkey}`);
 		expect((await getFrontmatter("Target.md")).leaflet_url).toBe(reservedUrl);

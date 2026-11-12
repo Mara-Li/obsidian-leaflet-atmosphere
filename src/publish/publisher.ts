@@ -163,6 +163,8 @@ export class Publisher {
 				(front: Record<string, unknown>) => {
 					if (s.uriKey) front[s.uriKey] = result.uri;
 					if (s.urlKey) front[s.urlKey] = url;
+					// Only a real publication sets it: reserved notes only have a URI and a URL
+					if (s.lastPublishedKey) front[s.lastPublishedKey] = new Date().toISOString();
 				}
 			);
 
@@ -180,6 +182,7 @@ export class Publisher {
 			(front: Record<string, unknown>) => {
 				delete front[this.settings.uriKey];
 				delete front[this.settings.urlKey];
+				delete front[this.settings.lastPublishedKey];
 				const key = this.settings.publishKey;
 				if (key && front[key] === true) front[key] = false;
 			}

@@ -66,14 +66,17 @@ export function unpublishFile(plugin: LeafletAtmosphere, file: TFile) {
 	).open();
 }
 
-export function publishedUrl(plugin: LeafletAtmosphere, file: TFile): string | undefined {
-	const fm = plugin.app.metadataCache.getFileCache(file)?.frontmatter;
-	return getString(fm, plugin.settings.urlKey);
-}
-
+/** A reserved note has a URI and a URL but no publication date yet. */
 export function isPublished(plugin: LeafletAtmosphere, file: TFile): boolean {
 	const fm = plugin.app.metadataCache.getFileCache(file)?.frontmatter;
-	return !!getString(fm, plugin.settings.uriKey);
+	const s = plugin.settings;
+	return !!getString(fm, s.uriKey) && !!getString(fm, s.lastPublishedKey);
+}
+
+export function publishedUrl(plugin: LeafletAtmosphere, file: TFile): string | undefined {
+	if (!isPublished(plugin, file)) return undefined;
+	const fm = plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+	return getString(fm, plugin.settings.urlKey);
 }
 
 export function publishMarkedFiles(plugin: LeafletAtmosphere) {
