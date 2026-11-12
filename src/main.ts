@@ -1,5 +1,5 @@
 import i18next from "i18next";
-import { Notice, Plugin } from "obsidian";
+import { Notice, Platform, Plugin } from "obsidian";
 import { AtpClient } from "./atproto/client";
 import { registerCommands } from "./commands";
 import { showError } from "./commands/actions";
@@ -10,6 +10,8 @@ import { LeafletAtmosphereSettingTab } from "./settings";
 
 export default class LeafletAtmosphere extends Plugin {
 	settings: LeafletAtmosphereSettings = { ...DEFAULT_SETTINGS };
+	/** Publication progress, desktop only: mobile has no status bar. */
+	statusBarEl: HTMLElement | null = null;
 	private client: AtpClient | null = null;
 	private clientKey = "";
 
@@ -24,6 +26,11 @@ export default class LeafletAtmosphere extends Plugin {
 			// Notices show plain text: no HTML escaping of interpolated values
 			interpolation: { escapeValue: false },
 		});
+		if (!Platform.isMobile) {
+			this.statusBarEl = this.addStatusBarItem();
+			this.statusBarEl.addClass("leaflet-atmosphere-status");
+			this.statusBarEl.hide();
+		}
 		registerCommands(this);
 		this.addSettingTab(new LeafletAtmosphereSettingTab(this.app, this));
 	}

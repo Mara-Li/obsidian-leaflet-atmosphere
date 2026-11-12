@@ -83,6 +83,11 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 				heading: t("settings.after.heading"),
 				items: [
 					{
+						name: t("settings.after.confirm"),
+						desc: t("settings.after.confirmDesc"),
+						control: { type: "toggle", key: "confirmBatch" },
+					},
+					{
 						name: t("settings.after.copy"),
 						control: { type: "toggle", key: "copyLinkAfterPublish" },
 					},

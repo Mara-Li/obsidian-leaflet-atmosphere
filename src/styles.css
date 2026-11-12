@@ -9,3 +9,22 @@
 	width: 1000px;
 	pointer-events: none;
 }
+
+.leaflet-atmosphere-status {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+}
+
+.leaflet-atmosphere-status-text {
+	max-width: 240px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.leaflet-atmosphere-status-bar {
+	width: 80px;
+	height: 6px;
+	accent-color: var(--interactive-accent);
+}

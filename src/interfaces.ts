@@ -43,6 +43,7 @@ export interface LeafletAtmosphereSettings {
 	maxImageWidth: number;
 
 	writeFrontmatter: boolean;
+	confirmBatch: boolean;
 	copyLinkAfterPublish: boolean;
 	openAfterPublish: boolean;
 }
@@ -85,6 +86,7 @@ export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
 	maxImageWidth: 2000,
 
 	writeFrontmatter: true,
+	confirmBatch: true,
 	copyLinkAfterPublish: false,
 	openAfterPublish: false,
 };

@@ -14,7 +14,6 @@
 		"filesMenu": "Publish {{count}} notes to Leaflet"
 	},
 	"notice": {
-		"publishing": "Publishing to Leaflet…",
 		"published": "Published to Leaflet",
 		"updated": "Updated on Leaflet",
 		"unpublished": "Deleted from Leaflet",
@@ -27,7 +26,8 @@
 		"batchDone": "Leaflet: {{created}} published, {{updated}} updated, {{failed}} failed",
 		"batchFailed": "Failed: {{list}}",
 		"noMarked": "No note has \"{{key}}: true\"",
-		"noSelection": "No note to publish in this selection"
+		"noSelection": "No note to publish in this selection",
+		"publishingNote": "Publishing {{name}}…"
 	},
 	"error": {
 		"prefix": "Leaflet: {{message}}",
@@ -143,9 +143,11 @@
 			"imagesHeading": "Images"
 		},
 		"after": {
-			"heading": "After publishing",
-			"copy": "Copy link",
-			"open": "Open in browser"
+			"heading": "When publishing",
+			"copy": "Copy link afterwards",
+			"open": "Open in browser afterwards",
+			"confirm": "Confirm before publishing several notes",
+			"confirmDesc": "Show the notes before publishing a folder, a selection or all marked notes."
 		},
 		"pages": {
 			"account": "Account",

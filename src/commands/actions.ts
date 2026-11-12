@@ -5,6 +5,7 @@ import type LeafletAtmosphere from "../main";
 import { getBoolean, getString } from "../publish/frontmatter";
 import { Publisher } from "../publish/publisher";
 import { ConfirmModal } from "../ui/confirmModal";
+import { PublishProgress } from "../ui/progress";
 import { PublicationModal } from "../ui/publicationModal";
 
 export function showError(error: unknown) {
@@ -22,10 +23,11 @@ function linkNotice(text: string, url: string) {
 }
 
 export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?: string) {
-	const progress = new Notice(i18next.t("notice.publishing"), 0);
+	const progress = new PublishProgress(plugin.statusBarEl);
+	progress.update(i18next.t("notice.publishingNote", { name: file.basename }));
 	try {
 		const result = await new Publisher(plugin).publish(file, { site });
-		progress.hide();
+		progress.done();
 		linkNotice(
 			i18next.t(result.created ? "notice.published" : "notice.updated"),
 			result.url
@@ -39,7 +41,7 @@ export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?:
 			await navigator.clipboard.writeText(result.url);
 		if (plugin.settings.openAfterPublish) window.open(result.url);
 	} catch (e) {
-		progress.hide();
+		progress.done();
 		showError(e);
 	}
 }
@@ -89,14 +91,12 @@ export function publishMarkedFiles(plugin: LeafletAtmosphere) {
 		new Notice(i18next.t("notice.noMarked", { key }));
 		return;
 	}
-	new ConfirmModal(
-		plugin.app,
+	confirmBatch(
+		plugin,
 		i18next.t("modal.batchTitle"),
 		i18next.t("modal.batchDesc", { count: files.length, key }),
-		() => void runBatch(plugin, publisher, files),
-		i18next.t("modal.publish"),
-		false
-	).open();
+		() => void runBatch(plugin, publisher, files)
+	);
 }
 
 /** Whether a note may be published: not blocked, marked when required, not a drawing. */
@@ -133,28 +133,49 @@ export function publishSelection(plugin: LeafletAtmosphere, items: TAbstractFile
 	const shown = files.slice(0, 5).map((f) => f.basename);
 	if (files.length > shown.length)
 		shown.push(i18next.t("modal.more", { count: files.length - shown.length }));
-	new ConfirmModal(
-		plugin.app,
+	confirmBatch(
+		plugin,
 		i18next.t("modal.selectionTitle", { count: files.length }),
 		i18next.t("modal.selectionDesc", { list: shown.join(", ") }),
-		() => void runBatch(plugin, new Publisher(plugin), files),
+		() => void runBatch(plugin, new Publisher(plugin), files)
+	);
+}
+
+/** Ask before publishing several notes, unless disabled in the settings. */
+function confirmBatch(
+	plugin: LeafletAtmosphere,
+	title: string,
+	message: string,
+	run: () => void
+) {
+	if (!plugin.settings.confirmBatch) {
+		run();
+		return;
+	}
+	new ConfirmModal(
+		plugin.app,
+		title,
+		message,
+		run,
 		i18next.t("modal.publish"),
 		false
 	).open();
 }
 
 async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: TFile[]) {
-	const progress = new Notice("", 0);
+	const progress = new PublishProgress(plugin.statusBarEl);
 	const created = new Set<string>();
 	const failed: string[] = [];
 	let updated = 0;
 	for (const [i, file] of files.entries()) {
-		progress.setMessage(
+		progress.update(
 			i18next.t("notice.batchProgress", {
 				current: i + 1,
 				total: files.length,
 				name: file.basename,
-			})
+			}),
+			i,
+			files.length
 		);
 		try {
 			const result = await publisher.publish(file);
@@ -166,7 +187,7 @@ async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: 
 		}
 	}
 
-	progress.hide();
+	progress.done();
 	new Notice(
 		i18next.t("notice.batchDone", {
 			created: created.size,

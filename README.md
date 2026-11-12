@@ -19,12 +19,14 @@ The other settings are grouped in sub-pages: **Publication** (default publicatio
 | Command | Description |
 | --- | --- |
 | **Publish all marked notes** | Publish or update every note with `leaflet_publish: true`, after confirmation. |
-| **Publish folder to Leaflet** / **Publish N notes to Leaflet** | Right-click a folder, or several selected files, to publish all their notes after confirmation. Notes with `leaflet_publish: false` and Excalidraw drawings are skipped; with **Only publish marked notes**, only marked notes are kept. |
+| **Publish folder to Leaflet** / **Publish N notes to Leaflet** | Right-click a folder, or several selected files, to publish all their notes after confirmation (optional, see **When publishing** in the settings). Notes with `leaflet_publish: false` and Excalidraw drawings are skipped; with **Only publish marked notes**, only marked notes are kept. |
 | **Publish current note** | Create or update the Leaflet post of the note. Also available in the ribbon and in the right-click menus of the file and of the editor (hidden for notes with `leaflet_publish: false`). |
 | **Publish current note to…** | Choose the publication (or your personal page) before publishing. |
 | **Delete current note from Leaflet** | Delete the record from your PDS. The note is kept. |
 | **Copy Leaflet link** / **Open published note in browser** | Use the URL saved in the note. |
 | **Refresh publications** | Reload the publications of your account. |
+
+On desktop, the progress is shown in the status bar; on mobile, in a notice.
 
 After the first publication, the record URI (`leaflet_uri`) and the URL (`leaflet_url`) are saved in the note properties. Publishing again updates the same post (its publication date and Bluesky post are kept).
 

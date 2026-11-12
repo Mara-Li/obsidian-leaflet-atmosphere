@@ -63,7 +63,11 @@ export async function setup(
 	await browser.executeObsidian(
 		({ plugins }, { did, defaults, overrides }) => {
 			const plugin = plugins.leafletAtmosphere;
-			const store = { records: {} as Record<string, unknown>, blobs: [] as unknown[] };
+			const store = {
+				records: {} as Record<string, unknown>,
+				blobs: [] as unknown[],
+				delay: 0,
+			};
 			const cid = "bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy";
 			const uri = (collection: string, rkey: string) => `at://${did}/${collection}/${rkey}`;
 			const fake = {
@@ -74,6 +78,7 @@ export async function setup(
 					return value ? { uri: uri(collection, rkey), cid, value } : null;
 				},
 				putRecord: async (collection: string, rkey: string, record: unknown) => {
+					await new Promise((resolve) => setTimeout(resolve, store.delay));
 					store.records[`${collection}/${rkey}`] = JSON.parse(JSON.stringify(record));
 					return { uri: uri(collection, rkey), cid };
 				},
@@ -182,4 +187,24 @@ export async function commandAvailable(command: string, file: string): Promise<b
 		const cmd = app.commands.commands[id];
 		return cmd?.checkCallback ? cmd.checkCallback(true) === true : !!cmd;
 	}, `${PLUGIN_ID}:${command}`);
+}
+
+/** Slow down the fake PDS so that progress can be observed. */
+export async function setPdsDelay(ms: number): Promise<void> {
+	await browser.executeObsidian((_, delay) => {
+		(window as unknown as { leafletTest: { delay: number } }).leafletTest.delay = delay;
+	}, ms);
+}
+
+/** Text and progress value of the status bar item, or null when hidden. */
+export async function statusBar(): Promise<{ text: string; value: number | null } | null> {
+	return browser.executeObsidian(() => {
+		const el = activeDocument.querySelector<HTMLElement>(".status-bar .leaflet-atmosphere-status");
+		if (!el || el.style.display === "none" || !el.textContent) return null;
+		const bar = el.querySelector("progress");
+		return {
+			text: el.textContent,
+			value: bar?.hasAttribute("value") ? bar.value : null,
+		};
+	});
 }

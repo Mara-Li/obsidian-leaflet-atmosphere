@@ -14,7 +14,6 @@
 		"filesMenu": "Publier {{count}} notes sur Leaflet"
 	},
 	"notice": {
-		"publishing": "Publication sur Leaflet…",
 		"published": "Publié sur Leaflet",
 		"updated": "Mis à jour sur Leaflet",
 		"unpublished": "Supprimé de Leaflet",
@@ -27,7 +26,8 @@
 		"batchDone": "Leaflet : {{created}} publiée(s), {{updated}} mise(s) à jour, {{failed}} en échec",
 		"batchFailed": "Échecs : {{list}}",
 		"noMarked": "Aucune note n'a « {{key}}: true »",
-		"noSelection": "Aucune note à publier dans cette sélection"
+		"noSelection": "Aucune note à publier dans cette sélection",
+		"publishingNote": "Publication de {{name}}…"
 	},
 	"error": {
 		"prefix": "Leaflet : {{message}}",
@@ -143,9 +143,11 @@
 			"imagesHeading": "Images"
 		},
 		"after": {
-			"heading": "Après publication",
-			"copy": "Copier le lien",
-			"open": "Ouvrir dans le navigateur"
+			"heading": "Lors de la publication",
+			"copy": "Copier le lien ensuite",
+			"open": "Ouvrir dans le navigateur ensuite",
+			"confirm": "Confirmer avant de publier plusieurs notes",
+			"confirmDesc": "Affiche les notes avant de publier un dossier, une sélection ou toutes les notes marquées."
 		},
 		"pages": {
 			"account": "Compte",
