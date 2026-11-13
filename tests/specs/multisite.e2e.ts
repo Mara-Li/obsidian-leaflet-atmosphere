@@ -120,4 +120,22 @@ describe("Publishing to several publications", function () {
 			app.workspace.detachLeavesOfType("leaflet-atmosphere-posts");
 		});
 	});
+
+	it("edits the publish property of a publication from the settings", async function () {
+		const keys = await browser.executeObsidian(async ({ app, plugins }, uri) => {
+			const setting = app.setting as unknown as {
+				pluginTabs: {
+					id: string;
+					getControlValue(key: string): unknown;
+					setControlValue(key: string, value: unknown): Promise<void>;
+				}[];
+			};
+			const tab = setting.pluginTabs.find((t) => t.id === "leaflet-atmosphere")!;
+			const before = tab.getControlValue(`publishKey:${uri}`);
+			await tab.setControlValue(`publishKey:${uri}`, " publish_other ");
+			const pub = plugins.leafletAtmosphere.settings.publications.find((p) => p.uri === uri);
+			return [before, pub?.publishKey];
+		}, SECOND.uri);
+		expect(keys).toEqual(["publish_second", "publish_other"]);
+	});
 });

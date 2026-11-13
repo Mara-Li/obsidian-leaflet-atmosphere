@@ -202,8 +202,16 @@
 	height: auto;
 }
 
-.leaflet-atmosphere-replacement .setting-item-control {
+.leaflet-atmosphere-replacement .setting-item-control,
+.leaflet-atmosphere-replacement.is-invalid .setting-item-control {
 	flex: 1 1 auto;
+	flex-wrap: wrap;
+	max-width: none;
+}
+
+.leaflet-atmosphere-replacement .setting-item-error {
+	order: 1;
+	flex-basis: 100%;
 }
 
 .leaflet-atmosphere-replacement .setting-item-control input {
@@ -214,9 +222,4 @@
 
 .leaflet-atmosphere-replacement .setting-item-info {
 	display: none;
-}
-
-.leaflet-atmosphere-replacement .setting-item-control input.leaflet-atmosphere-invalid {
-	border-color: var(--text-error);
-	box-shadow: 0 0 0 1px var(--text-error);
 }

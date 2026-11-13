@@ -33,12 +33,35 @@ const CODE_THEMES = [
 	"vitesse-dark",
 ];
 
+const PUB_KEY_PREFIX = "publishKey:";
+
 export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 	plugin: LeafletAtmosphere;
 
 	constructor(app: App, plugin: LeafletAtmosphere) {
 		super(app, plugin);
 		this.plugin = plugin;
+	}
+
+	/** `publishKey:<uri>` stands for the publish property of a publication. */
+	getControlValue(key: string): unknown {
+		if (!key.startsWith(PUB_KEY_PREFIX)) return super.getControlValue(key);
+		return this.publicationOf(key)?.publishKey ?? "";
+	}
+
+	async setControlValue(key: string, value: unknown): Promise<void> {
+		if (!key.startsWith(PUB_KEY_PREFIX)) return super.setControlValue(key, value);
+		const pub = this.publicationOf(key);
+		if (!pub) return;
+		const name = typeof value === "string" ? value.trim() : "";
+		if (name) pub.publishKey = name;
+		else delete pub.publishKey;
+		await this.plugin.saveSettings();
+	}
+
+	private publicationOf(key: string) {
+		const uri = key.slice(PUB_KEY_PREFIX.length);
+		return this.plugin.settings.publications.find((p) => p.uri === uri);
 	}
 
 	getSettingDefinitions(): SettingDefinitionItem[] {
@@ -212,21 +235,11 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 				type: "group",
 				heading: t("settings.publication.keysHeading"),
 				items: pubs.map((pub) => ({
-					name: pub.name,
-					desc: t("settings.publication.keyDesc"),
-					render: (setting) => {
-						setting.addText((text) =>
-							text
-								.setPlaceholder(t("settings.publication.keyPlaceholder"))
-								.setValue(pub.publishKey ?? "")
-								.onChange(async (value) => {
-									const key = value.trim();
-									if (key) pub.publishKey = key;
-									else delete pub.publishKey;
-									await this.plugin.saveSettings();
-								})
-						);
-					},
+					...this.keyField(
+						`${PUB_KEY_PREFIX}${pub.uri}`,
+						pub.name,
+						t("settings.publication.keyDesc")
+					),
 				})),
 			},
 		];
@@ -268,22 +281,23 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 					searchable: false,
 					render: (setting) => {
 						setting.settingEl.addClass("leaflet-atmosphere-replacement");
-						setting.addText((text) => {
-							const check = (value: string) => {
-								const invalid = !!value && !compileRule(value);
-								text.inputEl.toggleClass("leaflet-atmosphere-invalid", invalid);
-								text.inputEl.title = invalid ? t("settings.replacements.invalid") : "";
-							};
-							check(rule.regex);
+						// Same behaviour as `validate`: an invalid regex is shown, not saved
+						const check = (value: string) => {
+							const valid = !value || !!compileRule(value);
+							setting.setErrorMessage(valid ? null : t("settings.replacements.invalid"));
+							return valid;
+						};
+						check(rule.regex);
+						setting.addText((text) =>
 							text
 								.setPlaceholder(t("settings.replacements.regex"))
 								.setValue(rule.regex)
 								.onChange(async (value) => {
+									if (!check(value)) return;
 									rule.regex = value;
-									check(value);
 									await plugin.saveSettings();
-								});
-						});
+								})
+						);
 						setting.addText((text) =>
 							text
 								.setPlaceholder(t("settings.replacements.replacement"))
