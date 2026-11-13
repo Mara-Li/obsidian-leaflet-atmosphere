@@ -165,8 +165,30 @@ export async function clearNotices(): Promise<void> {
 
 export async function runCommand(command: string, file?: string): Promise<void> {
 	await clearNotices();
-	if (file) await obsidianPage.openFile(file);
-	await browser.executeObsidianCommand(`${PLUGIN_ID}:${command}`);
+	if (file) {
+		await obsidianPage.openFile(file);
+		// Opening a note can take a moment to make it the active file (seen on Windows)
+		await browser.waitUntil(
+			() => browser.executeObsidian(({ app }, p) => app.workspace.getActiveFile()?.path === p, file),
+			{ timeout: 10000, timeoutMsg: `${file} never became the active note` }
+		);
+	}
+	// A command whose check fails does nothing: retry, then say why
+	let state = "";
+	await browser.waitUntil(
+		async () => {
+			const result = await browser.executeObsidian(({ app }, id) => {
+				const ran = (app.commands as unknown as { executeCommandById(id: string): boolean })
+					.executeCommandById(id);
+				return { ran, active: app.workspace.getActiveFile()?.path ?? "none" };
+			}, `${PLUGIN_ID}:${command}`);
+			state = `active note: ${result.active}`;
+			return result.ran;
+		},
+		{ timeout: 5000, interval: 250 }
+	).catch(() => {
+		throw new Error(`Command ${command} could not run (${state})`);
+	});
 }
 
 /** Publish a note with the command palette and wait for the result notice. */
