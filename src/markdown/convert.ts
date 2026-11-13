@@ -1,5 +1,5 @@
 import type { Token, Tokens } from "marked";
-import { type App, TFile } from "obsidian";
+import { type App, getLanguage, TFile } from "obsidian";
 import type { LeafletAtmosphereSettings } from "../interfaces";
 import type { ImageUploader } from "../leaflet/images";
 import { RichText } from "../leaflet/richtext";
@@ -56,6 +56,33 @@ const link = (uri: string): FacetFeature => ({
 /** "@handle.domain" not glued to a word, an email or a path. */
 const MENTION =
 	/(^|[^\w@./])@([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z][a-z0-9-]*[a-z0-9])(?![\w-]|\.[a-z0-9])/gi;
+
+/**
+ * A date alone on its line ("@2026-11-13", "@2026-11-13 14:30"), shown like the
+ * date-time block of the Leaflet editor, which Leaflet does not publish.
+ */
+function dateTimeBlock(text: string): LeafletBlock | null {
+	const match = /^@(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?$/.exec(text.trim());
+	if (!match) return null;
+	const [year = 0, month = 0, day = 0, hour = 0, minute = 0] = match
+		.slice(1)
+		.map((v) => Number(v ?? 0));
+	const date = new Date(year, month - 1, day, hour, minute);
+	// Reject dates that do not exist (2026-02-30) or out of range hours
+	if (
+		date.getFullYear() !== year ||
+		date.getMonth() !== month - 1 ||
+		date.getDate() !== day ||
+		date.getHours() !== hour ||
+		date.getMinutes() !== minute
+	)
+		return null;
+	const format = new Intl.DateTimeFormat(getLanguage() || undefined, {
+		dateStyle: "long",
+		...(match[4] && { timeStyle: "short" }),
+	});
+	return { $type: "pub.leaflet.blocks.text", plaintext: `📅 ${format.format(date)}` };
+}
 
 /** Author and record key of a Bluesky post link, from any client or an at:// URI. */
 function parseBskyPost(url: string): { actor: string; rkey: string } | null {
@@ -239,6 +266,9 @@ export class MarkdownConverter {
 		if (tokens.length === 1) {
 			const embed = await this.standaloneEmbed(tokens[0]!);
 			if (embed) return [embed];
+			const date =
+				tokens[0]!.type === "text" ? dateTimeBlock(str(tokens[0]!.text)) : null;
+			if (date) return [date];
 		}
 		const segments = (await this.inline(token.tokens ?? [token])).finish();
 		return segments.map((seg) =>

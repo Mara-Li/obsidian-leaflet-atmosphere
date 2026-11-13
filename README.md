@@ -62,6 +62,7 @@ The keys of the first seven properties can be changed in the settings. Deleting 
 | `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, `` `code` ``, `<u>underline</u>`, links | Rich text facets |
 | Colored highlights `==🔴red==`, `==🟠orange==`, `==🟡yellow==`, `==🟢green==`, `==🔵blue==`, `==🟣purple==` | Highlight in the color of Obsidian, emoji removed |
 | `@handle.bsky.social` | Mention of the Bluesky account (shown by Leaflet as a link to the profile); unknown handles stay text |
+| A date alone on its line: `@2026-11-13` or `@2026-11-13 14:30` | 📅 and the date written in the language of Obsidian, like the date block of the Leaflet editor (Leaflet does not publish that block) |
 | `[[wikilinks]]`, links to notes | Link to the published note when it has a `leaflet_url`, plain text otherwise |
 | `![[image.png\|alt\|300]]`, `![alt](url)` | Image blocks, uploaded to your PDS (resized and compressed under 1 MB) |
 | `![[note]]`, `![[note#heading]]`, `![[note#^block]]` | Configurable in **Conversion → Embedded notes**: content inserted in place (also inside lists and quotes), a card opening a sub-page holding only the embedded part (whole note, section or block; the alias of `![[note\|alias]]` becomes its heading), or a link |
