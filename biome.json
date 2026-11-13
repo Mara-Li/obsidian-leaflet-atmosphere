@@ -10,7 +10,7 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"complexity": {
 				"noExtraBooleanCast": "error",
 				"noUselessCatch": "error",
@@ -90,21 +90,13 @@
 	},
 	"overrides": [
 		{
-			"includes": [
-				"**/*.ts",
-				"**/*.tsx",
-				"!**/*.js"
-			]
+			"includes": ["**/*.ts", "**/*.tsx", "!**/*.js"]
 		},
 		{
-			"includes": [
-				"**/*.js"
-			]
+			"includes": ["**/*.js"]
 		},
 		{
-			"includes": [
-				"**/*.json"
-			]
+			"includes": ["**/*.json"]
 		}
 	],
 	"formatter": {

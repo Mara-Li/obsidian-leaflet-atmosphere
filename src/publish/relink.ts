@@ -1,6 +1,6 @@
 import type { TFile } from "obsidian";
-import { isExcalidraw } from "../markdown/compilers/excalidraw";
 import type LeafletAtmosphere from "../main";
+import { isExcalidraw } from "../markdown/compilers/excalidraw";
 import { getBoolean, getString } from "./frontmatter";
 import { candidateKeys, expectedTitle, normalizeTitle } from "./recovery";
 

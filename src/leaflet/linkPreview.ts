@@ -14,6 +14,7 @@ export interface LinkPreview {
 const AT_URI = /^at:\/\/[^/\s]+\/[a-z0-9.]+\/[^/\s]+$/i;
 
 async function getText(url: string): Promise<{ text: string; type: string } | null> {
+	// biome-ignore lint/style/useNamingConvention: Web request with header
 	const res = await request({ url, headers: { Accept: "text/html,*/*" } }).catch(
 		() => null
 	);

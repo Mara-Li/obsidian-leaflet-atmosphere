@@ -6,10 +6,10 @@ import { richNotice } from "../ui/notices";
 import {
 	canPublish,
 	isPublished,
+	publishableNotes,
 	publishedUrl,
 	publishFile,
 	publishFileTo,
-	publishableNotes,
 	publishMarkedFiles,
 	publishSelection,
 	pullFile,

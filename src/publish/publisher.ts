@@ -2,11 +2,11 @@ import i18next from "i18next";
 import type { FrontMatterCache, TFile } from "obsidian";
 import type { AtpClient, ListedRecord } from "../atproto/client";
 import { isValidRecordKey, nextTid, parseAtUri } from "../atproto/tid";
+import { DOCUMENT_COLLECTION } from "../interfaces";
 import type { PostTheme } from "../leaflet/fonts";
 import { ImageUploader } from "../leaflet/images";
 import { fetchLinkPreview, type LinkPreview } from "../leaflet/linkPreview";
 import {
-	DOCUMENT_COLLECTION,
 	documentUrl,
 	fetchPublicationTheme,
 	standaloneSite,
@@ -26,14 +26,6 @@ import type LeafletAtmosphere from "../main";
 import { renderMermaid } from "../markdown/compilers/mermaid";
 import { MarkdownConverter } from "../markdown/convert";
 import { Preprocessor } from "../markdown/preprocess";
-import { findExistingPost, type RecoveryContext } from "./recovery";
-import {
-	isMarkedNote,
-	noteTargets,
-	type PostLink,
-	readLinks,
-	writeLinks,
-} from "./targets";
 import {
 	getBoolean,
 	getDate,
@@ -43,6 +35,14 @@ import {
 	slugify,
 	unwrapLink,
 } from "./frontmatter";
+import { findExistingPost, type RecoveryContext } from "./recovery";
+import {
+	isMarkedNote,
+	noteTargets,
+	type PostLink,
+	readLinks,
+	writeLinks,
+} from "./targets";
 
 const BLOB_PAGES_THRESHOLD = 100 * 1024;
 
