@@ -7,6 +7,11 @@ export type MermaidMode = "image" | "code";
 export type CalloutMode = "quote" | "html" | "page";
 export type DeletedNoteMode = "ask" | "delete" | "keep";
 
+export interface TextReplacement {
+	regex: string;
+	replacement: string;
+}
+
 export interface LeafletAtmosphereSettings {
 	identifier: string;
 	appPasswordSecret: string;
@@ -46,6 +51,7 @@ export interface LeafletAtmosphereSettings {
 	uploadRemoteImages: boolean;
 	codeTheme: string;
 	maxImageWidth: number;
+	replacements: TextReplacement[];
 
 	writeFrontmatter: boolean;
 	confirmBatch: boolean;
@@ -93,6 +99,7 @@ export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
 	uploadRemoteImages: true,
 	codeTheme: "github-light",
 	maxImageWidth: 2000,
+	replacements: [],
 
 	writeFrontmatter: true,
 	confirmBatch: true,

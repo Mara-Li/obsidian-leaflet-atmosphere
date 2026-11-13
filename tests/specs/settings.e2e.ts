@@ -14,6 +14,7 @@ describe("Settings", function () {
 			"page:Publication",
 			"page:Conversion",
 			"page:Properties",
+			"page:Text replacement",
 			"group:",
 			"group:",
 		]);

@@ -1,6 +1,7 @@
 import i18next from "i18next";
 import { type App, PluginSettingTab, type SettingDefinitionItem } from "obsidian";
 import type LeafletAtmosphere from "./main";
+import { compileRule } from "./markdown/replacements";
 
 const CODE_THEMES = [
 	"github-light",
@@ -77,6 +78,13 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 				name: t("settings.pages.properties"),
 				desc: t("settings.pages.propertiesDesc"),
 				items: this.propertyItems(),
+			},
+			{
+				type: "page",
+				name: t("settings.pages.replacements"),
+				desc: t("settings.pages.replacementsDesc"),
+				displayValue: () => String(this.plugin.settings.replacements.length),
+				items: this.replacementItems(),
 			},
 			{
 				type: "group",
@@ -216,6 +224,73 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 									if (key) pub.publishKey = key;
 									else delete pub.publishKey;
 									await this.plugin.saveSettings();
+								})
+						);
+					},
+				})),
+			},
+		];
+	}
+
+	private replacementItems(): SettingDefinitionItem[] {
+		const t = i18next.t;
+		const plugin = this.plugin;
+		const rules = () => plugin.settings.replacements;
+		return [
+			{
+				name: t("settings.replacements.syntax"),
+				desc: t("settings.replacements.desc"),
+			},
+			{
+				type: "list",
+				heading: t("settings.replacements.heading"),
+				emptyState: t("settings.replacements.empty"),
+				addItem: {
+					name: t("settings.replacements.add"),
+					action: () => {
+						plugin.settings.replacements = [...rules(), { regex: "", replacement: "" }];
+						void plugin.saveSettings().then(() => this.update());
+					},
+				},
+				onReorder: (from, to) => {
+					const list = [...rules()];
+					const [moved] = list.splice(from, 1);
+					if (moved) list.splice(to, 0, moved);
+					plugin.settings.replacements = list;
+					void plugin.saveSettings();
+				},
+				onDelete: (index) => {
+					plugin.settings.replacements = rules().filter((_, i) => i !== index);
+					void plugin.saveSettings().then(() => this.update());
+				},
+				items: rules().map((rule) => ({
+					name: "",
+					searchable: false,
+					render: (setting) => {
+						setting.settingEl.addClass("leaflet-atmosphere-replacement");
+						setting.addText((text) => {
+							const check = (value: string) => {
+								const invalid = !!value && !compileRule(value);
+								text.inputEl.toggleClass("leaflet-atmosphere-invalid", invalid);
+								text.inputEl.title = invalid ? t("settings.replacements.invalid") : "";
+							};
+							check(rule.regex);
+							text
+								.setPlaceholder(t("settings.replacements.regex"))
+								.setValue(rule.regex)
+								.onChange(async (value) => {
+									rule.regex = value;
+									check(value);
+									await plugin.saveSettings();
+								});
+						});
+						setting.addText((text) =>
+							text
+								.setPlaceholder(t("settings.replacements.replacement"))
+								.setValue(rule.replacement)
+								.onChange(async (value) => {
+									rule.replacement = value;
+									await plugin.saveSettings();
 								})
 						);
 					},

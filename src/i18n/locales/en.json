@@ -180,7 +180,9 @@
 			"content": "Conversion",
 			"contentDesc": "How Obsidian Markdown becomes a Leaflet post.",
 			"properties": "Properties",
-			"propertiesDesc": "Note properties read and written by the plugin."
+			"propertiesDesc": "Note properties read and written by the plugin.",
+			"replacements": "Text replacement",
+			"replacementsDesc": "Regular expressions applied to the note before conversion."
 		},
 		"deleted": {
 			"heading": "Deleted notes",
@@ -189,6 +191,16 @@
 			"ask": "Ask",
 			"delete": "Delete the post",
 			"keep": "Keep the post"
+		},
+		"replacements": {
+			"heading": "Rules",
+			"desc": "Applied from top to bottom. Write /pattern/flags or a bare pattern (replaced everywhere). $1 inserts a group, \\n a line break.",
+			"empty": "No rule yet.",
+			"add": "Add a rule",
+			"regex": "Regex",
+			"replacement": "Replacement",
+			"syntax": "Syntax",
+			"invalid": "Invalid regular expression: this rule is skipped."
 		}
 	},
 	"network": {

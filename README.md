@@ -68,6 +68,14 @@ Links to another note point to its published post. When the linked note is marke
 
 The keys of the first seven properties can be changed in the settings. Deleting a note from Leaflet sets `leaflet_publish` back to `false`.
 
+### Text replacement
+
+**Settings → Text replacement** holds a list of rules `[regex] → [replacement]`, applied from top to bottom to the note (embedded notes included) before conversion. Drag the rows to reorder them.
+
+- Write `/pattern/flags` (e.g. `/--(.+?)--/g`) or a bare pattern, replaced everywhere.
+- `$1`, `$2`… insert the captured groups; `\n` and `\t` stand for a line break and a tab.
+- An invalid regex is outlined in red and skipped.
+
 ### Markdown support
 
 | Obsidian | Leaflet |

@@ -12,7 +12,8 @@ import {
 	resolveSubpath,
 	TFile,
 } from "obsidian";
-import type { EmbedMode } from "../interfaces";
+import type { EmbedMode, TextReplacement } from "../interfaces";
+import { applyReplacements } from "./replacements";
 import { DataviewCompiler } from "./compilers/dataview";
 import { isExcalidraw } from "./compilers/excalidraw";
 
@@ -92,7 +93,8 @@ export class Preprocessor {
 	constructor(
 		private app: App,
 		private embedMode: EmbedMode,
-		convertDataview: boolean
+		convertDataview: boolean,
+		private replacements: TextReplacement[] = []
 	) {
 		this.dataview = DataviewCompiler.create(app, convertDataview);
 	}
@@ -101,7 +103,10 @@ export class Preprocessor {
 	readonly embeds = new Map<string, EmbeddedNote>();
 
 	async run(file: TFile): Promise<string> {
-		return cleanUp(await this.expand(file, null, new Set(), 0));
+		return applyReplacements(
+			cleanUp(await this.expand(file, null, new Set(), 0)),
+			this.replacements
+		);
 	}
 
 	/** Content of a note (or of one of its sections) with its embeds baked in. */
@@ -159,7 +164,7 @@ export class Preprocessor {
 				if (this.embedMode === "page" && alone && baked) {
 					const id = String(this.embeds.size + 1);
 					this.embeds.set(id, {
-						markdown: cleanUp(baked),
+						markdown: applyReplacements(cleanUp(baked), this.replacements),
 						title: this.embedTitle(linked, embed.original, sub, baked),
 					});
 					slice = `${before}\n\n${EMBED_PLACEHOLDER(id)}\n\n${after}`;

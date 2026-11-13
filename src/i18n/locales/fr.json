@@ -180,7 +180,9 @@
 			"content": "Conversion",
 			"contentDesc": "Comment le Markdown d'Obsidian devient un article Leaflet.",
 			"properties": "Propriétés",
-			"propertiesDesc": "Propriétés des notes lues et écrites par le plugin."
+			"propertiesDesc": "Propriétés des notes lues et écrites par le plugin.",
+			"replacements": "Remplacement de texte",
+			"replacementsDesc": "Expressions régulières appliquées à la note avant la conversion."
 		},
 		"deleted": {
 			"heading": "Notes supprimées",
@@ -189,6 +191,16 @@
 			"ask": "Demander",
 			"delete": "Supprimer l'article",
 			"keep": "Garder l'article"
+		},
+		"replacements": {
+			"heading": "Règles",
+			"desc": "Appliquées de haut en bas. Écrivez /motif/drapeaux ou un motif seul (remplacé partout). $1 insère un groupe, \\n un saut de ligne.",
+			"empty": "Aucune règle pour l’instant.",
+			"add": "Ajouter une règle",
+			"regex": "Regex",
+			"replacement": "Remplacement",
+			"syntax": "Syntaxe",
+			"invalid": "Expression régulière invalide : cette règle est ignorée."
 		}
 	},
 	"network": {

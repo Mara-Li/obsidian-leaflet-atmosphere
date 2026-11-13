@@ -159,7 +159,12 @@ export class Publisher {
 					: standaloneSite(did),
 			];
 
-		const preprocessor = new Preprocessor(this.app, s.embedMode, s.dataview);
+		const preprocessor = new Preprocessor(
+			this.app,
+			s.embedMode,
+			s.dataview,
+			s.replacements
+		);
 		const work: NoteWork = {
 			file,
 			fm,
