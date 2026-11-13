@@ -1,3 +1,5 @@
+// noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
+
 import i18next from "i18next";
 import { type App, PluginSettingTab, type SettingDefinitionItem } from "obsidian";
 import type LeafletAtmosphere from "./main";
