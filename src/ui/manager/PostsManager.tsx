@@ -8,13 +8,13 @@ import {
 	publishSelection,
 	showError,
 } from "../../commands/actions";
-import { DOCUMENT_COLLECTION } from "../../interfaces";
+import { DOCUMENT_COLLECTION } from "../../constants";
 import { documentUrl } from "../../leaflet/publications";
-import type { StandardDocument } from "../../leaflet/types";
 import type Gazette from "../../main";
 import { deletePosts } from "../../publish/deletions";
 import { notesByUri } from "../../publish/notes";
 import { linkNote, relinkNotes, unlinkedNotes } from "../../publish/relink";
+import type { StandardDocument } from "../../types";
 import { ConfirmModal } from "../confirmModal";
 import { NoteSuggestModal } from "../noteSuggest";
 import { richNotice } from "../notices";

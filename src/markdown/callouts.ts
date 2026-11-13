@@ -1,18 +1,15 @@
-import { type PostTheme, themeCss } from "../leaflet/fonts";
+import { themeCss } from "../leaflet/fonts";
 import { utf8Length } from "../leaflet/richtext";
 import type {
+	CalloutStyle,
 	Facet,
 	LeafletBlock,
 	OrderedListItem,
+	PostTheme,
 	UnorderedListItem,
-} from "../leaflet/types";
+} from "../types";
 import { cssColor } from "./highlights";
 import { escapeHtml } from "./inline";
-
-export interface CalloutStyle {
-	emoji: string;
-	color: { r: number; g: number; b: number };
-}
 
 const BLUE = { r: 8, g: 109, b: 221 };
 const CYAN = { r: 0, g: 191, b: 188 };

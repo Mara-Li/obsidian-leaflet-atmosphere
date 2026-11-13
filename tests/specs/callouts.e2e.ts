@@ -2,8 +2,7 @@ import { expect } from "@wdio/globals";
 import { sliceBytes, validateDocument } from "../helpers/lexicons";
 import { browser } from "@wdio/globals";
 import { getRecords, PUBLICATION, publish, setup } from "../helpers/obsidian";
-import type { CalloutMode } from "../../src/interfaces";
-import type { BlockquoteBlock, HtmlBlock, StandardDocument } from "../../src/leaflet/types";
+import type { BlockquoteBlock, CalloutMode, HtmlBlock, StandardDocument } from "../../src/types";
 
 async function publishCallouts(
 	mode: CalloutMode,

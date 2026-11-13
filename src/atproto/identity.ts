@@ -1,17 +1,8 @@
 import i18next from "i18next";
 import type { RequestUrlResponse } from "obsidian";
+import { ENTRYWAY, PLC_DIRECTORY, PUBLIC_API } from "../constants";
+import type { DidDocument } from "../types";
 import { httpErrorMessage, NetworkError, request } from "./http";
-
-const PUBLIC_API = "https://public.api.bsky.app";
-const PLC_DIRECTORY = "https://plc.directory";
-/** Bluesky entryway: accepts a login by email and hands over to the real PDS. */
-export const ENTRYWAY = "https://bsky.social";
-
-export interface DidDocument {
-	id: string;
-	alsoKnownAs?: string[];
-	service?: { id: string; type: string; serviceEndpoint: string }[];
-}
 
 /** JSON body of a response, with a readable error when the server sent something else. */
 export function readJson<T>(res: RequestUrlResponse, url: string): T {

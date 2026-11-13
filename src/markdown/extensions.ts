@@ -1,36 +1,4 @@
-import { Marked, type TokenizerExtension, type Tokens } from "marked";
-
-export interface WikilinkToken extends Tokens.Generic {
-	type: "wikilink" | "embed";
-	target: string;
-	alias?: string;
-}
-
-export interface HighlightToken extends Tokens.Generic {
-	type: "highlight";
-	tokens: Tokens.Generic[];
-}
-
-export interface MathToken extends Tokens.Generic {
-	type: "inlineMath" | "blockMath";
-	text: string;
-}
-
-export interface FootnoteRefToken extends Tokens.Generic {
-	type: "footnoteRef";
-	id: string;
-}
-
-export interface InlineFootnoteToken extends Tokens.Generic {
-	type: "inlineFootnote";
-	tokens: Tokens.Generic[];
-}
-
-export interface FootnoteDefToken extends Tokens.Generic {
-	type: "footnoteDef";
-	id: string;
-	tokens: Tokens.Generic[];
-}
+import { Marked, type TokenizerExtension } from "marked";
 
 function splitWikilink(inner: string): { target: string; alias?: string } {
 	// Dataview escapes the pipe of links written in tables

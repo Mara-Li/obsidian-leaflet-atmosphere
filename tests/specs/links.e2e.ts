@@ -9,7 +9,7 @@ import {
 	setup,
 	waitFrontmatter,
 } from "../helpers/obsidian";
-import type { TextBlock } from "../../src/leaflet/types";
+import type { TextBlock } from "../../src/types";
 
 describe("Links between notes", function () {
 	beforeEach(async function () {

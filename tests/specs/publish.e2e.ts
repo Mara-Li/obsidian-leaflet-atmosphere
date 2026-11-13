@@ -12,7 +12,7 @@ import {
 	waitNotice,
 } from "../helpers/obsidian";
 import { sliceBytes, validateDocument } from "../helpers/lexicons";
-import type { LeafletBlock } from "../../src/leaflet/types";
+import type { LeafletBlock } from "../../src/types";
 
 const COLLECTION = "site.standard.document";
 

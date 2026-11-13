@@ -1,27 +1,14 @@
 import type { App, FrontMatterCache, TFile } from "obsidian";
-import type { AtpClient, ListedRecord } from "../atproto/client";
 import { isValidRecordKey, parseAtUri } from "../atproto/tid";
-import { DOCUMENT_COLLECTION, type GazetteSettings } from "../interfaces";
-import type { StandardDocument } from "../leaflet/types";
+import { DOCUMENT_COLLECTION } from "../constants";
+import type {
+	FoundPost,
+	GazetteSettings,
+	RecoveryContext,
+	StandardDocument,
+} from "../types";
 import { getString, slugify } from "./frontmatter";
 import { getStrings } from "./targets";
-
-export interface FoundPost {
-	rkey: string;
-	record: ListedRecord<StandardDocument>;
-	/** How the post was matched to the note. */
-	by: "key" | "title";
-}
-
-export interface RecoveryContext {
-	app: App;
-	client: AtpClient;
-	settings: GazetteSettings;
-	/** Documents of the repository, listed once per run. */
-	listDocuments: () => Promise<ListedRecord<StandardDocument>[]>;
-	/** Note that already owns a record key in the current run. */
-	ownerOf: (rkey: string) => string | undefined;
-}
 
 export function normalizeTitle(title: string): string {
 	return title.replace(/\s+/g, " ").trim().toLowerCase();

@@ -1,15 +1,9 @@
 import type { TFile } from "obsidian";
 import type Gazette from "../main";
 import { isExcalidraw } from "../markdown/compilers/excalidraw";
+import type { PostToLink } from "../types";
 import { getBoolean, getString } from "./frontmatter";
 import { candidateKeys, expectedTitle, normalizeTitle } from "./recovery";
-
-export interface PostToLink {
-	uri: string;
-	rkey: string;
-	title: string;
-	url: string;
-}
 
 /** Write the link of a post in a note. */
 export async function linkNote(

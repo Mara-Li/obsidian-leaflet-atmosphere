@@ -1,8 +1,7 @@
 import i18next from "i18next";
-import type { BlobRef } from "../leaflet/types";
+import type { BlobRef, Credentials, DidDocument, ListedRecord } from "../types";
 import { httpErrorMessage, request } from "./http";
 import {
-	type DidDocument,
 	normalizeIdentifier,
 	normalizePdsUrl,
 	pdsFromDidDocument,
@@ -28,18 +27,6 @@ interface Session {
 	accessJwt: string;
 	refreshJwt: string;
 	didDoc?: DidDocument;
-}
-
-export interface Credentials {
-	identifier: string;
-	password: string;
-	pdsUrl?: string;
-}
-
-export interface ListedRecord<T> {
-	uri: string;
-	cid: string;
-	value: T;
 }
 
 type Params = Record<string, string | number | undefined>;

@@ -1,4 +1,4 @@
-import type { Facet, FacetFeature } from "./types";
+import type { Facet, FacetFeature } from "../types";
 
 const encoder = new TextEncoder();
 

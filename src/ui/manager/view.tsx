@@ -1,10 +1,9 @@
 import i18next from "i18next";
 import { ItemView, type WorkspaceLeaf } from "obsidian";
 import { render } from "preact";
+import { MANAGER_VIEW } from "../../constants";
 import type Gazette from "../../main";
 import { PostsManager } from "./PostsManager";
-
-export const MANAGER_VIEW = "gazette-posts";
 
 export class PostsManagerView extends ItemView {
 	constructor(

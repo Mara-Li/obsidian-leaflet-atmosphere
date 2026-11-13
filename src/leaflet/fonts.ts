@@ -1,3 +1,5 @@
+import type { PostTheme } from "../types";
+
 /**
  * Fonts of Leaflet themes, mirrored from Leaflet (src/fonts.ts) so that HTML blocks
  * use the same font and size as the rest of the post.
@@ -55,15 +57,6 @@ function fontConfig(id: string | undefined): FontConfig {
 	const custom = id?.startsWith("custom:") ? /^custom:([^:]+):(.+)$/.exec(id) : null;
 	if (custom) return { family: custom[1]!, size: 16, fallback: SANS, google: custom[2]! };
 	return FONTS[id ?? DEFAULT_FONT] ?? FONTS[DEFAULT_FONT]!;
-}
-
-export interface PostTheme {
-	bodyFont?: string;
-	headingFont?: string;
-	/** Colors of the publication, as CSS. */
-	textColor?: string;
-	backgroundColor?: string;
-	accentColor?: string;
 }
 
 /** Whether a CSS rgb()/rgba() color is dark. */

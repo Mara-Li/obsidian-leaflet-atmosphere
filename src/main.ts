@@ -3,12 +3,13 @@ import { Events, Platform, Plugin } from "obsidian";
 import { AtpClient } from "./atproto/client";
 import { registerCommands } from "./commands";
 import { showError } from "./commands/actions";
+import { DEFAULT_SETTINGS, MANAGER_VIEW } from "./constants";
 import { resources, translationLanguage } from "./i18n";
-import { DEFAULT_SETTINGS, type GazetteSettings } from "./interfaces";
 import { fetchPublications } from "./leaflet/publications";
 import { DeletionWatcher } from "./publish/deletions";
 import { GazetteSettingTab } from "./settings";
-import { MANAGER_VIEW, PostsManagerView } from "./ui/manager/view";
+import type { GazetteSettings } from "./types";
+import { PostsManagerView } from "./ui/manager/view";
 import { richNotice } from "./ui/notices";
 
 export default class Gazette extends Plugin {

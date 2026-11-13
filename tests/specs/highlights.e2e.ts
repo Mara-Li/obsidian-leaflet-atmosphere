@@ -1,7 +1,7 @@
 import { expect } from "@wdio/globals";
 import { sliceBytes, validateDocument } from "../helpers/lexicons";
 import { getRecords, publish, setup } from "../helpers/obsidian";
-import type { HtmlBlock, TextBlock } from "../../src/leaflet/types";
+import type { HtmlBlock, TextBlock } from "../../src/types";
 
 describe("Highlights", function () {
 	it("keep the color given by an emoji", async function () {

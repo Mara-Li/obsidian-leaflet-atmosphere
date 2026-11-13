@@ -1,15 +1,9 @@
 import i18next from "i18next";
 import type { FrontMatterCache } from "obsidian";
-import type { GazetteSettings } from "../interfaces";
+import { PREFERENCE_KEYS } from "../constants";
 import { standaloneSite } from "../leaflet/publications";
-import { getBoolean, PREFERENCE_KEYS } from "./frontmatter";
-
-/** A post of a note: its record, its address and the site it belongs to (when known). */
-export interface PostLink {
-	uri: string;
-	url?: string;
-	site?: string;
-}
+import type { GazetteSettings, PostLink } from "../types";
+import { getBoolean } from "./frontmatter";
 
 /** Values of a property written as a single value or as a list. */
 export function getStrings(fm: FrontMatterCache | undefined, key: string): string[] {

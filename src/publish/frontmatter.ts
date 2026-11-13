@@ -1,13 +1,5 @@
 import type { FrontMatterCache } from "obsidian";
 
-export const PREFERENCE_KEYS = {
-	publication: "leaflet_publication",
-	showInDiscover: "leaflet_discover",
-	showComments: "leaflet_comments",
-	showMentions: "leaflet_mentions",
-	showRecommends: "leaflet_recommends",
-} as const;
-
 export function getString(
 	fm: FrontMatterCache | undefined,
 	key: string

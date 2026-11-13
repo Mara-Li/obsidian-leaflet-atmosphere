@@ -1,8 +1,6 @@
 import type { Tokens } from "marked";
 import { RichText } from "../leaflet/richtext";
-import type { FacetFeature, ImageBlock } from "../leaflet/types";
-
-export type Segment = RichText | ImageBlock;
+import type { FacetFeature, ImageBlock, Segment } from "../types";
 
 const NAMED_ENTITIES: Record<string, string> = {
 	amp: "&",

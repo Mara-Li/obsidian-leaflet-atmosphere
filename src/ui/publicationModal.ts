@@ -1,6 +1,6 @@
 import i18next from "i18next";
 import { type App, SuggestModal } from "obsidian";
-import type { PublicationInfo } from "../leaflet/types";
+import type { PublicationInfo } from "../types";
 
 type Choice = Pick<PublicationInfo, "uri" | "name" | "url">;
 

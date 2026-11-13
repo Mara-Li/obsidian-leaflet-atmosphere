@@ -1,31 +1,27 @@
 import type { Token, Tokens } from "marked";
-import { type App, getLanguage, TFile } from "obsidian";
-import type { GazetteSettings } from "../interfaces";
-import { type PostTheme, themeCss } from "../leaflet/fonts";
-import type { ImageUploader } from "../leaflet/images";
-import type { LinkPreview } from "../leaflet/linkPreview";
+import { getLanguage, TFile } from "obsidian";
+import { themeCss } from "../leaflet/fonts";
 import { RichText } from "../leaflet/richtext";
 import type {
+	ConverterDeps,
+	ConvertResult,
 	FacetFeature,
-	ImageBlock,
-	LeafletBlock,
-	LinearDocumentPage,
-	ListContent,
-	OrderedListBlock,
-	OrderedListItem,
-	StrongRef,
-	UnorderedListBlock,
-	UnorderedListItem,
-} from "../leaflet/types";
-import { calloutHtml, calloutStyle, richTextToHtml } from "./callouts";
-import type {
 	FootnoteDefToken,
 	FootnoteRefToken,
 	HighlightToken,
+	ImageBlock,
 	InlineFootnoteToken,
+	LeafletBlock,
+	LinearDocumentPage,
+	ListContent,
 	MathToken,
+	OrderedListBlock,
+	OrderedListItem,
+	UnorderedListBlock,
+	UnorderedListItem,
 	WikilinkToken,
-} from "./extensions";
+} from "../types";
+import { calloutHtml, calloutStyle, richTextToHtml } from "./callouts";
 import { createLexer } from "./extensions";
 import { cssColor, splitHighlightColor } from "./highlights";
 import {
@@ -36,7 +32,7 @@ import {
 	InlineCollector,
 	withFeature,
 } from "./inline";
-import { type EmbeddedNote, splitSubpath } from "./preprocess";
+import { splitSubpath } from "./preprocess";
 
 type Generic = Tokens.Generic;
 
@@ -106,40 +102,10 @@ function parseBskyPost(url: string): { actor: string; rkey: string } | null {
 const YOUTUBE =
 	/^https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})/i;
 
-export interface ConverterDeps {
-	app: App;
-	settings: GazetteSettings;
-	images: ImageUploader;
-	sourcePath: string;
-	strictLineBreaks: boolean;
-	resolveBskyPost(handleOrDid: string, rkey: string): Promise<StrongRef | null>;
-	/** SVG markup of a rendered Mermaid diagram. */
-	renderDiagram?: (source: string) => Promise<string | null>;
-	/** Title, image and standard.site records of a web page, for link cards. */
-	linkPreview?: (url: string) => Promise<LinkPreview>;
-	/** DID of a mentioned handle, or null when it does not exist. */
-	resolveMention?: (handle: string) => Promise<string | null>;
-	/** Notes embedded as sub-pages by the preprocessor. */
-	embeds?: Map<string, EmbeddedNote>;
-	/** Fonts and colors of the publication, for HTML blocks. */
-	theme?: PostTheme;
-	/** Published (or reserved) URL of a note, used for internal links. */
-	noteUrl?: (file: TFile) => Promise<string | null>;
-}
-
 interface SharedPages {
 	pages: LinearDocumentPage[];
 	/** Number of secondary pages created, for unique ids. */
 	count: number;
-}
-
-export interface ConvertResult {
-	blocks: LeafletBlock[];
-	/** Secondary pages, opened from page blocks (callouts in "page" mode). */
-	pages: LinearDocumentPage[];
-	title?: string;
-	textContent: string;
-	warnings: string[];
 }
 
 function isBlank(token: Token) {

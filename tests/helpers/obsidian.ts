@@ -2,8 +2,8 @@ import { browser } from "@wdio/globals";
 import * as fs from "fs";
 import * as path from "path";
 import { obsidianPage } from "wdio-obsidian-service";
-import { DEFAULT_SETTINGS, type GazetteSettings } from "../../src/interfaces";
-import type { StandardDocument } from "../../src/leaflet/types";
+import type { GazetteSettings, StandardDocument } from "../../src/types";
+import { DEFAULT_SETTINGS } from "../../src/constants";
 
 export const DID = "did:plc:leaflettest";
 export const PUBLICATION = {

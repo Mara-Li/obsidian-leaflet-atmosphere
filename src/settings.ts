@@ -2,7 +2,7 @@
 
 import i18next from "i18next";
 import { type App, PluginSettingTab, type SettingDefinitionItem } from "obsidian";
-import { CODE_THEMES, PUB_KEY_PREFIX } from "./interfaces";
+import { CODE_THEMES, PUB_KEY_PREFIX } from "./constants";
 import type Gazette from "./main";
 import { compileRule } from "./markdown/replacements";
 

@@ -1,4 +1,5 @@
 import { expect } from "@wdio/globals";
+import * as fs from "fs";
 import * as path from "path";
 import { validateDocuments } from "../helpers/lexicons";
 import {
@@ -10,7 +11,7 @@ import {
 	setup,
 	waitNotice,
 } from "../helpers/obsidian";
-import type { StandardDocument } from "../../src/leaflet/types";
+import type { StandardDocument } from "../../src/types";
 
 async function publishMarked(): Promise<string> {
 	await runCommand("publish-marked-notes");
@@ -57,13 +58,18 @@ describe("Publishing marked notes", function () {
 
 	it("publishes the showcase blog with working links", async function () {
 		this.timeout(180000);
-		await setup({}, path.resolve("showcase-blog"));
+		const blog = path.resolve("showcase-blog");
+		const marked = fs
+			.readdirSync(blog)
+			.filter((f) => f.endsWith(".md"))
+			.filter((f) => /^leaflet_publish: true$/m.test(fs.readFileSync(path.join(blog, f), "utf8")));
+		await setup({}, blog);
 		const notice = await publishMarked();
-		expect(notice).toMatch(/7 published, 0 updated, 0 failed/);
+		expect(notice).toMatch(new RegExp(`${marked.length} published, 0 updated, 0 failed`));
 
 		const records = Object.values(await getRecords());
-		expect(records).toHaveLength(7);
-		expect(validateDocuments(records)).toEqual(Array(7).fill(""));
+		expect(records).toHaveLength(marked.length);
+		expect(validateDocuments(records)).toEqual(Array(marked.length).fill(""));
 
 		const welcome = records.find((r) => r.title === "Welcome to the Garden")!;
 		const internal = linksOf(welcome).filter((u) => u.startsWith(PUBLICATION.url));

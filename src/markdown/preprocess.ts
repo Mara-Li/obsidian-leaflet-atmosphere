@@ -12,15 +12,14 @@ import {
 	resolveSubpath,
 	TFile,
 } from "obsidian";
-import type { EmbedMode, TextReplacement } from "../interfaces";
+import { EMBED_PLACEHOLDER, MAX_DEPTH } from "../constants";
+import type { EmbeddedNote, EmbedMode, TextReplacement } from "../types";
 import { DataviewCompiler } from "./compilers/dataview";
 import { isExcalidraw } from "./compilers/excalidraw";
 import { applyReplacements } from "./replacements";
 
 const FENCE =
 	/^( {0,3})(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:\n {0,3}\2[`~]*[ \t]*(?=\n|$)|$)/gm;
-const MAX_DEPTH = 4;
-
 export function stripFrontmatter(content: string): string {
 	const match = /^---\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/.exec(content);
 	return match ? content.slice(match[0].length) : content;
@@ -220,15 +219,6 @@ export class Preprocessor {
 		return typeof title === "string" && title.trim() ? title.trim() : note.basename;
 	}
 }
-
-export interface EmbeddedNote {
-	markdown: string;
-	/** Heading added on top of the sub-page, when the content has none. */
-	title?: string;
-}
-
-/** Line standing for a note embedded as a sub-page (an HTML block: opening tag alone). */
-export const EMBED_PLACEHOLDER = (id: string) => `<leaflet-embed data-id="${id}">`;
 
 /** Remove comments and block ids outside of code. */
 function cleanUp(text: string): string {

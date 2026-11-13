@@ -1,7 +1,12 @@
 import type { AtpClient } from "../atproto/client";
 import { parseAtUri } from "../atproto/tid";
-import type { Color, LegacyPublication, StandardPublication, Theme } from "../interfaces";
-import type { PublicationInfo } from "./types";
+import type {
+	Color,
+	LegacyPublication,
+	PublicationInfo,
+	StandardPublication,
+	Theme,
+} from "../types";
 
 function toCss(color: Color | undefined): string | undefined {
 	if (!color || [color.r, color.g, color.b].some((c) => typeof c !== "number"))

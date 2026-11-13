@@ -236,16 +236,32 @@ export interface StandardDocument {
 	content: LeafletContent;
 }
 
-export interface PublicationInfo {
-	uri: string;
-	name: string;
-	url: string;
-	/** Leaflet font ids and text color of the publication theme. */
+export interface Color {
+	r?: number;
+	g?: number;
+	b?: number;
+	a?: number;
+}
+
+export interface Theme {
 	bodyFont?: string;
 	headingFont?: string;
-	textColor?: string;
-	backgroundColor?: string;
-	accentColor?: string;
-	/** Note property that publishes a note to this publication when true. */
-	publishKey?: string;
+	primary?: Color;
+	backgroundColor?: Color;
+	pageBackground?: Color;
+	showPageBackground?: boolean;
+	accentBackground?: Color;
+}
+
+export interface StandardPublication {
+	name?: string;
+	url?: string;
+	theme?: Theme;
+}
+
+export interface LegacyPublication {
+	name?: string;
+	// biome-ignore lint/style/useNamingConvention: web based request
+	base_path?: string;
+	theme?: Theme;
 }

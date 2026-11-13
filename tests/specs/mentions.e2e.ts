@@ -1,7 +1,7 @@
 import { expect } from "@wdio/globals";
 import { sliceBytes, validateDocument } from "../helpers/lexicons";
 import { getRecords, publish, setup } from "../helpers/obsidian";
-import type { TextBlock } from "../../src/leaflet/types";
+import type { TextBlock } from "../../src/types";
 
 async function publishMentions(mentions: boolean): Promise<TextBlock> {
 	await setup({ publishKey: "", mentions });

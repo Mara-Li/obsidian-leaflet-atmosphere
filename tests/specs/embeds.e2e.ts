@@ -2,8 +2,7 @@ import { expect } from "@wdio/globals";
 import { validateDocument } from "../helpers/lexicons";
 import { browser } from "@wdio/globals";
 import { getRecords, publish, setup } from "../helpers/obsidian";
-import type { EmbedMode } from "../../src/interfaces";
-import type { LeafletBlock, StandardDocument } from "../../src/leaflet/types";
+import type { EmbedMode, LeafletBlock, StandardDocument } from "../../src/types";
 
 async function publishEmbeds(mode: EmbedMode): Promise<StandardDocument> {
 	await setup({ embedMode: mode, publishKey: "" });

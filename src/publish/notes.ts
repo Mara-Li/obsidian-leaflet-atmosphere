@@ -1,5 +1,5 @@
 import type { App, TFile } from "obsidian";
-import type { GazetteSettings } from "../interfaces";
+import type { GazetteSettings } from "../types";
 import { getStrings } from "./targets";
 
 /** Notes of the vault linked to a post, by record URI. */

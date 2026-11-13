@@ -1,6 +1,6 @@
 import { browser, expect } from "@wdio/globals";
 import { getRecords, publish, setup } from "../helpers/obsidian";
-import type { TextReplacement } from "../../src/interfaces";
+import type { TextReplacement } from "../../src/types";
 
 const texts = async (): Promise<string[]> =>
 	Object.values(await getRecords())[0]!.content.pages.flatMap((p) =>

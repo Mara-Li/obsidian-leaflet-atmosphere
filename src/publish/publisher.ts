@@ -1,69 +1,47 @@
 import i18next from "i18next";
 import type { FrontMatterCache, TFile } from "obsidian";
-import type { AtpClient, ListedRecord } from "../atproto/client";
+import type { AtpClient } from "../atproto/client";
 import { isValidRecordKey, nextTid, parseAtUri } from "../atproto/tid";
-import { DOCUMENT_COLLECTION } from "../interfaces";
-import type { PostTheme } from "../leaflet/fonts";
+import { BLOB_PAGES_THRESHOLD, DOCUMENT_COLLECTION, PREFERENCE_KEYS } from "../constants";
 import { ImageUploader } from "../leaflet/images";
-import { fetchLinkPreview, type LinkPreview } from "../leaflet/linkPreview";
+import { fetchLinkPreview } from "../leaflet/linkPreview";
 import {
 	documentUrl,
 	fetchPublicationTheme,
 	standaloneSite,
 } from "../leaflet/publications";
 import { utf8Length } from "../leaflet/richtext";
+import type Gazette from "../main";
+import { renderMermaid } from "../markdown/compilers/mermaid";
+import { MarkdownConverter } from "../markdown/convert";
+import { Preprocessor } from "../markdown/preprocess";
 import type {
 	BlobRef,
 	DocumentPreferences,
 	LeafletBlock,
 	LeafletContent,
 	LinearDocumentPage,
+	LinkPreview,
+	ListedRecord,
+	PostLink,
+	PostTheme,
 	PublicationInfo,
+	PublishOptions,
+	PublishResult,
+	RecoveryContext,
 	StandardDocument,
 	StrongRef,
-} from "../leaflet/types";
-import type Gazette from "../main";
-import { renderMermaid } from "../markdown/compilers/mermaid";
-import { MarkdownConverter } from "../markdown/convert";
-import { Preprocessor } from "../markdown/preprocess";
+} from "../types";
 import {
 	getBoolean,
 	getDate,
 	getString,
 	getTags,
-	PREFERENCE_KEYS,
 	slugify,
 	unwrapLink,
 } from "./frontmatter";
-import { findExistingPost, type RecoveryContext } from "./recovery";
-import {
-	isMarkedNote,
-	noteTargets,
-	type PostLink,
-	readLinks,
-	writeLinks,
-} from "./targets";
-
-const BLOB_PAGES_THRESHOLD = 100 * 1024;
-
-export interface PublishResult {
-	uri: string;
-	url: string;
-	title: string;
-	/** Publication AT-URI, or the personal page address. */
-	site: string;
-	created: boolean;
-	/** The note had lost its link: the existing post was found and updated. */
-	recovered: boolean;
-	/** DataviewJS queries left out because DataviewJS is disabled in Dataview. */
-	skippedDataviewJs: number;
-	warnings: string[];
-}
-
-export interface PublishOptions {
-	/** Publication AT-URI, or "" for a standalone document. */
-	site?: string;
-}
+import { findExistingPost } from "./recovery";
+import { getStrings, isMarkedNote, noteTargets, readLinks, writeLinks } from "./targets";
 
 interface ExistingPosts {
 	/** Posts of the note that still exist, by site. */
@@ -412,14 +390,16 @@ export class Publisher {
 		file: TFile,
 		site: string
 	): Promise<string | null> {
-		const links =
-			this.published.get(file.path) ?? readLinks(this.frontmatter(file), this.settings);
+		// Only posts of this account: a note may still point to the posts of another one
+		const links = this.links(file, client.did);
+		const fm = this.frontmatter(file);
+		const reserved = getStrings(fm, this.settings.uriKey).length === 0;
 		const base = this.publicationsFor(site)[0]?.url;
 		const known =
 			links.find((l) => l.site === site)?.url ??
 			(base ? links.find((l) => l.url?.startsWith(base))?.url : undefined) ??
 			links[0]?.url ??
-			getString(this.frontmatter(file), this.settings.urlKey);
+			(reserved ? getString(fm, this.settings.urlKey) : undefined);
 		if (known && /^https?:\/\//.test(known)) return known;
 		if (!this.settings.writeFrontmatter || !this.isMarked(file)) return null;
 		let pending = this.reservations.get(file.path);

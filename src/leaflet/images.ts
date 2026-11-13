@@ -1,16 +1,9 @@
 import { type App, TFile } from "obsidian";
 import type { AtpClient } from "../atproto/client";
 import { request } from "../atproto/http";
-import {
-	IMAGE_EXTENSIONS,
-	MAX_BLOB_SIZE,
-	MIME_BY_EXT,
-	PASSTHROUGH,
-	type RawImage,
-	type UploadedImage,
-} from "../interfaces";
+import { IMAGE_EXTENSIONS, MAX_BLOB_SIZE, MIME_BY_EXT, PASSTHROUGH } from "../constants";
 import { exportExcalidraw, isExcalidraw } from "../markdown/compilers/excalidraw";
-import type { AspectRatio } from "./types";
+import type { AspectRatio, RawImage, UploadedImage } from "../types";
 
 async function loadElement(blob: Blob): Promise<HTMLImageElement> {
 	const url = URL.createObjectURL(blob);

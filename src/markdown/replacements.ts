@@ -1,4 +1,4 @@
-import type { TextReplacement } from "../interfaces";
+import type { TextReplacement } from "../types";
 
 /** Regex of a rule: `/pattern/flags`, or a bare pattern replaced everywhere. */
 export function compileRule(pattern: string): RegExp | null {

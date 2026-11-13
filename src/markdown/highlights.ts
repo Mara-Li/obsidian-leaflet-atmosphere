@@ -1,5 +1,5 @@
 import type { Tokens } from "marked";
-import type { RgbaColor } from "../leaflet/types";
+import type { RgbaColor } from "../types";
 
 /** Colored highlights of Obsidian (==🔴text==), with Obsidian's default colors. */
 const COLORS: [string, [number, number, number]][] = [

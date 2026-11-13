@@ -1,7 +1,7 @@
 import { expect } from "@wdio/globals";
 import { validateDocument } from "../helpers/lexicons";
 import { getRecords, publish, setup } from "../helpers/obsidian";
-import type { TextBlock } from "../../src/leaflet/types";
+import type { TextBlock } from "../../src/types";
 
 describe("Dates", function () {
 	it("alone on their line look like the Leaflet date block", async function () {

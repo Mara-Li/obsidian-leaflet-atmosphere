@@ -1,8 +1,7 @@
 import { expect } from "@wdio/globals";
 import { validateDocument } from "../helpers/lexicons";
 import { getRecords, publish, setup } from "../helpers/obsidian";
-import type { CalloutMode } from "../../src/interfaces";
-import type { LeafletBlock } from "../../src/leaflet/types";
+import type { CalloutMode, LeafletBlock } from "../../src/types";
 
 async function publishGrids(calloutMode: CalloutMode): Promise<LeafletBlock[]> {
 	await setup({ publishKey: "", calloutMode });

@@ -1,15 +1,5 @@
 import { request } from "../atproto/http";
-
-export interface LinkPreview {
-	title?: string;
-	description?: string;
-	/** Absolute URL of the preview image. */
-	image?: string;
-	/** AT-URI of the standard.site document shown by the page. */
-	document?: string;
-	/** AT-URI of the standard.site publication living at this address. */
-	publication?: string;
-}
+import type { LinkPreview } from "../types";
 
 const AT_URI = /^at:\/\/[^/\s]+\/[a-z0-9.]+\/[^/\s]+$/i;
 
