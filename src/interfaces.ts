@@ -1,4 +1,4 @@
-import type { PublicationInfo } from "./leaflet/types";
+import type {PublicationInfo} from "./leaflet/types";
 
 export type WikilinkMode = "text" | "published";
 export type EmbedMode = "inline" | "link" | "page";
@@ -110,3 +110,33 @@ export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
 
 /** Leaflet personal page used as `site` for documents outside a publication. */
 export const STANDALONE = "";
+export const CODE_THEMES = [
+	"github-light",
+	"github-dark",
+	"github-light-default",
+	"github-dark-default",
+	"catppuccin-latte",
+	"catppuccin-mocha",
+	"dracula",
+	"everforest-light",
+	"everforest-dark",
+	"gruvbox-light-medium",
+	"gruvbox-dark-medium",
+	"material-theme-lighter",
+	"material-theme",
+	"min-light",
+	"min-dark",
+	"monokai",
+	"night-owl",
+	"nord",
+	"one-light",
+	"one-dark-pro",
+	"rose-pine-dawn",
+	"rose-pine",
+	"solarized-light",
+	"solarized-dark",
+	"tokyo-night",
+	"vitesse-light",
+	"vitesse-dark",
+];
+export const PUB_KEY_PREFIX = "publishKey:";

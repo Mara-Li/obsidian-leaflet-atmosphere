@@ -2,40 +2,9 @@
 
 import i18next from "i18next";
 import { type App, PluginSettingTab, type SettingDefinitionItem } from "obsidian";
+import { CODE_THEMES, PUB_KEY_PREFIX } from "./interfaces";
 import type LeafletAtmosphere from "./main";
 import { compileRule } from "./markdown/replacements";
-
-const CODE_THEMES = [
-	"github-light",
-	"github-dark",
-	"github-light-default",
-	"github-dark-default",
-	"catppuccin-latte",
-	"catppuccin-mocha",
-	"dracula",
-	"everforest-light",
-	"everforest-dark",
-	"gruvbox-light-medium",
-	"gruvbox-dark-medium",
-	"material-theme-lighter",
-	"material-theme",
-	"min-light",
-	"min-dark",
-	"monokai",
-	"night-owl",
-	"nord",
-	"one-light",
-	"one-dark-pro",
-	"rose-pine-dawn",
-	"rose-pine",
-	"solarized-light",
-	"solarized-dark",
-	"tokyo-night",
-	"vitesse-light",
-	"vitesse-dark",
-];
-
-const PUB_KEY_PREFIX = "publishKey:";
 
 export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 	plugin: LeafletAtmosphere;
