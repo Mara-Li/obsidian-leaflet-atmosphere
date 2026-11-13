@@ -1,6 +1,6 @@
 import i18next from "i18next";
 import { debounce, TFile } from "obsidian";
-import type LeafletAtmosphere from "../main";
+import type Gazette from "../main";
 import { ConfirmModal } from "../ui/confirmModal";
 import { richNotice } from "../ui/notices";
 import { Publisher } from "./publisher";
@@ -21,7 +21,7 @@ export class DeletionWatcher {
 	private pending: DeletedPost[] = [];
 	private flush = debounce(() => void this.handle(), 800, true);
 
-	constructor(private plugin: LeafletAtmosphere) {}
+	constructor(private plugin: Gazette) {}
 
 	register() {
 		const { app } = this.plugin;
@@ -76,7 +76,7 @@ export class DeletionWatcher {
 
 /** Delete posts, through their notes when they still exist. */
 export async function deletePosts(
-	plugin: LeafletAtmosphere,
+	plugin: Gazette,
 	posts: { name: string; uri: string; file?: TFile | null }[]
 ): Promise<number> {
 	const publisher = new Publisher(plugin);

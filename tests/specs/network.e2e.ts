@@ -19,7 +19,7 @@ async function setProxy(rules: string | null): Promise<void> {
 
 async function connectError(): Promise<string> {
 	return browser.executeObsidian(async ({ app, plugins }) => {
-		const plugin = plugins.leafletAtmosphere;
+		const plugin = plugins.gazette;
 		app.secretStorage.setSecret("leaflet-network-test", "not-a-password");
 		Object.assign(plugin.settings, {
 			identifier: "alice.example.com",
@@ -80,7 +80,7 @@ describe("HTTP errors", function () {
 		await clearNotices();
 		await browser.executeObsidian(
 			async ({ app, plugins }, { identifier, pdsUrl }) => {
-				const plugin = plugins.leafletAtmosphere;
+				const plugin = plugins.gazette;
 				app.secretStorage.setSecret("leaflet-network-test", "not-a-password");
 				Object.assign(plugin.settings, {
 					identifier,

@@ -24,8 +24,8 @@ export class PublishProgress {
 			el.empty();
 			el.show();
 			el.setAttr("aria-label", message);
-			el.createSpan({ cls: "leaflet-atmosphere-status-text", text: message });
-			const bar = el.createEl("progress", { cls: "leaflet-atmosphere-status-bar" });
+			el.createSpan({ cls: "gazette-status-text", text: message });
+			const bar = el.createEl("progress", { cls: "gazette-status-bar" });
 			if (total) {
 				bar.max = total;
 				bar.value = current ?? 0;

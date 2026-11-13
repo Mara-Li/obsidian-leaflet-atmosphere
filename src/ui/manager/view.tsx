@@ -1,15 +1,15 @@
 import i18next from "i18next";
 import { ItemView, type WorkspaceLeaf } from "obsidian";
 import { render } from "preact";
-import type LeafletAtmosphere from "../../main";
+import type Gazette from "../../main";
 import { PostsManager } from "./PostsManager";
 
-export const MANAGER_VIEW = "leaflet-atmosphere-posts";
+export const MANAGER_VIEW = "gazette-posts";
 
 export class PostsManagerView extends ItemView {
 	constructor(
 		leaf: WorkspaceLeaf,
-		private plugin: LeafletAtmosphere
+		private plugin: Gazette
 	) {
 		super(leaf);
 	}
@@ -36,7 +36,7 @@ export class PostsManagerView extends ItemView {
 }
 
 /** Show the manager, reusing an open one. */
-export async function openPostsManager(plugin: LeafletAtmosphere): Promise<void> {
+export async function openPostsManager(plugin: Gazette): Promise<void> {
 	const { workspace } = plugin.app;
 	const existing = workspace.getLeavesOfType(MANAGER_VIEW)[0];
 	if (existing) {

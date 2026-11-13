@@ -143,8 +143,8 @@ describe("Callouts", function () {
 					primary: { $type: "pub.leaflet.theme.color#rgb", r: 40, g: 60, b: 90 },
 				},
 			};
-			await plugins.leafletAtmosphere.refreshPublications();
-			return plugins.leafletAtmosphere.settings.publications[0];
+			await plugins.gazette.refreshPublications();
+			return plugins.gazette.settings.publications[0];
 		}, PUBLICATION.uri);
 		expect(pub).toMatchObject({
 			bodyFont: "lora",

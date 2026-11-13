@@ -1,7 +1,7 @@
 import type { App, FrontMatterCache, TFile } from "obsidian";
 import type { AtpClient, ListedRecord } from "../atproto/client";
 import { isValidRecordKey, parseAtUri } from "../atproto/tid";
-import { DOCUMENT_COLLECTION, type LeafletAtmosphereSettings } from "../interfaces";
+import { DOCUMENT_COLLECTION, type GazetteSettings } from "../interfaces";
 import type { StandardDocument } from "../leaflet/types";
 import { getString, slugify } from "./frontmatter";
 import { getStrings } from "./targets";
@@ -16,7 +16,7 @@ export interface FoundPost {
 export interface RecoveryContext {
 	app: App;
 	client: AtpClient;
-	settings: LeafletAtmosphereSettings;
+	settings: GazetteSettings;
 	/** Documents of the repository, listed once per run. */
 	listDocuments: () => Promise<ListedRecord<StandardDocument>[]>;
 	/** Note that already owns a record key in the current run. */
@@ -38,7 +38,7 @@ function stripMarkdown(text: string): string {
 /** Title the post of a note should have, without converting the note. */
 export function expectedTitle(
 	app: App,
-	settings: LeafletAtmosphereSettings,
+	settings: GazetteSettings,
 	file: TFile,
 	fm: FrontMatterCache | undefined
 ): string {
@@ -60,7 +60,7 @@ export function expectedTitle(
 
 /** Record keys the post of a note may already use: reserved address, then slug. */
 export function candidateKeys(
-	settings: LeafletAtmosphereSettings,
+	settings: GazetteSettings,
 	file: TFile,
 	fm: FrontMatterCache | undefined
 ): string[] {

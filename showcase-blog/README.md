@@ -4,7 +4,7 @@ leaflet_url: https://obsidian-bridge.leaflet.pub/3n24gbfpn22yi
 ---
 # Showcase blog
 
-A small blog to try Leaflet Atmosphere on a real Leaflet publication. Each post exercises a part of the conversion.
+A small blog to try Gazette on a real Leaflet publication. Each post exercises a part of the conversion.
 
 | Post | What it shows |
 | --- | --- |
@@ -21,7 +21,7 @@ The notes in `Books`, `Snippets`, `Drafts` and the drawing have `leaflet_publish
 ## Try it
 
 1. Copy this folder anywhere in your vault.
-2. Connect your account in **Settings → Leaflet Atmosphere → Account** and choose a publication in **Publication**.
+2. Connect your account in **Settings → Gazette → Account** and choose a publication in **Publication**.
 3. Run **Publish all marked notes** from the command palette.
 
 The seven posts are published with working links between them: a post linking to a note that is not published yet reserves its future address. Run the command again after editing a note to update the posts.

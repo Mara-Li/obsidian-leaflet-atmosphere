@@ -1,6 +1,6 @@
 import i18next from "i18next";
 import type { FrontMatterCache } from "obsidian";
-import type { LeafletAtmosphereSettings } from "../interfaces";
+import type { GazetteSettings } from "../interfaces";
 import { standaloneSite } from "../leaflet/publications";
 import { getBoolean, PREFERENCE_KEYS } from "./frontmatter";
 
@@ -25,7 +25,7 @@ export function getStrings(fm: FrontMatterCache | undefined, key: string): strin
 /** Posts of a note, from its URI and URL properties (lists for several publications). */
 export function readLinks(
 	fm: FrontMatterCache | undefined,
-	settings: LeafletAtmosphereSettings
+	settings: GazetteSettings
 ): PostLink[] {
 	const urls = getStrings(fm, settings.urlKey);
 	return getStrings(fm, settings.uriKey).map((uri, i) => ({
@@ -37,7 +37,7 @@ export function readLinks(
 /** Save the posts of a note: a single value for one post, lists for several. */
 export function writeLinks(
 	front: Record<string, unknown>,
-	settings: LeafletAtmosphereSettings,
+	settings: GazetteSettings,
 	links: PostLink[]
 ) {
 	const { uriKey, urlKey } = settings;
@@ -57,7 +57,7 @@ export function writeLinks(
 }
 
 /** Site of a publication named in a note: its name, address or AT-URI, or "none". */
-function siteOf(settings: LeafletAtmosphereSettings, value: string, did: string): string {
+function siteOf(settings: GazetteSettings, value: string, did: string): string {
 	const lower = value.toLowerCase();
 	if (lower === "none" || lower === "standalone") return standaloneSite(did);
 	const pub = settings.publications.find(
@@ -72,7 +72,7 @@ function siteOf(settings: LeafletAtmosphereSettings, value: string, did: string)
  * publish property of a publication. Null when the note asks for none.
  */
 export function noteTargets(
-	settings: LeafletAtmosphereSettings,
+	settings: GazetteSettings,
 	fm: FrontMatterCache | undefined,
 	did: string
 ): string[] | null {
@@ -86,7 +86,7 @@ export function noteTargets(
 
 /** Whether a note is marked for publishing, globally or for one of the publications. */
 export function isMarkedNote(
-	settings: LeafletAtmosphereSettings,
+	settings: GazetteSettings,
 	fm: FrontMatterCache | undefined
 ): boolean {
 	if (settings.publishKey && getBoolean(fm, settings.publishKey) === true) return true;

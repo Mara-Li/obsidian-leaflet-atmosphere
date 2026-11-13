@@ -1,6 +1,6 @@
 import type { Token, Tokens } from "marked";
 import { type App, getLanguage, TFile } from "obsidian";
-import type { LeafletAtmosphereSettings } from "../interfaces";
+import type { GazetteSettings } from "../interfaces";
 import { type PostTheme, themeCss } from "../leaflet/fonts";
 import type { ImageUploader } from "../leaflet/images";
 import type { LinkPreview } from "../leaflet/linkPreview";
@@ -108,7 +108,7 @@ const YOUTUBE =
 
 export interface ConverterDeps {
 	app: App;
-	settings: LeafletAtmosphereSettings;
+	settings: GazetteSettings;
 	images: ImageUploader;
 	sourcePath: string;
 	strictLineBreaks: boolean;

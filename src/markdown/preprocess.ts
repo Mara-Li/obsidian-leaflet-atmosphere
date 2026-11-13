@@ -52,6 +52,18 @@ function dedent(text: string): string {
 	return text.replace(new RegExp(`^${indent}`, "gm"), "");
 }
 
+/** Map offsets of a CRLF text to the same text with LF line endings. */
+function lfOffsets(raw: string): (offset: number) => number {
+	const crs: number[] = [];
+	for (let i = raw.indexOf("\r\n"); i !== -1; i = raw.indexOf("\r\n", i + 2)) crs.push(i);
+	if (crs.length === 0) return (offset) => offset;
+	return (offset) => {
+		let count = 0;
+		while (count < crs.length && crs[count]! < offset) count++;
+		return offset - count;
+	};
+}
+
 /** Range of a heading or block, a list block keeps its nested items. */
 function subpathRange(
 	result: HeadingSubpathResult | BlockSubpathResult,
@@ -116,7 +128,10 @@ export class Preprocessor {
 		ancestors: Set<string>,
 		depth: number
 	): Promise<string> {
-		const text = await this.app.vault.cachedRead(file);
+		const raw = await this.app.vault.cachedRead(file);
+		// Work on LF text: the offsets of the cache count the CR of CRLF files
+		const text = raw.replace(/\r\n/g, "\n");
+		const at = lfOffsets(raw);
 		const cache = this.app.metadataCache.getFileCache(file);
 		let start = 0;
 		let end = text.length;
@@ -124,12 +139,16 @@ export class Preprocessor {
 		if (subpath) {
 			const result = cache ? resolveSubpath(cache, subpath) : null;
 			if (!cache || !result || result.type === "footnote") return "";
-			({ start, end, list } = subpathRange(result, cache, text.length));
+			({ start, end, list } = subpathRange(result, cache, raw.length));
+			start = at(start);
+			end = at(end);
 		}
 
 		let slice = text.slice(start, end);
 		const embeds = (cache?.embeds ?? [])
-			.filter((e) => e.position.start.offset >= start && e.position.end.offset <= end)
+			.filter(
+				(e) => at(e.position.start.offset) >= start && at(e.position.end.offset) <= end
+			)
 			.sort((a, b) => b.position.start.offset - a.position.start.offset);
 		const key = `${file.path}#${subpath ?? ""}`;
 		const nested = new Set(ancestors).add(key);
@@ -145,8 +164,8 @@ export class Preprocessor {
 				isExcalidraw(this.app, linked)
 			)
 				continue;
-			const from = embed.position.start.offset - start;
-			const to = embed.position.end.offset - start;
+			const from = at(embed.position.start.offset) - start;
+			const to = at(embed.position.end.offset) - start;
 			const before = slice.slice(0, from);
 			const after = slice.slice(to);
 			let replacement: string;

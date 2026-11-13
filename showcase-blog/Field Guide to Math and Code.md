@@ -47,7 +47,7 @@ fn hydration(water: f64, flour: f64) -> f64 {
 
 ```mermaid
 flowchart LR
-    A[Obsidian note] --> B[Leaflet Atmosphere]
+    A[Obsidian note] --> B[Gazette]
     B --> C[(PDS)]
     C --> D[Leaflet]
     C --> E[Other standard.site readers]

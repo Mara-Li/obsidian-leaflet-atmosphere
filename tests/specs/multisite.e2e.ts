@@ -105,10 +105,10 @@ describe("Publishing to several publications", function () {
 		await publish("Both.md");
 		await waitLinks("Both.md", 2);
 		await runCommand("manage-posts");
-		const rows = browser.$$(".leaflet-atmosphere-manager-row");
+		const rows = browser.$$(".gazette-manager-row");
 		await browser.waitUntil(async () => (await rows.length) === 2);
 		for (const row of await rows) {
-			const meta = await row.$(".leaflet-atmosphere-manager-meta").getText();
+			const meta = await row.$(".gazette-manager-meta").getText();
 			if (!meta.includes("Second blog")) continue;
 			await row.$("button[aria-label='Delete']").click();
 			break;
@@ -117,7 +117,7 @@ describe("Publishing to several publications", function () {
 		expect(await waitLinks("Both.md", 1)).toBe(`at://${DID}/${COLLECTION}/shared-post`);
 		expect(Object.keys(await getRecords())).toEqual([`${COLLECTION}/shared-post`]);
 		await browser.executeObsidian(({ app }) => {
-			app.workspace.detachLeavesOfType("leaflet-atmosphere-posts");
+			app.workspace.detachLeavesOfType("gazette-posts");
 		});
 	});
 
@@ -130,10 +130,10 @@ describe("Publishing to several publications", function () {
 					setControlValue(key: string, value: unknown): Promise<void>;
 				}[];
 			};
-			const tab = setting.pluginTabs.find((t) => t.id === "leaflet-atmosphere")!;
+			const tab = setting.pluginTabs.find((t) => t.id === "gazette")!;
 			const before = tab.getControlValue(`publishKey:${uri}`);
 			await tab.setControlValue(`publishKey:${uri}`, " publish_other ");
-			const pub = plugins.leafletAtmosphere.settings.publications.find((p) => p.uri === uri);
+			const pub = plugins.gazette.settings.publications.find((p) => p.uri === uri);
 			return [before, pub?.publishKey];
 		}, SECOND.uri);
 		expect(keys).toEqual(["publish_second", "publish_other"]);

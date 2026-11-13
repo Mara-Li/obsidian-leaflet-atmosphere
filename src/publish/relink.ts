@@ -1,5 +1,5 @@
 import type { TFile } from "obsidian";
-import type LeafletAtmosphere from "../main";
+import type Gazette from "../main";
 import { isExcalidraw } from "../markdown/compilers/excalidraw";
 import { getBoolean, getString } from "./frontmatter";
 import { candidateKeys, expectedTitle, normalizeTitle } from "./recovery";
@@ -13,7 +13,7 @@ export interface PostToLink {
 
 /** Write the link of a post in a note. */
 export async function linkNote(
-	plugin: LeafletAtmosphere,
+	plugin: Gazette,
 	file: TFile,
 	post: PostToLink
 ): Promise<void> {
@@ -28,7 +28,7 @@ export async function linkNote(
 }
 
 /** Notes that may receive a link: not linked yet, not blocked, not drawings. */
-export function unlinkedNotes(plugin: LeafletAtmosphere): TFile[] {
+export function unlinkedNotes(plugin: Gazette): TFile[] {
 	const { app, settings } = plugin;
 	return app.vault.getMarkdownFiles().filter((file) => {
 		if (isExcalidraw(app, file)) return false;
@@ -44,7 +44,7 @@ export function unlinkedNotes(plugin: LeafletAtmosphere): TFile[] {
  * address or slug), then by title when a single note and a single post match.
  */
 export async function relinkNotes(
-	plugin: LeafletAtmosphere,
+	plugin: Gazette,
 	posts: PostToLink[]
 ): Promise<TFile[]> {
 	const { app, settings } = plugin;

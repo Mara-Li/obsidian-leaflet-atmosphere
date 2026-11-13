@@ -11,7 +11,7 @@ import {
 import { DOCUMENT_COLLECTION } from "../../interfaces";
 import { documentUrl } from "../../leaflet/publications";
 import type { StandardDocument } from "../../leaflet/types";
-import type LeafletAtmosphere from "../../main";
+import type Gazette from "../../main";
 import { deletePosts } from "../../publish/deletions";
 import { notesByUri } from "../../publish/notes";
 import { linkNote, relinkNotes, unlinkedNotes } from "../../publish/relink";
@@ -34,7 +34,7 @@ function Icon({ name }: { name: string }) {
 	useEffect(() => {
 		if (ref.current) setIcon(ref.current, name);
 	}, [name]);
-	return <span class="leaflet-atmosphere-icon" ref={ref} />;
+	return <span class="gazette-icon" ref={ref} />;
 }
 
 function IconButton(props: {
@@ -45,7 +45,7 @@ function IconButton(props: {
 }) {
 	return (
 		<button
-			class={`clickable-icon${props.warning ? " leaflet-atmosphere-danger" : ""}`}
+			class={`clickable-icon${props.warning ? " gazette-danger" : ""}`}
 			aria-label={props.label}
 			onClick={props.onClick}
 		>
@@ -54,7 +54,7 @@ function IconButton(props: {
 	);
 }
 
-async function loadPosts(plugin: LeafletAtmosphere): Promise<Post[]> {
+async function loadPosts(plugin: Gazette): Promise<Post[]> {
 	const client = await plugin.getClient();
 	const records = await client.listRecords<StandardDocument>(DOCUMENT_COLLECTION);
 	const { publications } = plugin.settings;
@@ -78,7 +78,7 @@ async function loadPosts(plugin: LeafletAtmosphere): Promise<Post[]> {
 		.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
 
-export function PostsManager({ plugin }: { plugin: LeafletAtmosphere }) {
+export function PostsManager({ plugin }: { plugin: Gazette }) {
 	const { app } = plugin;
 	const [records, setRecords] = useState<Post[] | null>(null);
 	const [error, setError] = useState("");
@@ -197,8 +197,8 @@ export function PostsManager({ plugin }: { plugin: LeafletAtmosphere }) {
 	const openNote = (file: TFile) => void app.workspace.getLeaf(false).openFile(file);
 
 	return (
-		<div class="leaflet-atmosphere-manager">
-			<div class="leaflet-atmosphere-manager-toolbar">
+		<div class="gazette-manager">
+			<div class="gazette-manager-toolbar">
 				<input
 					type="search"
 					placeholder={i18next.t("manager.search")}
@@ -217,7 +217,7 @@ export function PostsManager({ plugin }: { plugin: LeafletAtmosphere }) {
 						</option>
 					))}
 				</select>
-				<label class="leaflet-atmosphere-manager-check">
+				<label class="gazette-manager-check">
 					<input
 						type="checkbox"
 						checked={orphans}
@@ -231,7 +231,7 @@ export function PostsManager({ plugin }: { plugin: LeafletAtmosphere }) {
 					onClick={() => void refresh()}
 				/>
 			</div>
-			<div class="leaflet-atmosphere-manager-toolbar">
+			<div class="gazette-manager-toolbar">
 				<button onClick={() => void relink()}>
 					<Icon name="link" />
 					{i18next.t("manager.relink")}
@@ -242,21 +242,21 @@ export function PostsManager({ plugin }: { plugin: LeafletAtmosphere }) {
 				</button>
 			</div>
 
-			{error && <p class="leaflet-atmosphere-manager-error">{error}</p>}
+			{error && <p class="gazette-manager-error">{error}</p>}
 			{records === null && !error && (
-				<p class="leaflet-atmosphere-muted">{i18next.t("manager.loading")}</p>
+				<p class="gazette-muted">{i18next.t("manager.loading")}</p>
 			)}
 			{records !== null && !error && (
 				<>
-					<div class="leaflet-atmosphere-manager-summary">
-						<label class="leaflet-atmosphere-manager-check">
+					<div class="gazette-manager-summary">
+						<label class="gazette-manager-check">
 							<input type="checkbox" checked={allSelected} onChange={toggleAll} />
 							{i18next.t("manager.selectAll")}
 						</label>
-						<span class="leaflet-atmosphere-muted">
+						<span class="gazette-muted">
 							{i18next.t("manager.count", { count: visible.length })}
 						</span>
-						<span class="leaflet-atmosphere-manager-spacer" />
+						<span class="gazette-manager-spacer" />
 						<button
 							disabled={selectedNotes.length === 0}
 							onClick={() => publishSelection(plugin, selectedNotes)}
@@ -272,34 +272,30 @@ export function PostsManager({ plugin }: { plugin: LeafletAtmosphere }) {
 						</button>
 					</div>
 					{visible.length === 0 && (
-						<p class="leaflet-atmosphere-muted">{i18next.t("manager.empty")}</p>
+						<p class="gazette-muted">{i18next.t("manager.empty")}</p>
 					)}
-					<ul class="leaflet-atmosphere-manager-list">
+					<ul class="gazette-manager-list">
 						{visible.map((post) => {
 							const file = noteOf(post);
 							return (
-								<li
-									key={post.uri}
-									class="leaflet-atmosphere-manager-row"
-									data-uri={post.uri}
-								>
+								<li key={post.uri} class="gazette-manager-row" data-uri={post.uri}>
 									<input
 										type="checkbox"
 										checked={selected.has(post.uri)}
 										onChange={() => toggle(post.uri)}
 									/>
-									<div class="leaflet-atmosphere-manager-main">
-										<a href={post.url} class="leaflet-atmosphere-manager-title">
+									<div class="gazette-manager-main">
+										<a href={post.url} class="gazette-manager-title">
 											{post.title}
 										</a>
-										<div class="leaflet-atmosphere-manager-meta">
+										<div class="gazette-manager-meta">
 											<span>{post.publication}</span>
 											{post.publishedAt && (
 												<span>{new Date(post.publishedAt).toLocaleDateString()}</span>
 											)}
 											{file ? (
 												<a
-													class="leaflet-atmosphere-manager-note"
+													class="gazette-manager-note"
 													onClick={(e) => {
 														e.preventDefault();
 														openNote(file);
@@ -308,13 +304,13 @@ export function PostsManager({ plugin }: { plugin: LeafletAtmosphere }) {
 													{file.path}
 												</a>
 											) : (
-												<span class="leaflet-atmosphere-manager-orphan">
+												<span class="gazette-manager-orphan">
 													{i18next.t("manager.noNote")}
 												</span>
 											)}
 										</div>
 									</div>
-									<div class="leaflet-atmosphere-manager-actions">
+									<div class="gazette-manager-actions">
 										{file ? (
 											<>
 												<IconButton

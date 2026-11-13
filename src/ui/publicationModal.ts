@@ -27,7 +27,7 @@ export class PublicationModal extends SuggestModal<Choice> {
 
 	renderSuggestion(choice: Choice, el: HTMLElement) {
 		el.createDiv({ text: choice.name });
-		el.createEl("small", { text: choice.url, cls: "leaflet-atmosphere-muted" });
+		el.createEl("small", { text: choice.url, cls: "gazette-muted" });
 	}
 
 	onChooseSuggestion(choice: Choice) {

@@ -33,9 +33,9 @@ async function addOrphanPost(): Promise<void> {
 
 async function rows(): Promise<{ title: string; meta: string }[]> {
 	return browser.executeObsidian(() =>
-		Array.from(activeDocument.querySelectorAll(".leaflet-atmosphere-manager-row")).map((row) => ({
-			title: row.querySelector(".leaflet-atmosphere-manager-title")?.textContent ?? "",
-			meta: row.querySelector(".leaflet-atmosphere-manager-meta")?.textContent ?? "",
+		Array.from(activeDocument.querySelectorAll(".gazette-manager-row")).map((row) => ({
+			title: row.querySelector(".gazette-manager-title")?.textContent ?? "",
+			meta: row.querySelector(".gazette-manager-meta")?.textContent ?? "",
 		}))
 	);
 }
@@ -49,7 +49,7 @@ async function waitRows(count: number): Promise<void> {
 
 async function closeManager(): Promise<void> {
 	await browser.executeObsidian(({ app }) => {
-		app.workspace.detachLeavesOfType("leaflet-atmosphere-posts");
+		app.workspace.detachLeavesOfType("gazette-posts");
 	});
 }
 
@@ -78,7 +78,7 @@ describe("Posts manager", function () {
 		await addOrphanPost();
 		await runCommand("manage-posts");
 		await waitRows(1);
-		await browser.$(".leaflet-atmosphere-manager-row button[aria-label='Delete']").click();
+		await browser.$(".gazette-manager-row button[aria-label='Delete']").click();
 		await confirmModal();
 		await waitRows(0);
 		expect(await getRecords()).toEqual({});
@@ -89,7 +89,7 @@ describe("Posts manager", function () {
 		await waitFrontmatter("Target.md", "leaflet_uri");
 		await runCommand("manage-posts");
 		await waitRows(1);
-		await browser.$(".leaflet-atmosphere-manager-row input[type='checkbox']").click();
+		await browser.$(".gazette-manager-row input[type='checkbox']").click();
 		await browser.$("button=Delete (1)").click();
 		await confirmModal();
 		await waitRows(0);
@@ -115,7 +115,7 @@ describe("Publishing and linking from the manager", function () {
 
 	it("opens from the ribbon and follows new publications", async function () {
 		await browser.$(".side-dock-ribbon-action[aria-label='Manage Leaflet posts']").click();
-		await browser.$(".leaflet-atmosphere-manager").waitForExist();
+		await browser.$(".gazette-manager").waitForExist();
 		await waitRows(0);
 		await publish("Target.md");
 		await waitRows(1);
@@ -155,7 +155,7 @@ describe("Publishing and linking from the manager", function () {
 		await runCommand("manage-posts");
 		await waitMeta("Orphan post", "No note in the vault");
 		await browser
-			.$(".leaflet-atmosphere-manager-row button[aria-label='Link to a note']")
+			.$(".gazette-manager-row button[aria-label='Link to a note']")
 			.click();
 		const input = browser.$(".prompt-input");
 		await input.waitForDisplayed();
@@ -174,7 +174,7 @@ describe("Publishing and linking from the manager", function () {
 		await waitRows(1);
 		await clearNotices();
 		await browser
-			.$(".leaflet-atmosphere-manager-row button[aria-label='Publish again']")
+			.$(".gazette-manager-row button[aria-label='Publish again']")
 			.click();
 		await waitNotice(/Updated on Leaflet/);
 		expect(Object.values(await getRecords())[0]!.updatedAt).toBeDefined();
@@ -185,7 +185,7 @@ describe("Publishing and linking from the manager", function () {
 		await waitFrontmatter("Target.md", "leaflet_uri");
 		await runCommand("manage-posts");
 		await waitRows(1);
-		await browser.$(".leaflet-atmosphere-manager-row input[type='checkbox']").click();
+		await browser.$(".gazette-manager-row input[type='checkbox']").click();
 		await clearNotices();
 		await browser.$("button=Publish (1)").click();
 		const notice = await waitNotice(/failed/, 30000);
