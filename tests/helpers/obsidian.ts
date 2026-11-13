@@ -49,19 +49,31 @@ export async function setup(
 	// Wait for the metadata cache to hold the properties of the restored notes
 	const expected: Record<string, string[]> = {};
 	for (const [file, content] of Object.entries(notes)) {
-		const yaml = /^---\n([\s\S]*?)\n---/.exec(content)?.[1] ?? "";
+		const yaml = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content)?.[1] ?? "";
 		expected[file] = [...yaml.matchAll(/^([A-Za-z_][\w-]*):/gm)].map((m) => m[1]!).sort();
 	}
+	let attempt = 0;
 	await browser.waitUntil(
 		() =>
-			browser.executeObsidian(({ app }, wanted) => {
-				return Object.entries(wanted).every(([p, keys]) => {
-					const file = app.vault.getFileByPath(p);
-					if (!file) return false;
-					const fm = app.metadataCache.getFileCache(file)?.frontmatter ?? {};
-					return JSON.stringify(Object.keys(fm).sort()) === JSON.stringify(keys);
-				});
-			}, expected),
+			browser.executeObsidian(
+				async ({ app }, { wanted, contents, repair }) => {
+					let ready = true;
+					for (const [p, keys] of Object.entries(wanted)) {
+						const file = app.vault.getFileByPath(p);
+						if (!file) {
+							ready = false;
+							continue;
+						}
+						const fm = app.metadataCache.getFileCache(file)?.frontmatter ?? {};
+						if (JSON.stringify(Object.keys(fm).sort()) === JSON.stringify(keys)) continue;
+						ready = false;
+						// The file watcher can miss the restore (seen on Windows): write it again
+						if (repair) await app.vault.modify(file, contents[p]!);
+					}
+					return ready;
+				},
+				{ wanted: expected, contents: notes, repair: ++attempt % 5 === 0 }
+			),
 		{ timeout: 15000, timeoutMsg: "Metadata cache not ready" }
 	);
 	await browser.executeObsidian(
