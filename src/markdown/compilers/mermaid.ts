@@ -9,7 +9,9 @@ export async function renderMermaid(
 	source: string,
 	sourcePath: string
 ): Promise<string | null> {
+	// biome-ignore lint/correctness/noUndeclaredVariables: Obsidian globals
 	const host = createDiv({ cls: "leaflet-atmosphere-offscreen" });
+	// biome-ignore lint/correctness/noUndeclaredVariables: Obsidian globals
 	activeDocument.body.appendChild(host);
 	const component = new Component();
 	component.load();

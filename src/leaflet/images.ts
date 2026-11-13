@@ -1,34 +1,16 @@
 import { type App, TFile } from "obsidian";
 import type { AtpClient } from "../atproto/client";
 import { request } from "../atproto/http";
+import {
+	IMAGE_EXTENSIONS,
+	MAX_BLOB_SIZE,
+	MIME_BY_EXT,
+	PASSTHROUGH,
+	type RawImage,
+	type UploadedImage,
+} from "../interfaces";
 import { exportExcalidraw, isExcalidraw } from "../markdown/compilers/excalidraw";
-import type { AspectRatio, BlobRef } from "./types";
-
-const MAX_BLOB_SIZE = 1_000_000;
-const PASSTHROUGH = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
-
-const MIME_BY_EXT: Record<string, string> = {
-	png: "image/png",
-	jpg: "image/jpeg",
-	jpeg: "image/jpeg",
-	webp: "image/webp",
-	gif: "image/gif",
-	svg: "image/svg+xml",
-	bmp: "image/bmp",
-	avif: "image/avif",
-};
-
-export const IMAGE_EXTENSIONS = new Set(Object.keys(MIME_BY_EXT));
-
-export interface UploadedImage {
-	blob: BlobRef;
-	aspectRatio: AspectRatio;
-}
-
-export interface RawImage {
-	data: ArrayBuffer;
-	mime: string;
-}
+import type { AspectRatio } from "./types";
 
 async function loadElement(blob: Blob): Promise<HTMLImageElement> {
 	const url = URL.createObjectURL(blob);
@@ -59,6 +41,7 @@ async function reencode(
 	}
 	let quality = 0.9;
 	for (let attempt = 0; attempt < 12; attempt++) {
+		// biome-ignore lint/correctness/noUndeclaredVariables: Obsidian global
 		const canvas = createEl("canvas");
 		canvas.width = width;
 		canvas.height = height;

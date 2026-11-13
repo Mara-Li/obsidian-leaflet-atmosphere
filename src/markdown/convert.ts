@@ -1,7 +1,9 @@
 import type { Token, Tokens } from "marked";
 import { type App, getLanguage, TFile } from "obsidian";
 import type { LeafletAtmosphereSettings } from "../interfaces";
+import { type PostTheme, themeCss } from "../leaflet/fonts";
 import type { ImageUploader } from "../leaflet/images";
+import type { LinkPreview } from "../leaflet/linkPreview";
 import { RichText } from "../leaflet/richtext";
 import type {
 	FacetFeature,
@@ -15,6 +17,7 @@ import type {
 	UnorderedListBlock,
 	UnorderedListItem,
 } from "../leaflet/types";
+import { calloutHtml, calloutStyle, richTextToHtml } from "./callouts";
 import type {
 	FootnoteDefToken,
 	FootnoteRefToken,
@@ -24,6 +27,7 @@ import type {
 	WikilinkToken,
 } from "./extensions";
 import { createLexer } from "./extensions";
+import { cssColor, splitHighlightColor } from "./highlights";
 import {
 	applyInlineHtml,
 	decodeEntities,
@@ -32,10 +36,6 @@ import {
 	InlineCollector,
 	withFeature,
 } from "./inline";
-import { type PostTheme, themeCss } from "../leaflet/fonts";
-import type { LinkPreview } from "../leaflet/linkPreview";
-import { calloutHtml, calloutStyle, richTextToHtml } from "./callouts";
-import { cssColor, splitHighlightColor } from "./highlights";
 import { type EmbeddedNote, splitSubpath } from "./preprocess";
 
 type Generic = Tokens.Generic;

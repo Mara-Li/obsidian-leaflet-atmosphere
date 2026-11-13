@@ -13,7 +13,7 @@ export function compileRule(pattern: string): RegExp | null {
 }
 
 /** `\n` and `\t` written in a replacement stand for a line break and a tab. */
-function unescape(replacement: string): string {
+function spaceUnescape(replacement: string): string {
 	return replacement.replace(/\\([nt\\])/g, (_, c: string) =>
 		c === "n" ? "\n" : c === "t" ? "\t" : "\\"
 	);
@@ -23,7 +23,7 @@ function unescape(replacement: string): string {
 export function applyReplacements(text: string, rules: TextReplacement[]): string {
 	for (const rule of rules) {
 		const regex = compileRule(rule.regex);
-		if (regex) text = text.replace(regex, unescape(rule.replacement));
+		if (regex) text = text.replace(regex, spaceUnescape(rule.replacement));
 	}
 	return text;
 }

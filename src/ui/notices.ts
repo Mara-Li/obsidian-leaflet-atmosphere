@@ -27,6 +27,7 @@ interface NoticeContent {
 /** A notice with an icon, a heading, optional details and action buttons. */
 export function richNotice(content: NoticeContent): Notice {
 	let notice: Notice | null = null;
+	// biome-ignore lint/correctness/noUndeclaredVariables: Obsidian globals
 	const fragment = createFragment((f) => {
 		const root = f.createDiv({ cls: `leaflet-atmosphere-notice is-${content.tone}` });
 		const header = root.createDiv({ cls: "leaflet-atmosphere-notice-header" });

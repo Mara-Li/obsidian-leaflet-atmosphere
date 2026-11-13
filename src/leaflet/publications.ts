@@ -1,37 +1,7 @@
 import type { AtpClient } from "../atproto/client";
 import { parseAtUri } from "../atproto/tid";
+import type { Color, LegacyPublication, StandardPublication, Theme } from "../interfaces";
 import type { PublicationInfo } from "./types";
-
-export const DOCUMENT_COLLECTION = "site.standard.document";
-
-interface Color {
-	r?: number;
-	g?: number;
-	b?: number;
-	a?: number;
-}
-
-interface Theme {
-	bodyFont?: string;
-	headingFont?: string;
-	primary?: Color;
-	backgroundColor?: Color;
-	pageBackground?: Color;
-	showPageBackground?: boolean;
-	accentBackground?: Color;
-}
-
-interface StandardPublication {
-	name?: string;
-	url?: string;
-	theme?: Theme;
-}
-
-interface LegacyPublication {
-	name?: string;
-	base_path?: string;
-	theme?: Theme;
-}
 
 function toCss(color: Color | undefined): string | undefined {
 	if (!color || [color.r, color.g, color.b].some((c) => typeof c !== "number"))

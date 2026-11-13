@@ -1,7 +1,7 @@
 import i18next from "i18next";
 import { type TAbstractFile, TFile, TFolder } from "obsidian";
-import { isExcalidraw } from "../markdown/compilers/excalidraw";
 import type LeafletAtmosphere from "../main";
+import { isExcalidraw } from "../markdown/compilers/excalidraw";
 import { getBoolean, getString } from "../publish/frontmatter";
 import { Publisher } from "../publish/publisher";
 import { isMarkedNote } from "../publish/targets";

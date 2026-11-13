@@ -13,9 +13,9 @@ import {
 	TFile,
 } from "obsidian";
 import type { EmbedMode, TextReplacement } from "../interfaces";
-import { applyReplacements } from "./replacements";
 import { DataviewCompiler } from "./compilers/dataview";
 import { isExcalidraw } from "./compilers/excalidraw";
+import { applyReplacements } from "./replacements";
 
 const FENCE =
 	/^( {0,3})(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:\n {0,3}\2[`~]*[ \t]*(?=\n|$)|$)/gm;

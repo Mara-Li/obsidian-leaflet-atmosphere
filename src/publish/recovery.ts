@@ -1,8 +1,7 @@
 import type { App, FrontMatterCache, TFile } from "obsidian";
 import type { AtpClient, ListedRecord } from "../atproto/client";
 import { isValidRecordKey, parseAtUri } from "../atproto/tid";
-import type { LeafletAtmosphereSettings } from "../interfaces";
-import { DOCUMENT_COLLECTION } from "../leaflet/publications";
+import {DOCUMENT_COLLECTION, LeafletAtmosphereSettings} from "../interfaces";
 import type { StandardDocument } from "../leaflet/types";
 import { getString, slugify } from "./frontmatter";
 import { getStrings } from "./targets";

@@ -3,8 +3,8 @@ import { debounce, TFile } from "obsidian";
 import type LeafletAtmosphere from "../main";
 import { ConfirmModal } from "../ui/confirmModal";
 import { richNotice } from "../ui/notices";
-import { getStrings } from "./targets";
 import { Publisher } from "./publisher";
+import { getStrings } from "./targets";
 
 interface DeletedPost {
 	name: string;

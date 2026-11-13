@@ -186,6 +186,7 @@ export class DataviewCompiler {
 	}
 
 	private async executeJs(query: string, path: string, max = 50): Promise<string> {
+		// biome-ignore lint/correctness/noUndeclaredVariables: Obsidian globals
 		const div = createDiv();
 		const component = new Component();
 		component.load();

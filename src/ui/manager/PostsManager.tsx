@@ -3,20 +3,21 @@ import { debounce, setIcon, type TFile } from "obsidian";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { parseAtUri } from "../../atproto/tid";
 import {
-	publishMarkedFiles,
 	publishFile,
+	publishMarkedFiles,
 	publishSelection,
 	showError,
 } from "../../commands/actions";
-import { DOCUMENT_COLLECTION, documentUrl } from "../../leaflet/publications";
+import { documentUrl } from "../../leaflet/publications";
 import type { StandardDocument } from "../../leaflet/types";
 import type LeafletAtmosphere from "../../main";
 import { deletePosts } from "../../publish/deletions";
 import { notesByUri } from "../../publish/notes";
 import { linkNote, relinkNotes, unlinkedNotes } from "../../publish/relink";
 import { ConfirmModal } from "../confirmModal";
-import { richNotice } from "../notices";
 import { NoteSuggestModal } from "../noteSuggest";
+import { richNotice } from "../notices";
+import {DOCUMENT_COLLECTION} from "../../interfaces";
 
 interface Post {
 	uri: string;

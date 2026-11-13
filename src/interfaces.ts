@@ -1,4 +1,4 @@
-import type {PublicationInfo} from "./leaflet/types";
+import type { AspectRatio, BlobRef, PublicationInfo } from "./leaflet/types";
 
 export type WikilinkMode = "text" | "published";
 export type EmbedMode = "inline" | "link" | "page";
@@ -140,3 +140,63 @@ export const CODE_THEMES = [
 	"vitesse-dark",
 ];
 export const PUB_KEY_PREFIX = "publishKey:";
+export const DOCUMENT_COLLECTION = "site.standard.document";
+
+export interface Color {
+	r?: number;
+	g?: number;
+	b?: number;
+	a?: number;
+}
+
+export interface Theme {
+	bodyFont?: string;
+	headingFont?: string;
+	primary?: Color;
+	backgroundColor?: Color;
+	pageBackground?: Color;
+	showPageBackground?: boolean;
+	accentBackground?: Color;
+}
+
+export interface StandardPublication {
+	name?: string;
+	url?: string;
+	theme?: Theme;
+}
+
+export interface LegacyPublication {
+	name?: string;
+	// biome-ignore lint/style/useNamingConvention: web based request
+	base_path?: string;
+	theme?: Theme;
+}
+
+export const MAX_BLOB_SIZE = 1_000_000;
+export const PASSTHROUGH = new Set([
+	"image/png",
+	"image/jpeg",
+	"image/webp",
+	"image/gif",
+]);
+export const MIME_BY_EXT: Record<string, string> = {
+	png: "image/png",
+	jpg: "image/jpeg",
+	jpeg: "image/jpeg",
+	webp: "image/webp",
+	gif: "image/gif",
+	svg: "image/svg+xml",
+	bmp: "image/bmp",
+	avif: "image/avif",
+};
+export const IMAGE_EXTENSIONS = new Set(Object.keys(MIME_BY_EXT));
+
+export interface UploadedImage {
+	blob: BlobRef;
+	aspectRatio: AspectRatio;
+}
+
+export interface RawImage {
+	data: ArrayBuffer;
+	mime: string;
+}

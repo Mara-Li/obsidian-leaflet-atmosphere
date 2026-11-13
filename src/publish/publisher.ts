@@ -6,7 +6,6 @@ import type { PostTheme } from "../leaflet/fonts";
 import { ImageUploader } from "../leaflet/images";
 import { fetchLinkPreview, type LinkPreview } from "../leaflet/linkPreview";
 import {
-	DOCUMENT_COLLECTION,
 	documentUrl,
 	fetchPublicationTheme,
 	standaloneSite,
@@ -26,14 +25,6 @@ import type LeafletAtmosphere from "../main";
 import { renderMermaid } from "../markdown/compilers/mermaid";
 import { MarkdownConverter } from "../markdown/convert";
 import { Preprocessor } from "../markdown/preprocess";
-import { findExistingPost, type RecoveryContext } from "./recovery";
-import {
-	isMarkedNote,
-	noteTargets,
-	type PostLink,
-	readLinks,
-	writeLinks,
-} from "./targets";
 import {
 	getBoolean,
 	getDate,
@@ -43,6 +34,15 @@ import {
 	slugify,
 	unwrapLink,
 } from "./frontmatter";
+import { findExistingPost, type RecoveryContext } from "./recovery";
+import {
+	isMarkedNote,
+	noteTargets,
+	type PostLink,
+	readLinks,
+	writeLinks,
+} from "./targets";
+import {DOCUMENT_COLLECTION} from "../interfaces";
 
 const BLOB_PAGES_THRESHOLD = 100 * 1024;
 
