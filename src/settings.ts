@@ -1,5 +1,10 @@
 import i18next from "i18next";
-import { type App, PluginSettingTab, type SettingDefinitionItem } from "obsidian";
+import {
+	type App,
+	type ButtonComponent,
+	PluginSettingTab,
+	type SettingDefinitionItem,
+} from "obsidian";
 import type LeafletAtmosphere from "./main";
 import { compileRule } from "./markdown/replacements";
 
@@ -159,16 +164,19 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 						button
 							.setButtonText(t("settings.account.testButton"))
 							.setCta()
-							.onClick(async () => {
-								button.setDisabled(true);
-								await this.plugin.connect();
-								button.setDisabled(false);
-								this.update();
-							})
+							.onClick(() => void this.runButton(button, () => this.plugin.connect()))
 					);
 				},
 			},
 		];
+	}
+
+	/** Disable a button while its task runs, then refresh the tab. */
+	private async runButton(button: ButtonComponent, task: () => Promise<void>) {
+		button.setDisabled(true);
+		await task();
+		button.setDisabled(false);
+		this.update();
 	}
 
 	private publicationItems(): SettingDefinitionItem[] {
@@ -190,12 +198,9 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 					setting.addButton((button) =>
 						button
 							.setButtonText(t("settings.publication.refreshButton"))
-							.onClick(async () => {
-								button.setDisabled(true);
-								await this.plugin.refreshPublications();
-								button.setDisabled(false);
-								this.update();
-							})
+							.onClick(
+								() => void this.runButton(button, () => this.plugin.refreshPublications())
+							)
 					);
 				},
 			},
@@ -219,11 +224,11 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 							text
 								.setPlaceholder(t("settings.publication.keyPlaceholder"))
 								.setValue(pub.publishKey ?? "")
-								.onChange(async (value) => {
+								.onChange((value) => {
 									const key = value.trim();
 									if (key) pub.publishKey = key;
 									else delete pub.publishKey;
-									await this.plugin.saveSettings();
+									void this.plugin.saveSettings();
 								})
 						);
 					},
@@ -278,19 +283,19 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 							text
 								.setPlaceholder(t("settings.replacements.regex"))
 								.setValue(rule.regex)
-								.onChange(async (value) => {
+								.onChange((value) => {
 									rule.regex = value;
 									check(value);
-									await plugin.saveSettings();
+									void plugin.saveSettings();
 								});
 						});
 						setting.addText((text) =>
 							text
 								.setPlaceholder(t("settings.replacements.replacement"))
 								.setValue(rule.replacement)
-								.onChange(async (value) => {
+								.onChange((value) => {
 									rule.replacement = value;
-									await plugin.saveSettings();
+									void plugin.saveSettings();
 								})
 						);
 					},
