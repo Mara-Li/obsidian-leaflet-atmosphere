@@ -29,19 +29,16 @@ export function richNotice(content: NoticeContent): Notice {
 	let notice: Notice | null = null;
 	// biome-ignore lint/correctness/noUndeclaredVariables: Obsidian globals
 	const fragment = createFragment((f) => {
-		const root = f.createDiv({ cls: `leaflet-atmosphere-notice is-${content.tone}` });
-		const header = root.createDiv({ cls: "leaflet-atmosphere-notice-header" });
-		setIcon(
-			header.createSpan({ cls: "leaflet-atmosphere-notice-icon" }),
-			ICONS[content.tone]
-		);
+		const root = f.createDiv({ cls: `gazette-notice is-${content.tone}` });
+		const header = root.createDiv({ cls: "gazette-notice-header" });
+		setIcon(header.createSpan({ cls: "gazette-notice-icon" }), ICONS[content.tone]);
 		header.createSpan({ text: content.heading });
 		if (content.title)
-			root.createDiv({ cls: "leaflet-atmosphere-notice-title", text: content.title });
+			root.createDiv({ cls: "gazette-notice-title", text: content.title });
 		for (const line of [content.meta ?? []].flat())
-			root.createDiv({ cls: "leaflet-atmosphere-notice-meta", text: line });
+			root.createDiv({ cls: "gazette-notice-meta", text: line });
 		if (content.actions?.length) {
-			const actions = root.createDiv({ cls: "leaflet-atmosphere-notice-actions" });
+			const actions = root.createDiv({ cls: "gazette-notice-actions" });
 			for (const action of content.actions) {
 				const button = actions.createEl("button", { text: action.label });
 				button.addEventListener("click", (e) => {

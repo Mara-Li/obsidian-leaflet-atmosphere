@@ -1,6 +1,6 @@
 import i18next from "i18next";
 import { type TAbstractFile, TFile, TFolder } from "obsidian";
-import type LeafletAtmosphere from "../main";
+import type Gazette from "../main";
 import { isExcalidraw } from "../markdown/compilers/excalidraw";
 import { getBoolean, getString } from "../publish/frontmatter";
 import { Publisher } from "../publish/publisher";
@@ -23,14 +23,14 @@ export function showError(error: unknown) {
 const warn = (heading: string) =>
 	richNotice({ tone: "warning", heading, duration: 10000 });
 
-function publicationName(plugin: LeafletAtmosphere, site: string): string {
+function publicationName(plugin: Gazette, site: string): string {
 	return (
 		plugin.settings.publications.find((p) => p.uri === site)?.name ??
 		i18next.t("manager.personalPage")
 	);
 }
 
-export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?: string) {
+export async function publishFile(plugin: Gazette, file: TFile, site?: string) {
 	const progress = new PublishProgress(plugin.statusBarEl);
 	progress.update(i18next.t("notice.publishingNote", { name: file.basename }));
 	try {
@@ -61,7 +61,7 @@ export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?:
 	}
 }
 
-export async function pullFile(plugin: LeafletAtmosphere, file: TFile) {
+export async function pullFile(plugin: Gazette, file: TFile) {
 	try {
 		const found = await new Publisher(plugin).pull(file);
 		for (const post of found)
@@ -77,13 +77,13 @@ export async function pullFile(plugin: LeafletAtmosphere, file: TFile) {
 	}
 }
 
-export function publishFileTo(plugin: LeafletAtmosphere, file: TFile) {
+export function publishFileTo(plugin: Gazette, file: TFile) {
 	new PublicationModal(plugin.app, plugin.settings.publications, (site) => {
 		void publishFile(plugin, file, site);
 	}).open();
 }
 
-export function unpublishFile(plugin: LeafletAtmosphere, file: TFile) {
+export function unpublishFile(plugin: Gazette, file: TFile) {
 	new ConfirmModal(
 		plugin.app,
 		i18next.t("modal.unpublishTitle"),
@@ -104,18 +104,18 @@ export function unpublishFile(plugin: LeafletAtmosphere, file: TFile) {
 }
 
 /** The URI is only written by a real publication; a reserved note has just a URL. */
-export function isPublished(plugin: LeafletAtmosphere, file: TFile): boolean {
+export function isPublished(plugin: Gazette, file: TFile): boolean {
 	const fm = plugin.app.metadataCache.getFileCache(file)?.frontmatter;
 	return !!getString(fm, plugin.settings.uriKey);
 }
 
-export function publishedUrl(plugin: LeafletAtmosphere, file: TFile): string | undefined {
+export function publishedUrl(plugin: Gazette, file: TFile): string | undefined {
 	if (!isPublished(plugin, file)) return undefined;
 	const fm = plugin.app.metadataCache.getFileCache(file)?.frontmatter;
 	return getString(fm, plugin.settings.urlKey);
 }
 
-export function publishMarkedFiles(plugin: LeafletAtmosphere) {
+export function publishMarkedFiles(plugin: Gazette) {
 	const key = plugin.settings.publishKey;
 	const publisher = new Publisher(plugin);
 	const files = key
@@ -134,7 +134,7 @@ export function publishMarkedFiles(plugin: LeafletAtmosphere) {
 }
 
 /** Whether a note may be published: not blocked, marked when required, not a drawing. */
-export function canPublish(plugin: LeafletAtmosphere, file: TFile): boolean {
+export function canPublish(plugin: Gazette, file: TFile): boolean {
 	if (file.extension !== "md" || isExcalidraw(plugin.app, file)) return false;
 	const { publishKey, requirePublishFlag } = plugin.settings;
 	const fm = plugin.app.metadataCache.getFileCache(file)?.frontmatter;
@@ -143,10 +143,7 @@ export function canPublish(plugin: LeafletAtmosphere, file: TFile): boolean {
 }
 
 /** Publishable notes of a selection, folders included. */
-export function publishableNotes(
-	plugin: LeafletAtmosphere,
-	items: TAbstractFile[]
-): TFile[] {
+export function publishableNotes(plugin: Gazette, items: TAbstractFile[]): TFile[] {
 	const notes = new Map<string, TFile>();
 	const visit = (item: TAbstractFile) => {
 		if (item instanceof TFolder) item.children.forEach(visit);
@@ -157,7 +154,7 @@ export function publishableNotes(
 	return [...notes.values()].sort((a, b) => a.path.localeCompare(b.path));
 }
 
-export function publishSelection(plugin: LeafletAtmosphere, items: TAbstractFile[]) {
+export function publishSelection(plugin: Gazette, items: TAbstractFile[]) {
 	const files = publishableNotes(plugin, items);
 	if (files.length === 0) {
 		richNotice({ tone: "info", heading: i18next.t("notice.noSelection") });
@@ -175,12 +172,7 @@ export function publishSelection(plugin: LeafletAtmosphere, items: TAbstractFile
 }
 
 /** Ask before publishing several notes, unless disabled in the settings. */
-function confirmBatch(
-	plugin: LeafletAtmosphere,
-	title: string,
-	message: string,
-	run: () => void
-) {
+function confirmBatch(plugin: Gazette, title: string, message: string, run: () => void) {
 	if (!plugin.settings.confirmBatch) {
 		run();
 		return;
@@ -195,7 +187,7 @@ function confirmBatch(
 	).open();
 }
 
-async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: TFile[]) {
+async function runBatch(plugin: Gazette, publisher: Publisher, files: TFile[]) {
 	const progress = new PublishProgress(plugin.statusBarEl);
 	let created = 0;
 	const failed: string[] = [];

@@ -22,7 +22,7 @@ import type {
 	StandardDocument,
 	StrongRef,
 } from "../leaflet/types";
-import type LeafletAtmosphere from "../main";
+import type Gazette from "../main";
 import { renderMermaid } from "../markdown/compilers/mermaid";
 import { MarkdownConverter } from "../markdown/convert";
 import { Preprocessor } from "../markdown/preprocess";
@@ -97,7 +97,7 @@ export class Publisher {
 	private previews = new Map<string, Promise<LinkPreview>>();
 	private themes = new Map<string, Promise<Partial<PublicationInfo> | null>>();
 
-	constructor(private plugin: LeafletAtmosphere) {}
+	constructor(private plugin: Gazette) {}
 
 	private get settings() {
 		return this.plugin.settings;

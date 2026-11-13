@@ -1,6 +1,6 @@
 import i18next from "i18next";
 import { type Menu, type TAbstractFile, TFile, TFolder } from "obsidian";
-import type LeafletAtmosphere from "../main";
+import type Gazette from "../main";
 import { openPostsManager } from "../ui/manager/view";
 import { richNotice } from "../ui/notices";
 import {
@@ -16,17 +16,13 @@ import {
 	unpublishFile,
 } from "./actions";
 
-function markdownFile(plugin: LeafletAtmosphere): TFile | null {
+function markdownFile(plugin: Gazette): TFile | null {
 	const file = plugin.app.workspace.getActiveFile();
 	return file?.extension === "md" ? file : null;
 }
 
 /** "Publish" entry of the file and editor menus, hidden for notes that cannot be published. */
-function addPublishItem(
-	plugin: LeafletAtmosphere,
-	menu: Menu,
-	file: TAbstractFile | null
-) {
+function addPublishItem(plugin: Gazette, menu: Menu, file: TAbstractFile | null) {
 	if (file instanceof TFolder)
 		return addSelectionItem(plugin, menu, [file], "commands.folderMenu");
 	if (!(file instanceof TFile) || !canPublish(plugin, file)) return;
@@ -41,7 +37,7 @@ function addPublishItem(
 }
 
 function addSelectionItem(
-	plugin: LeafletAtmosphere,
+	plugin: Gazette,
 	menu: Menu,
 	items: TAbstractFile[],
 	title: "commands.folderMenu" | "commands.filesMenu"
@@ -57,7 +53,7 @@ function addSelectionItem(
 	);
 }
 
-export function registerCommands(plugin: LeafletAtmosphere) {
+export function registerCommands(plugin: Gazette) {
 	const t = i18next.t;
 
 	plugin.addCommand({

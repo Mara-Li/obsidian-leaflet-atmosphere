@@ -35,4 +35,4 @@ Each post is a plain Markdown note. Formatting such as ==highlights== (in ==🟢
 
 See you around the garden.
 
-[^stack]: The whole stack is Obsidian, the *Leaflet Atmosphere* plugin and an AT Protocol account. Nothing else.
+[^stack]: The whole stack is Obsidian, the *Gazette* plugin and an AT Protocol account. Nothing else.

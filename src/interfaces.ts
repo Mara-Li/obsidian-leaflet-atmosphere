@@ -12,7 +12,7 @@ export interface TextReplacement {
 	replacement: string;
 }
 
-export interface LeafletAtmosphereSettings {
+export interface GazetteSettings {
 	identifier: string;
 	appPasswordSecret: string;
 	pdsUrl: string;
@@ -60,7 +60,7 @@ export interface LeafletAtmosphereSettings {
 	openAfterPublish: boolean;
 }
 
-export const DEFAULT_SETTINGS: LeafletAtmosphereSettings = {
+export const DEFAULT_SETTINGS: GazetteSettings = {
 	identifier: "",
 	appPasswordSecret: "",
 	pdsUrl: "",

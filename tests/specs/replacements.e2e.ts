@@ -19,7 +19,7 @@ async function editRules(action: "add" | "reorder" | "delete"): Promise<TextRepl
 		const setting = app.setting as unknown as {
 			pluginTabs: { id: string; getSettingDefinitions(): { name?: string; items?: unknown[] }[] }[];
 		};
-		const tab = setting.pluginTabs.find((t) => t.id === "leaflet-atmosphere")!;
+		const tab = setting.pluginTabs.find((t) => t.id === "gazette")!;
 		const page = tab.getSettingDefinitions().find((d) => d.name === "Text replacement")!;
 		const list = page.items![1] as ListDefinition;
 		if (act === "add") list.addItem.action();
@@ -27,7 +27,7 @@ async function editRules(action: "add" | "reorder" | "delete"): Promise<TextRepl
 		else list.onDelete(0);
 	}, action);
 	await browser.pause(200);
-	return browser.executeObsidian(({ plugins }) => plugins.leafletAtmosphere.settings.replacements);
+	return browser.executeObsidian(({ plugins }) => plugins.gazette.settings.replacements);
 }
 
 describe("Text replacement", function () {

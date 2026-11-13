@@ -3,13 +3,13 @@
 import i18next from "i18next";
 import { type App, PluginSettingTab, type SettingDefinitionItem } from "obsidian";
 import { CODE_THEMES, PUB_KEY_PREFIX } from "./interfaces";
-import type LeafletAtmosphere from "./main";
+import type Gazette from "./main";
 import { compileRule } from "./markdown/replacements";
 
-export class LeafletAtmosphereSettingTab extends PluginSettingTab {
-	plugin: LeafletAtmosphere;
+export class GazetteSettingTab extends PluginSettingTab {
+	plugin: Gazette;
 
-	constructor(app: App, plugin: LeafletAtmosphere) {
+	constructor(app: App, plugin: Gazette) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -251,7 +251,7 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 					name: "",
 					searchable: false,
 					render: (setting) => {
-						setting.settingEl.addClass("leaflet-atmosphere-replacement");
+						setting.settingEl.addClass("gazette-replacement");
 						// Same behaviour as `validate`: an invalid regex is shown, not saved
 						const check = (value: string) => {
 							const valid = !value || !!compileRule(value);

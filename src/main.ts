@@ -4,15 +4,15 @@ import { AtpClient } from "./atproto/client";
 import { registerCommands } from "./commands";
 import { showError } from "./commands/actions";
 import { resources, translationLanguage } from "./i18n";
-import { DEFAULT_SETTINGS, type LeafletAtmosphereSettings } from "./interfaces";
+import { DEFAULT_SETTINGS, type GazetteSettings } from "./interfaces";
 import { fetchPublications } from "./leaflet/publications";
 import { DeletionWatcher } from "./publish/deletions";
-import { LeafletAtmosphereSettingTab } from "./settings";
+import { GazetteSettingTab } from "./settings";
 import { MANAGER_VIEW, PostsManagerView } from "./ui/manager/view";
 import { richNotice } from "./ui/notices";
 
-export default class LeafletAtmosphere extends Plugin {
-	settings: LeafletAtmosphereSettings = { ...DEFAULT_SETTINGS };
+export default class Gazette extends Plugin {
+	settings: GazetteSettings = { ...DEFAULT_SETTINGS };
 	/** Publication progress, desktop only: mobile has no status bar. */
 	statusBarEl: HTMLElement | null = null;
 	/** "changed" is triggered when posts are published, linked or deleted. */
@@ -33,13 +33,13 @@ export default class LeafletAtmosphere extends Plugin {
 		});
 		if (!Platform.isMobile) {
 			this.statusBarEl = this.addStatusBarItem();
-			this.statusBarEl.addClass("leaflet-atmosphere-status");
+			this.statusBarEl.addClass("gazette-status");
 			this.statusBarEl.hide();
 		}
 		this.registerView(MANAGER_VIEW, (leaf) => new PostsManagerView(leaf, this));
 		new DeletionWatcher(this).register();
 		registerCommands(this);
-		this.addSettingTab(new LeafletAtmosphereSettingTab(this.app, this));
+		this.addSettingTab(new GazetteSettingTab(this.app, this));
 	}
 
 	onunload() {
@@ -54,7 +54,7 @@ export default class LeafletAtmosphere extends Plugin {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
-			(await this.loadData()) as Partial<LeafletAtmosphereSettings>
+			(await this.loadData()) as Partial<GazetteSettings>
 		);
 	}
 

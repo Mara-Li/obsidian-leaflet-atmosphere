@@ -2,7 +2,7 @@ import { browser } from "@wdio/globals";
 import * as fs from "fs";
 import * as path from "path";
 import { obsidianPage } from "wdio-obsidian-service";
-import { DEFAULT_SETTINGS, type LeafletAtmosphereSettings } from "../../src/interfaces";
+import { DEFAULT_SETTINGS, type GazetteSettings } from "../../src/interfaces";
 import type { StandardDocument } from "../../src/leaflet/types";
 
 export const DID = "did:plc:leaflettest";
@@ -11,7 +11,7 @@ export const PUBLICATION = {
 	name: "Test garden",
 	url: "https://garden.example.com",
 };
-const PLUGIN_ID = "leaflet-atmosphere";
+const PLUGIN_ID = "gazette";
 
 export interface FakeStore {
 	records: Record<string, StandardDocument>;
@@ -37,13 +37,13 @@ function notesOf(vault: string, dir = vault, out: Record<string, string> = {}) {
 
 /** Reset the vault and replace the PDS client of the plugin by an in-memory fake. */
 export async function setup(
-	settings: Partial<LeafletAtmosphereSettings> = {},
+	settings: Partial<GazetteSettings> = {},
 	vault = TEST_VAULT
 ): Promise<void> {
 	const notes = notesOf(vault);
 	// Restoring the vault deletes notes: their posts are not the business of the next test
 	await browser.executeObsidian(({ plugins }) => {
-		plugins.leafletAtmosphere.settings.onNoteDeleted = "keep";
+		plugins.gazette.settings.onNoteDeleted = "keep";
 	});
 	await obsidianPage.resetVault(vault, notes);
 	// Wait for the metadata cache to hold the properties of the restored notes
@@ -78,7 +78,7 @@ export async function setup(
 	);
 	await browser.executeObsidian(
 		({ plugins }, { did, defaults, overrides }) => {
-			const plugin = plugins.leafletAtmosphere;
+			const plugin = plugins.gazette;
 			const store = {
 				records: {} as Record<string, unknown>,
 				blobs: [] as unknown[],
@@ -243,7 +243,7 @@ export async function setPdsDelay(ms: number): Promise<void> {
 /** Text and progress value of the status bar item, or null when hidden. */
 export async function statusBar(): Promise<{ text: string; value: number | null } | null> {
 	return browser.executeObsidian(() => {
-		const el = activeDocument.querySelector<HTMLElement>(".status-bar .leaflet-atmosphere-status");
+		const el = activeDocument.querySelector<HTMLElement>(".status-bar .gazette-status");
 		if (!el || el.style.display === "none" || !el.textContent) return null;
 		const bar = el.querySelector("progress");
 		return {

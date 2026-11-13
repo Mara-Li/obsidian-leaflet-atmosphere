@@ -3,14 +3,14 @@ import { browser, expect } from "@wdio/globals";
 describe("Plugin", function () {
 	it("is loaded", async function () {
 		const loaded = await browser.executeObsidian(
-			({ plugins }) => plugins.leafletAtmosphere?._loaded ?? false
+			({ plugins }) => plugins.gazette?._loaded ?? false
 		);
 		expect(loaded).toBe(true);
 	});
 
 	it("registers its commands", async function () {
 		const commands = await browser.executeObsidian(({ app }) =>
-			Object.keys(app.commands.commands).filter((id) => id.startsWith("leaflet-atmosphere:"))
+			Object.keys(app.commands.commands).filter((id) => id.startsWith("gazette:"))
 		);
 		expect(commands.sort()).toEqual(
 			[
@@ -23,7 +23,7 @@ describe("Plugin", function () {
 				"pull-note",
 				"refresh-publications",
 				"unpublish-note",
-			].map((id) => `leaflet-atmosphere:${id}`)
+			].map((id) => `gazette:${id}`)
 		);
 	});
 });

@@ -1,4 +1,4 @@
-# Leaflet Atmosphere
+# Gazette
 
 Publish your Obsidian notes to [Leaflet](https://leaflet.pub), straight to your AT Protocol repository (PDS). Works on desktop and mobile.
 
@@ -7,7 +7,7 @@ Documents are written as [`site.standard.document`](https://standard.site) recor
 ## ⚙️ Setup
 
 1. Create an app password in Bluesky: **Settings → Privacy and security → App passwords**.
-2. In **Settings → Leaflet Atmosphere → Account**, fill in your handle (`alice.bsky.social`, `@alice.bsky.social` or a `bsky.app` profile link also work), your DID or your email, and select the app password (it is kept in Obsidian's secret storage, not in `data.json`).
+2. In **Settings → Gazette → Account**, fill in your handle (`alice.bsky.social`, `@alice.bsky.social` or a `bsky.app` profile link also work), your DID or your email, and select the app password (it is kept in Obsidian's secret storage, not in `data.json`).
 3. Select **Connect**: your publications are loaded and the first one becomes the default publication. Change it in **Publication**.
 
 If your account is not hosted on Bluesky, the PDS is resolved from your handle. You can also set it manually (`https://` and a trailing `/xrpc` are optional). An email login goes through `bsky.social` unless a PDS is set.
@@ -125,13 +125,13 @@ Nothing else is collected or sent.
 ## 📥 Installation
 
 - [ ] From Obsidian's community plugins
-- [x] Using BRAT with `https://github.com/Mara-Li/leaflet-atmosphere`
+- [x] Using BRAT with `https://github.com/Mara-Li/gazette`
 - [x] From the release page:
     - Download the latest release
-    - Unzip `leaflet-atmosphere.zip` in `.obsidian/plugins/` path
+    - Unzip `gazette.zip` in `.obsidian/plugins/` path
     - In Obsidian settings, reload the plugin
     - Enable the plugin
-- [x] Manually: copy `main.js`, `manifest.json` and `styles.css` (if any) to `<Vault>/.obsidian/plugins/leaflet-atmosphere/`
+- [x] Manually: copy `main.js`, `manifest.json` and `styles.css` (if any) to `<Vault>/.obsidian/plugins/gazette/`
 
 ## 🛠️ Development
 
