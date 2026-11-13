@@ -7,6 +7,8 @@ cover: "[[cover-garden.png]]"
 date: 2026-11-01
 slug: welcome
 leaflet_publish: true
+leaflet_uri: at://did:plc:6hwd4n5x6b2mclyuv3kzjfyi/site.standard.document/welcome
+leaflet_url: https://obsidian-bridge.leaflet.pub/welcome
 ---
 # Welcome to the Garden
 

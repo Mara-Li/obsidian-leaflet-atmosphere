@@ -1,9 +1,12 @@
 ---
 description: Drawings made with Excalidraw, exported as images when publishing.
-tags: [drawing]
+tags:
+  - drawing
 date: 2026-11-11
 slug: sketchbook
 leaflet_publish: true
+leaflet_uri: at://did:plc:6hwd4n5x6b2mclyuv3kzjfyi/site.standard.document/sketchbook
+leaflet_url: https://obsidian-bridge.leaflet.pub/sketchbook
 ---
 # Sketchbook
 

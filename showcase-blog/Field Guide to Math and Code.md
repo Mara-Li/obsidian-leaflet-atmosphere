@@ -1,9 +1,13 @@
 ---
 description: Equations, code in several languages, a diagram and a table.
-tags: [math, code]
+tags:
+  - math
+  - code
 date: 2026-11-09
 slug: field-guide-math-code
 leaflet_publish: true
+leaflet_uri: at://did:plc:6hwd4n5x6b2mclyuv3kzjfyi/site.standard.document/field-guide-math-code
+leaflet_url: https://obsidian-bridge.leaflet.pub/field-guide-math-code
 ---
 # Field Guide to Math and Code
 

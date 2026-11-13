@@ -1,11 +1,15 @@
 ---
 description: Embeds, links and small habits that keep a note collection alive.
-tags: [pkm, obsidian]
+tags:
+  - pkm
+  - obsidian
 cover: "[[notebook.svg]]"
 date: 2026-11-07
 slug: notes-on-note-taking
 leaflet_publish: true
 leaflet_comments: false
+leaflet_uri: at://did:plc:6hwd4n5x6b2mclyuv3kzjfyi/site.standard.document/notes-on-note-taking
+leaflet_url: https://obsidian-bridge.leaflet.pub/notes-on-note-taking
 ---
 Most of my notes are small and reused everywhere. Obsidian embeds make that easy, and they survive publishing: the content is inserted in place.
 

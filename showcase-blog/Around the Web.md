@@ -1,9 +1,12 @@
 ---
 description: Bluesky posts, videos and link cards in a Leaflet post.
-tags: [links]
+tags:
+  - links
 date: 2026-11-12
 slug: around-the-web
 leaflet_publish: true
+leaflet_uri: at://did:plc:6hwd4n5x6b2mclyuv3kzjfyi/site.standard.document/around-the-web
+leaflet_url: https://obsidian-bridge.leaflet.pub/around-the-web
 ---
 # Around the Web
 

@@ -1,11 +1,16 @@
 ---
 title: A week of sourdough, day by day
 description: A beginner's diary of feeding a starter and baking a first loaf.
-tags: [bread, sourdough, diary]
+tags:
+  - bread
+  - sourdough
+  - diary
 cover: assets/cover-sourdough.png
 date: 2026-11-04
 slug: a-week-of-sourdough
 leaflet_publish: true
+leaflet_uri: at://did:plc:6hwd4n5x6b2mclyuv3kzjfyi/site.standard.document/a-week-of-sourdough
+leaflet_url: https://obsidian-bridge.leaflet.pub/a-week-of-sourdough
 ---
 I finally did it: a starter, a schedule and seven days of flour everywhere. Here is the diary, with every mistake left in.
 

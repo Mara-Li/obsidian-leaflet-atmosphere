@@ -1,3 +1,7 @@
+---
+leaflet_uri: at://did:plc:6hwd4n5x6b2mclyuv3kzjfyi/site.standard.document/3n24gbfpn22yi
+leaflet_url: https://obsidian-bridge.leaflet.pub/3n24gbfpn22yi
+---
 # Showcase blog
 
 A small blog to try Leaflet Atmosphere on a real Leaflet publication. Each post exercises a part of the conversion.
