@@ -37,6 +37,9 @@ Somewhere around day five things got interesting:
 
 Not bad for a first try! The crust was thick, the crumb a bit tight. Next time, a longer bulk fermentation.
 
+> [!grid] The week in pictures
+> ![[cover-sourdough.png]] ![[crumb.jpg]]
+
 > [!warning] Lesson learned
 > Never put a closed jar of active starter in a warm oven. **Never.**
 

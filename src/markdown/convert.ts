@@ -84,6 +84,11 @@ function dateTimeBlock(text: string): LeafletBlock | null {
 	return { $type: "pub.leaflet.blocks.text", plaintext: `📅 ${format.format(date)}` };
 }
 
+/** Callouts turned into image galleries when they hold images. */
+const GALLERY_CALLOUTS = new Set(["grid", "gallery"]);
+type GalleryFormat = "grid" | "carousel" | "strip" | "masonry";
+const GALLERY_FORMATS = new Set<string>(["grid", "carousel", "strip", "masonry"]);
+
 /** Author and record key of a Bluesky post link, from any client or an at:// URI. */
 function parseBskyPost(url: string): { actor: string; rkey: string } | null {
 	const at = /^at:\/\/([^/\s]+)\/app\.bsky\.feed\.post\/([a-z0-9]+)$/i.exec(url);
@@ -347,10 +352,61 @@ export class MarkdownConverter {
 		return callout ? this.callout(callout, inner) : mergeQuote(inner, null);
 	}
 
+	/**
+	 * A grid callout holding images becomes an image gallery, placed where its first
+	 * image was; its other blocks stay around it. Null when it has no image.
+	 */
+	private async gallery(
+		callout: Callout,
+		inner: LeafletBlock[]
+	): Promise<LeafletBlock[] | null> {
+		const images = inner.filter(
+			(b): b is ImageBlock => b.$type === "pub.leaflet.blocks.image"
+		);
+		if (images.length === 0) return null;
+		const format = callout.metadata.find((m): m is GalleryFormat =>
+			GALLERY_FORMATS.has(m)
+		);
+		const gallery: LeafletBlock =
+			images.length === 1
+				? images[0]!
+				: {
+						$type: "pub.leaflet.blocks.imageGallery",
+						images: images.map((img) => ({
+							$type: "pub.leaflet.blocks.imageGallery#image",
+							image: img.image,
+							aspectRatio: img.aspectRatio,
+							...(img.alt && { alt: img.alt }),
+						})),
+						format: format ?? "grid",
+					};
+		const out: LeafletBlock[] = [];
+		if (callout.title) {
+			const col = new InlineCollector();
+			await this.renderInline(callout.title, col, [F.bold]);
+			const title = col.text().trim();
+			if (!title.isBlank)
+				out.push({ $type: "pub.leaflet.blocks.text", ...title.toBlockFields() });
+		}
+		let placed = false;
+		for (const block of inner) {
+			if (block.$type !== "pub.leaflet.blocks.image") out.push(block);
+			else if (!placed) {
+				out.push(gallery);
+				placed = true;
+			}
+		}
+		return out;
+	}
+
 	private async callout(
 		callout: Callout,
 		inner: LeafletBlock[]
 	): Promise<LeafletBlock[]> {
+		if (GALLERY_CALLOUTS.has(callout.type)) {
+			const gallery = await this.gallery(callout, inner);
+			if (gallery) return gallery;
+		}
 		const { calloutMode, foldableCalloutsAsPages } = this.deps.settings;
 		// A foldable callout hides its content: a sub-page does the same on Leaflet
 		const mode = callout.foldable && foldableCalloutsAsPages ? "page" : calloutMode;
@@ -872,6 +928,8 @@ interface Callout {
 	title: Generic[] | null;
 	/** Written `[!type]+` or `[!type]-`: folded in Obsidian. */
 	foldable: boolean;
+	/** Words after the type: `[!grid|masonry]`. */
+	metadata: string[];
 }
 
 /** Detect an Obsidian callout (`> [!type] title`) and strip its marker from the tokens. */
@@ -880,7 +938,7 @@ function extractCallout(children: Token[]): Callout | null {
 	if (paragraph?.type !== "paragraph") return null;
 	const first = paragraph.tokens[0];
 	if (first?.type !== "text") return null;
-	const match = /^\[!([\w-]+)\]([+-]?)[ \t]*/.exec(first.text as string);
+	const match = /^\[!([\w-]+)(?:\|([^\]]*))?\]([+-]?)[ \t]*/.exec(first.text as string);
 	if (!match) return null;
 
 	const rest: Generic[] = [
@@ -918,7 +976,11 @@ function extractCallout(children: Token[]): Callout | null {
 	return {
 		type: match[1]!.toLowerCase(),
 		title: hasTitle ? title : null,
-		foldable: match[2] !== "",
+		foldable: match[3] !== "",
+		metadata: (match[2] ?? "")
+			.toLowerCase()
+			.split(/[|,\s]+/)
+			.filter(Boolean),
 	};
 }
 

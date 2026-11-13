@@ -102,6 +102,17 @@ export interface WebsiteBlock {
 	previewImage?: BlobRef;
 }
 
+export interface ImageGalleryBlock {
+	$type: "pub.leaflet.blocks.imageGallery";
+	images: {
+		$type: "pub.leaflet.blocks.imageGallery#image";
+		image: BlobRef;
+		aspectRatio: AspectRatio;
+		alt?: string;
+	}[];
+	format?: "grid" | "carousel" | "strip" | "masonry";
+}
+
 export interface StandardSitePostBlock {
 	$type: "pub.leaflet.blocks.standardSitePost";
 	uri: string;
@@ -169,6 +180,7 @@ export type LeafletBlock =
 	| HeaderBlock
 	| BlockquoteBlock
 	| ImageBlock
+	| ImageGalleryBlock
 	| CodeBlock
 	| MathBlock
 	| HorizontalRuleBlock
