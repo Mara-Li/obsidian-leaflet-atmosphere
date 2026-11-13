@@ -1,43 +1,43 @@
 name: Release obsidian plugin
 
 on:
-    workflow_dispatch:
-        inputs:
-            bump:
-                default: false
-                description: "Bump version based on semantic release"
-                type: boolean
-                required: false
-            beta:
-                default: false
-                description: "Make a beta release"
-                type: boolean
-                required: false
-    push:
-        tags:
-            - "*"
+  workflow_dispatch:
+    inputs:
+      bump:
+        default: false
+        description: "Bump version based on semantic release"
+        type: boolean
+        required: false
+      beta:
+        default: false
+        description: "Make a beta release"
+        type: boolean
+        required: false
+  push:
+    tags:
+      - "*"
 permissions:
   contents: write
   id-token: write
   attestations: write
 
 jobs:
-    release:
-        if: (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && !inputs.bump)
-        uses: mara-li/reusable-workflows/.github/workflows/obsidian-plugin-release.yaml@main
+  release:
+    if: (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && !inputs.bump)
+    uses: mara-li/reusable-workflows/.github/workflows/obsidian-plugin-release.yaml@main
 
-        with:
-            PLUGIN_NAME: leaflet-atmosphere
-            CACHE: "pnpm"
-        secrets:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      PLUGIN_NAME: gazette
+      CACHE: "pnpm"
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    bump-version-and-release:
-        if: ${{ inputs.bump || false }}
-        uses: mara-li/reusable-workflows/.github/workflows/obsidian-plugin-bump-version.yaml@main
-        with:
-            PLUGIN_NAME: leaflet-atmosphere
-            BETA: ${{ inputs.beta || false}}
-            CACHE: "pnpm"
-        secrets:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  bump-version-and-release:
+    if: ${{ inputs.bump || false }}
+    uses: mara-li/reusable-workflows/.github/workflows/obsidian-plugin-bump-version.yaml@main
+    with:
+      PLUGIN_NAME: gazette
+      BETA: ${{ inputs.beta || false}}
+      CACHE: "pnpm"
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
