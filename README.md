@@ -36,6 +36,20 @@ If a note lost its properties (sync issue, failed write…), publishing it again
 
 When a published note is deleted from the vault, the plugin asks whether to delete its post too (or always deletes it, or keeps it: **Settings → Deleted notes**). Several notes deleted at once (a folder) are asked about together.
 
+### Several publications
+
+A note can be published to several publications, with one post on each:
+
+- list them in `leaflet_publication`:
+  ```yaml
+  leaflet_publication:
+    - My garden
+    - Work blog
+  ```
+- or give a publication its own publish property (**Settings → Publication → Publish property per publication**, e.g. `publish_work`): notes where it is `true` are published there, and count as marked for **Publish all marked notes**.
+
+Both can be combined. With several posts, `leaflet_uri` and `leaflet_url` become lists (in the same order). When the slug is already used by the post on another publication, the next one gets `<slug>-<publication name>`. Unpublishing a note deletes all its posts; deleting one of them from the posts manager keeps the others.
+
 Links to another note point to its published post. When the linked note is marked with `leaflet_publish: true` but not published yet, its future address is reserved: only `leaflet_url` is saved in its properties (`leaflet_uri` is written by the publication itself), so the link works as soon as that note is published. The commands that need a published post (copy, open, delete) are not offered on a reserved note. Links to unmarked notes become plain text.
 
 ### Properties
@@ -49,7 +63,7 @@ Links to another note point to its published post. When the linked note is marke
 | Cover image | `cover` | Vault path, `[[wikilink]]` or URL. |
 | Publication date | `date` | Defaults to the first publication date. |
 | Slug | `slug` | Record key used in the URL on first publish (`https://you.leaflet.pub/<slug>`). |
-| Publication | `leaflet_publication` | Name, URL or AT-URI of a publication, or `none` for your personal page. |
+| Publication | `leaflet_publication` | Name, URL or AT-URI of a publication, or `none` for your personal page. A list publishes the note to each of them. |
 | Preferences | `leaflet_discover`, `leaflet_comments`, `leaflet_mentions`, `leaflet_recommends` | `true` / `false`, override the defaults of the settings. |
 
 The keys of the first seven properties can be changed in the settings. Deleting a note from Leaflet sets `leaflet_publish` back to `false`.

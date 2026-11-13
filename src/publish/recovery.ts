@@ -5,6 +5,7 @@ import type { LeafletAtmosphereSettings } from "../interfaces";
 import { DOCUMENT_COLLECTION } from "../leaflet/publications";
 import type { StandardDocument } from "../leaflet/types";
 import { getString, slugify } from "./frontmatter";
+import { getStrings } from "./targets";
 
 export interface FoundPost {
 	rkey: string;
@@ -79,9 +80,14 @@ function claimedByAnotherNote(ctx: RecoveryContext, file: TFile, rkey: string): 
 	const { uriKey } = ctx.settings;
 	return ctx.app.vault.getMarkdownFiles().some((other) => {
 		if (other.path === file.path) return false;
-		const uri = getString(ctx.app.metadataCache.getFileCache(other)?.frontmatter, uriKey);
-		const parsed = uri ? parseAtUri(uri) : null;
-		return parsed?.collection === DOCUMENT_COLLECTION && parsed.rkey === rkey;
+		const uris = getStrings(
+			ctx.app.metadataCache.getFileCache(other)?.frontmatter,
+			uriKey
+		);
+		return uris.some((uri) => {
+			const parsed = parseAtUri(uri);
+			return parsed?.collection === DOCUMENT_COLLECTION && parsed.rkey === rkey;
+		});
 	});
 }
 
@@ -92,21 +98,31 @@ function claimedByAnotherNote(ctx: RecoveryContext, file: TFile, rkey: string): 
 export async function findExistingPost(
 	ctx: RecoveryContext,
 	file: TFile,
-	fm: FrontMatterCache | undefined
+	fm: FrontMatterCache | undefined,
+	site?: string
 ): Promise<FoundPost | null> {
-	for (const rkey of candidateKeys(ctx.settings, file, fm)) {
+	const inSite = (record: StandardDocument) => site === undefined || record.site === site;
+	const keys = candidateKeys(ctx.settings, file, fm);
+	// A post in another publication than the first one may use the slug and its name
+	const pub = ctx.settings.publications.find((p) => p.uri === site);
+	const explicit = getString(fm, ctx.settings.slugKey);
+	const slug =
+		explicit || ctx.settings.useSlugAsRecordKey ? slugify(explicit ?? file.basename) : "";
+	if (slug && pub) keys.push(slugify(`${slug}-${pub.name}`));
+	for (const rkey of keys) {
 		if (claimedByAnotherNote(ctx, file, rkey)) continue;
 		const record = await ctx.client.getRecord<StandardDocument>(
 			DOCUMENT_COLLECTION,
 			rkey
 		);
-		if (record) return { rkey, record, by: "key" };
+		if (record && inSite(record.value)) return { rkey, record, by: "key" };
 	}
 	const title = normalizeTitle(expectedTitle(ctx.app, ctx.settings, file, fm));
 	const matches = (await ctx.listDocuments()).filter((r) => {
 		const rkey = parseAtUri(r.uri)?.rkey;
 		return (
 			!!rkey &&
+			inSite(r.value) &&
 			normalizeTitle(r.value.title ?? "") === title &&
 			!claimedByAnotherNote(ctx, file, rkey)
 		);

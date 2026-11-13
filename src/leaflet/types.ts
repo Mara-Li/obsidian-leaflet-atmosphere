@@ -246,4 +246,6 @@ export interface PublicationInfo {
 	textColor?: string;
 	backgroundColor?: string;
 	accentColor?: string;
+	/** Note property that publishes a note to this publication when true. */
+	publishKey?: string;
 }

@@ -1,6 +1,6 @@
 import type { App, TFile } from "obsidian";
 import type { LeafletAtmosphereSettings } from "../interfaces";
-import { getString } from "./frontmatter";
+import { getStrings } from "./targets";
 
 /** Notes of the vault linked to a post, by record URI. */
 export function notesByUri(
@@ -11,8 +11,7 @@ export function notesByUri(
 	if (!settings.uriKey) return out;
 	for (const file of app.vault.getMarkdownFiles()) {
 		const fm = app.metadataCache.getFileCache(file)?.frontmatter;
-		const uri = getString(fm, settings.uriKey);
-		if (uri) out.set(uri, file);
+		for (const uri of getStrings(fm, settings.uriKey)) out.set(uri, file);
 	}
 	return out;
 }

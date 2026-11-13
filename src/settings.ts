@@ -191,6 +191,36 @@ export class LeafletAtmosphereSettingTab extends PluginSettingTab {
 					);
 				},
 			},
+			...this.publishKeyItems(),
+		];
+	}
+
+	private publishKeyItems(): SettingDefinitionItem[] {
+		const t = i18next.t;
+		const pubs = this.plugin.settings.publications;
+		if (pubs.length === 0) return [];
+		return [
+			{
+				type: "group",
+				heading: t("settings.publication.keysHeading"),
+				items: pubs.map((pub) => ({
+					name: pub.name,
+					desc: t("settings.publication.keyDesc"),
+					render: (setting) => {
+						setting.addText((text) =>
+							text
+								.setPlaceholder(t("settings.publication.keyPlaceholder"))
+								.setValue(pub.publishKey ?? "")
+								.onChange(async (value) => {
+									const key = value.trim();
+									if (key) pub.publishKey = key;
+									else delete pub.publishKey;
+									await this.plugin.saveSettings();
+								})
+						);
+					},
+				})),
+			},
 		];
 	}
 

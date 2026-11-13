@@ -83,7 +83,10 @@
 			"refresh": "Actualiser les publications",
 			"refreshDesc": "Recharger les publications de votre compte.",
 			"refreshButton": "Actualiser",
-			"standalone": "Page personnelle"
+			"standalone": "Page personnelle",
+			"keysHeading": "Propriété de publication par publication",
+			"keyDesc": "Les notes où cette propriété vaut true sont publiées dans cette publication, en plus de celles listées dans leaflet_publication.",
+			"keyPlaceholder": "ex. publish_blog"
 		},
 		"preferences": {
 			"heading": "Préférences des articles",

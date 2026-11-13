@@ -3,7 +3,7 @@ import { debounce, TFile } from "obsidian";
 import type LeafletAtmosphere from "../main";
 import { ConfirmModal } from "../ui/confirmModal";
 import { richNotice } from "../ui/notices";
-import { getString } from "./frontmatter";
+import { getStrings } from "./targets";
 import { Publisher } from "./publisher";
 
 interface DeletedPost {
@@ -17,7 +17,7 @@ interface DeletedPost {
  */
 export class DeletionWatcher {
 	/** Record URI of every published note, by path: a deleted note has no metadata left. */
-	private links = new Map<string, string>();
+	private links = new Map<string, string[]>();
 	private pending: DeletedPost[] = [];
 	private flush = debounce(() => void this.handle(), 800, true);
 
@@ -32,18 +32,19 @@ export class DeletionWatcher {
 			);
 			this.plugin.registerEvent(
 				app.vault.on("rename", (file, oldPath) => {
-					const uri = this.links.get(oldPath);
+					const uris = this.links.get(oldPath);
 					this.links.delete(oldPath);
-					if (uri && file instanceof TFile) this.links.set(file.path, uri);
+					if (uris && file instanceof TFile) this.links.set(file.path, uris);
 				})
 			);
 			this.plugin.registerEvent(
 				app.vault.on("delete", (file) => {
-					const uri = this.links.get(file.path);
-					if (!uri) return;
+					const uris = this.links.get(file.path);
+					if (!uris) return;
 					this.links.delete(file.path);
 					if (this.plugin.settings.onNoteDeleted === "keep") return;
-					this.pending.push({ name: file.name.replace(/\.md$/, ""), uri });
+					const name = file.name.replace(/\.md$/, "");
+					for (const uri of uris) this.pending.push({ name, uri });
 					this.flush();
 				})
 			);
@@ -52,8 +53,8 @@ export class DeletionWatcher {
 
 	private index(file: TFile) {
 		const fm = this.plugin.app.metadataCache.getFileCache(file)?.frontmatter;
-		const uri = getString(fm, this.plugin.settings.uriKey);
-		if (uri) this.links.set(file.path, uri);
+		const uris = getStrings(fm, this.plugin.settings.uriKey);
+		if (uris.length > 0) this.links.set(file.path, uris);
 		else this.links.delete(file.path);
 	}
 

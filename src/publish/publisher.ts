@@ -28,6 +28,13 @@ import { MarkdownConverter } from "../markdown/convert";
 import { Preprocessor } from "../markdown/preprocess";
 import { findExistingPost, type RecoveryContext } from "./recovery";
 import {
+	isMarkedNote,
+	noteTargets,
+	type PostLink,
+	readLinks,
+	writeLinks,
+} from "./targets";
+import {
 	getBoolean,
 	getDate,
 	getString,
@@ -58,9 +65,28 @@ export interface PublishOptions {
 	site?: string;
 }
 
+interface ExistingPosts {
+	/** Posts of the note that still exist, by site. */
+	bySite: Map<
+		string,
+		{ rkey: string; record: ListedRecord<StandardDocument>; url?: string }
+	>;
+	/** Record keys of posts that no longer exist: reused when publishing again. */
+	missing: string[];
+}
+
+/** Work done once per note, shared by its publications. */
+interface NoteWork {
+	file: TFile;
+	fm: FrontMatterCache | undefined;
+	markdown: string;
+	preprocessor: Preprocessor;
+	images: ImageUploader;
+}
+
 export class Publisher {
-	/** Notes published by this instance; the metadata cache may lag behind. */
-	readonly published = new Map<string, { uri: string; url: string }>();
+	/** Posts published by this instance, by note: the metadata cache may lag behind. */
+	readonly published = new Map<string, PostLink[]>();
 	/** Future addresses of linked notes that are marked but not published yet. */
 	private reservations = new Map<string, Promise<{ url: string } | null>>();
 	private reserved = new Map<string, string>();
@@ -85,52 +111,123 @@ export class Publisher {
 		return this.app.metadataCache.getFileCache(file)?.frontmatter;
 	}
 
-	/** Record key of the document already published from this note, if any. */
-	existingRkey(file: TFile, did: string): string | undefined {
-		const uri =
-			this.published.get(file.path)?.uri ??
-			getString(this.frontmatter(file), this.settings.uriKey);
-		const parsed = uri ? parseAtUri(uri) : null;
-		if (!parsed || parsed.collection !== DOCUMENT_COLLECTION || parsed.repo !== did)
-			return undefined;
-		return parsed.rkey;
+	/** Posts of a note in the account: published in this run, or saved in the note. */
+	private links(file: TFile, did: string): PostLink[] {
+		const links =
+			this.published.get(file.path) ?? readLinks(this.frontmatter(file), this.settings);
+		return links.filter((l) => {
+			const parsed = parseAtUri(l.uri);
+			return parsed?.collection === DOCUMENT_COLLECTION && parsed.repo === did;
+		});
 	}
 
-	async publish(file: TFile, options: PublishOptions = {}): Promise<PublishResult> {
+	private async existingPosts(client: AtpClient, file: TFile): Promise<ExistingPosts> {
+		const out: ExistingPosts = { bySite: new Map(), missing: [] };
+		for (const link of this.links(file, client.did)) {
+			const rkey = parseAtUri(link.uri)!.rkey;
+			const record = await client.getRecord<StandardDocument>(DOCUMENT_COLLECTION, rkey);
+			if (record?.value.site)
+				out.bySite.set(record.value.site, { rkey, record, url: link.url });
+			else out.missing.push(rkey);
+		}
+		return out;
+	}
+
+	/**
+	 * Publish a note to its publications: those it names, else those it is already
+	 * published in, else the default one. One post per publication.
+	 */
+	async publish(file: TFile, options: PublishOptions = {}): Promise<PublishResult[]> {
 		const client = await this.plugin.getClient();
 		const did = client.did;
 		const fm = this.frontmatter(file);
 		const s = this.settings;
 		this.checkPublishFlag(fm);
 
-		let rkey = this.existingRkey(file, did);
-		let existing = rkey
-			? await client.getRecord<StandardDocument>(DOCUMENT_COLLECTION, rkey)
-			: null;
-		let recovered = false;
-		if (!rkey) {
-			// No link in the note: its post may still exist (sync issue, failed write…)
-			const found = await findExistingPost(this.recoveryContext(client), file, fm);
-			if (found) {
-				rkey = found.rkey;
-				existing = found.record;
-				recovered = true;
-			}
-		}
-		rkey ??= await this.reservedOrNewRkey(client, file, fm);
+		const existing = await this.existingPosts(client, file);
+		const chosen =
+			options.site === undefined
+				? undefined
+				: options.site.startsWith("at://")
+					? options.site
+					: standaloneSite(did);
+		const targets = noteTargets(s, fm, did) ??
+			(chosen ? [chosen] : null) ??
+			(existing.bySite.size > 0 ? [...existing.bySite.keys()] : null) ?? [
+				s.defaultPublication.startsWith("at://")
+					? s.defaultPublication
+					: standaloneSite(did),
+			];
 
-		const site = this.resolveSite(fm, options, existing?.value.site, did);
-		this.owners.set(rkey, file.path);
-		const selfUrl = documentUrl(site, `/${rkey}`, this.publicationsFor(site));
-
-		const images = new ImageUploader(
-			this.app,
-			client,
-			s.maxImageWidth,
-			s.uploadRemoteImages
-		);
 		const preprocessor = new Preprocessor(this.app, s.embedMode, s.dataview);
-		const markdown = await preprocessor.run(file);
+		const work: NoteWork = {
+			file,
+			fm,
+			preprocessor,
+			markdown: await preprocessor.run(file),
+			images: new ImageUploader(this.app, client, s.maxImageWidth, s.uploadRemoteImages),
+		};
+
+		const results: PublishResult[] = [];
+		for (const [index, site] of targets.entries()) {
+			let post = existing.bySite.get(site) ?? null;
+			let recovered = false;
+			if (!post) {
+				// No link to a post in this publication: it may still exist (sync issue…)
+				const found = await findExistingPost(
+					this.recoveryContext(client),
+					file,
+					fm,
+					site
+				);
+				if (found) {
+					post = { rkey: found.rkey, record: found.record };
+					recovered = true;
+				}
+			}
+			const rkey =
+				post?.rkey ??
+				existing.missing.shift() ??
+				(index === 0
+					? await this.reservedOrNewRkey(client, file, fm)
+					: await this.newRecordKey(client, file, fm, site));
+			this.owners.set(rkey, file.path);
+			const result = await this.publishTo(client, work, site, rkey, post?.record ?? null);
+			results.push({ ...result, recovered });
+			existing.bySite.set(site, {
+				rkey,
+				record: { uri: result.uri, cid: "", value: { site } as StandardDocument },
+				url: result.url,
+			});
+		}
+
+		// Posts in publications the note no longer names are kept, with their links
+		const links: PostLink[] = [...existing.bySite.entries()].map(([site, post]) => ({
+			uri: `at://${did}/${DOCUMENT_COLLECTION}/${post.rkey}`,
+			url: post.url ?? documentUrl(site, `/${post.rkey}`, this.publicationsFor(site)),
+			site,
+		}));
+		this.published.set(file.path, links);
+		if (s.writeFrontmatter)
+			await this.app.fileManager.processFrontMatter(
+				file,
+				(front: Record<string, unknown>) => writeLinks(front, s, links)
+			);
+		return results;
+	}
+
+	/** Publish the note to one publication, at the given record key. */
+	private async publishTo(
+		client: AtpClient,
+		work: NoteWork,
+		site: string,
+		rkey: string,
+		existing: ListedRecord<StandardDocument> | null
+	): Promise<PublishResult> {
+		const { file, fm, images, preprocessor } = work;
+		const s = this.settings;
+		const path = `/${rkey}`;
+		const selfUrl = documentUrl(site, path, this.publicationsFor(site));
 		const converter = new MarkdownConverter({
 			app: this.app,
 			settings: s,
@@ -146,9 +243,9 @@ export class Publisher {
 			noteUrl: (target) =>
 				target.path === file.path
 					? Promise.resolve(selfUrl)
-					: this.noteUrl(client, target),
+					: this.noteUrl(client, target, site),
 		});
-		const converted = await converter.convert(markdown);
+		const converted = await converter.convert(work.markdown);
 
 		const title = (getString(fm, s.titleKey) ?? converted.title ?? file.basename).slice(
 			0,
@@ -162,7 +259,6 @@ export class Publisher {
 			existing?.value.publishedAt ??
 			new Date().toISOString();
 
-		const path = `/${rkey}`;
 		const record: StandardDocument = {
 			$type: "site.standard.document",
 			site,
@@ -185,59 +281,57 @@ export class Publisher {
 		};
 
 		const result = await client.putRecord(DOCUMENT_COLLECTION, rkey, record);
-		const url = documentUrl(site, path, this.publicationsFor(site));
-		this.published.set(file.path, { uri: result.uri, url });
-
-		if (s.writeFrontmatter)
-			await this.app.fileManager.processFrontMatter(
-				file,
-				(front: Record<string, unknown>) => {
-					if (s.uriKey) front[s.uriKey] = result.uri;
-					if (s.urlKey) front[s.urlKey] = url;
-				}
-			);
-
 		return {
 			uri: result.uri,
-			url,
+			url: selfUrl,
 			title,
 			site,
 			created: !existing,
-			recovered,
+			recovered: false,
 			skippedDataviewJs: preprocessor.skippedDataviewJs,
 			warnings: converted.warnings,
 		};
 	}
 
 	/**
-	 * Restore the link of a note to its existing post without publishing it.
-	 * Returns null when no post matches.
+	 * Restore the links of a note to its existing posts without publishing it.
+	 * Returns the posts found.
 	 */
-	async pull(file: TFile): Promise<{ uri: string; url: string; by: string } | null> {
+	async pull(file: TFile): Promise<{ uri: string; url: string; by: string }[]> {
 		const client = await this.plugin.getClient();
 		const fm = this.frontmatter(file);
-		const rkey = this.existingRkey(file, client.did);
-		let found: {
-			rkey: string;
-			record: ListedRecord<StandardDocument>;
-			by: string;
-		} | null = null;
-		if (rkey) {
-			const record = await client.getRecord<StandardDocument>(DOCUMENT_COLLECTION, rkey);
-			if (record) found = { rkey, record, by: "uri" };
+		const existing = await this.existingPosts(client, file);
+		const found: { uri: string; url: string; by: string; site: string }[] = [
+			...existing.bySite.entries(),
+		].map(([site, post]) => ({
+			uri: post.record.uri,
+			url: post.url ?? documentUrl(site, `/${post.rkey}`, this.publicationsFor(site)),
+			by: "uri",
+			site,
+		}));
+		const targets = noteTargets(this.settings, fm, client.did) ?? [
+			this.settings.defaultPublication.startsWith("at://")
+				? this.settings.defaultPublication
+				: standaloneSite(client.did),
+		];
+		for (const site of targets) {
+			if (existing.bySite.has(site)) continue;
+			const post = await findExistingPost(this.recoveryContext(client), file, fm, site);
+			if (!post) continue;
+			const { path } = post.record.value;
+			found.push({
+				uri: post.record.uri,
+				url: documentUrl(site, path ?? `/${post.rkey}`, this.publicationsFor(site)),
+				by: post.by,
+				site,
+			});
 		}
-		found ??= await findExistingPost(this.recoveryContext(client), file, fm);
-		if (!found) return null;
-		const { site, path } = found.record.value;
-		const url = documentUrl(site, path ?? `/${found.rkey}`, this.publicationsFor(site));
+		if (found.length === 0) return [];
 		await this.app.fileManager.processFrontMatter(
 			file,
-			(front: Record<string, unknown>) => {
-				if (this.settings.uriKey) front[this.settings.uriKey] = found.record.uri;
-				if (this.settings.urlKey) front[this.settings.urlKey] = url;
-			}
+			(front: Record<string, unknown>) => writeLinks(front, this.settings, found)
 		);
-		return { uri: found.record.uri, url, by: found.by };
+		return found;
 	}
 
 	private recoveryContext(client: AtpClient): RecoveryContext {
@@ -255,9 +349,8 @@ export class Publisher {
 		};
 	}
 
-	/** Delete a post of the account, through its note when it still has one. */
+	/** Delete a post of the account; its note, if any, keeps its other posts. */
 	async deletePost(uri: string, file?: TFile | null): Promise<void> {
-		if (file && (await this.unpublish(file))) return;
 		const client = await this.plugin.getClient();
 		const parsed = parseAtUri(uri);
 		if (
@@ -266,31 +359,61 @@ export class Publisher {
 			parsed.repo !== client.did
 		)
 			throw new Error(i18next.t("error.notOwnPost"));
+		const links = file ? this.links(file, client.did) : [];
+		if (file && links.length <= 1 && links[0]?.uri === uri) {
+			await this.unpublish(file);
+			return;
+		}
 		await client.deleteRecord(DOCUMENT_COLLECTION, parsed.rkey);
+		if (!file) return;
+		const remaining = readLinks(this.frontmatter(file), this.settings).filter(
+			(l) => l.uri !== uri
+		);
+		this.published.delete(file.path);
+		await this.app.fileManager.processFrontMatter(
+			file,
+			(front: Record<string, unknown>) => writeLinks(front, this.settings, remaining)
+		);
 	}
 
+	/** Delete every post of a note and unmark it. */
 	async unpublish(file: TFile): Promise<boolean> {
 		const client = await this.plugin.getClient();
-		const rkey = this.existingRkey(file, client.did);
-		if (!rkey) return false;
-		await client.deleteRecord(DOCUMENT_COLLECTION, rkey);
+		const links = this.links(file, client.did);
+		if (links.length === 0) return false;
+		for (const link of links)
+			await client.deleteRecord(DOCUMENT_COLLECTION, parseAtUri(link.uri)!.rkey);
 		this.published.delete(file.path);
 		await this.app.fileManager.processFrontMatter(
 			file,
 			(front: Record<string, unknown>) => {
-				delete front[this.settings.uriKey];
-				delete front[this.settings.urlKey];
-				const key = this.settings.publishKey;
-				if (key && front[key] === true) front[key] = false;
+				writeLinks(front, this.settings, []);
+				const keys = [
+					this.settings.publishKey,
+					...this.settings.publications.map((p) => p.publishKey ?? ""),
+				];
+				for (const key of keys) if (key && front[key] === true) front[key] = false;
 			}
 		);
 		return true;
 	}
 
-	/** URL of a linked note: published, or reserved when it is marked for publishing. */
-	private async noteUrl(client: AtpClient, file: TFile): Promise<string | null> {
+	/**
+	 * URL of a linked note, in the publication being written when it is published
+	 * there; reserved when the note is marked but not published yet.
+	 */
+	private async noteUrl(
+		client: AtpClient,
+		file: TFile,
+		site: string
+	): Promise<string | null> {
+		const links =
+			this.published.get(file.path) ?? readLinks(this.frontmatter(file), this.settings);
+		const base = this.publicationsFor(site)[0]?.url;
 		const known =
-			this.published.get(file.path)?.url ??
+			links.find((l) => l.site === site)?.url ??
+			(base ? links.find((l) => l.url?.startsWith(base))?.url : undefined) ??
+			links[0]?.url ??
 			getString(this.frontmatter(file), this.settings.urlKey);
 		if (known && /^https?:\/\//.test(known)) return known;
 		if (!this.settings.writeFrontmatter || !this.isMarked(file)) return null;
@@ -306,8 +429,8 @@ export class Publisher {
 	}
 
 	/**
-	 * Pick the record key and URL of a note before it is published. Only the URL is
-	 * saved: the URI stays the mark of a published note.
+	 * Pick the record key and URL of a note before it is published, in its first
+	 * publication. Only the URL is saved: the URI stays the mark of a published note.
 	 */
 	private async reserve(client: AtpClient, file: TFile): Promise<{ url: string }> {
 		const fm = this.frontmatter(file);
@@ -315,7 +438,11 @@ export class Publisher {
 		const rkey = await this.newRecordKey(client, file, fm);
 		this.owners.set(rkey, file.path);
 		this.reserved.set(file.path, rkey);
-		const site = this.resolveSite(fm, {}, undefined, did);
+		const site =
+			noteTargets(this.settings, fm, did)?.[0] ??
+			(this.settings.defaultPublication.startsWith("at://")
+				? this.settings.defaultPublication
+				: standaloneSite(did));
 		const url = documentUrl(site, `/${rkey}`, this.publicationsFor(site));
 		await this.app.fileManager.processFrontMatter(
 			file,
@@ -347,7 +474,7 @@ export class Publisher {
 	}
 
 	isMarked(file: TFile): boolean {
-		return getBoolean(this.frontmatter(file), this.settings.publishKey) === true;
+		return isMarkedNote(this.settings, this.frontmatter(file));
 	}
 
 	private checkPublishFlag(fm: FrontMatterCache | undefined) {
@@ -355,7 +482,7 @@ export class Publisher {
 		if (!key) return;
 		const flag = getBoolean(fm, key);
 		if (flag === false) throw new Error(i18next.t("error.publishDisabled", { key }));
-		if (flag !== true && this.settings.requirePublishFlag)
+		if (!isMarkedNote(this.settings, fm) && this.settings.requirePublishFlag)
 			throw new Error(i18next.t("error.notMarked", { key }));
 	}
 
@@ -364,44 +491,27 @@ export class Publisher {
 		return vault.getConfig?.("strictLineBreaks") === true;
 	}
 
+	/**
+	 * Record key of a new post: a random one, or the slug. For an extra publication,
+	 * a slug already used by the note gets the publication name appended.
+	 */
 	private async newRecordKey(
 		client: AtpClient,
 		file: TFile,
-		fm: FrontMatterCache | undefined
+		fm: FrontMatterCache | undefined,
+		extraSite?: string
 	): Promise<string> {
 		const explicit = getString(fm, this.settings.slugKey);
 		if (!this.settings.useSlugAsRecordKey && !explicit) return nextTid();
 		const slug = slugify(explicit ?? file.basename);
 		if (!slug || !isValidRecordKey(slug)) return nextTid();
-		const taken =
-			this.owners.has(slug) || (await client.getRecord(DOCUMENT_COLLECTION, slug));
-		if (taken) throw new Error(i18next.t("error.slugTaken", { slug }));
-		return slug;
-	}
-
-	private resolveSite(
-		fm: FrontMatterCache | undefined,
-		options: PublishOptions,
-		existingSite: string | undefined,
-		did: string
-	): string {
-		const fromNote = getString(fm, PREFERENCE_KEYS.publication);
-		let choice: string | undefined;
-		if (fromNote !== undefined) {
-			const lower = fromNote.toLowerCase();
-			if (lower === "none" || lower === "standalone") choice = "";
-			else {
-				const pub = this.settings.publications.find(
-					(p) =>
-						p.uri === fromNote || p.name.toLowerCase() === lower || p.url === fromNote
-				);
-				if (!pub)
-					throw new Error(i18next.t("error.unknownPublication", { name: fromNote }));
-				choice = pub.uri;
-			}
-		}
-		choice ??= options.site ?? existingSite ?? this.settings.defaultPublication;
-		return choice && choice.startsWith("at://") ? choice : choice || standaloneSite(did);
+		const taken = async (key: string) =>
+			this.owners.has(key) || !!(await client.getRecord(DOCUMENT_COLLECTION, key));
+		if (!(await taken(slug))) return slug;
+		if (extraSite === undefined) throw new Error(i18next.t("error.slugTaken", { slug }));
+		const name = this.publicationsFor(extraSite)[0]?.name ?? "";
+		const suffixed = slugify(`${slug}-${name}`);
+		return isValidRecordKey(suffixed) && !(await taken(suffixed)) ? suffixed : nextTid();
 	}
 
 	/** Preview of a linked page, fetched once per run. */

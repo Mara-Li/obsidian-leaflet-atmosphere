@@ -106,7 +106,11 @@ export default class LeafletAtmosphere extends Plugin {
 		try {
 			const client = await this.getClient();
 			const firstLoad = this.settings.publications.length === 0;
-			this.settings.publications = await fetchPublications(client);
+			const keys = new Map(this.settings.publications.map((p) => [p.uri, p.publishKey]));
+			this.settings.publications = (await fetchPublications(client)).map((p) => {
+				const publishKey = keys.get(p.uri);
+				return publishKey ? { ...p, publishKey } : p;
+			});
 			const current = this.settings.defaultPublication;
 			if (current && !this.settings.publications.some((p) => p.uri === current))
 				this.settings.defaultPublication = "";

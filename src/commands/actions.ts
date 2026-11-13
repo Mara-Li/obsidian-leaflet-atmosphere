@@ -4,6 +4,7 @@ import { isExcalidraw } from "../markdown/compilers/excalidraw";
 import type LeafletAtmosphere from "../main";
 import { getBoolean, getString } from "../publish/frontmatter";
 import { Publisher } from "../publish/publisher";
+import { isMarkedNote } from "../publish/targets";
 import { ConfirmModal } from "../ui/confirmModal";
 import { postNotice, richNotice } from "../ui/notices";
 import { PublishProgress } from "../ui/progress";
@@ -33,23 +34,27 @@ export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?:
 	const progress = new PublishProgress(plugin.statusBarEl);
 	progress.update(i18next.t("notice.publishingNote", { name: file.basename }));
 	try {
-		const result = await new Publisher(plugin).publish(file, { site });
+		const results = await new Publisher(plugin).publish(file, { site });
 		progress.done();
 		plugin.notifyPostsChanged();
-		postNotice(i18next.t(result.created ? "notice.published" : "notice.updated"), {
-			title: result.title,
-			url: result.url,
-			publication: publicationName(plugin, result.site),
-		});
-		if (result.recovered)
+		// One notice per publication the note went to
+		for (const result of results)
+			postNotice(i18next.t(result.created ? "notice.published" : "notice.updated"), {
+				title: result.title,
+				url: result.url,
+				publication: publicationName(plugin, result.site),
+			});
+		if (results.some((r) => r.recovered))
 			richNotice({ tone: "info", heading: i18next.t("notice.recovered") });
-		if (result.skippedDataviewJs > 0)
-			warn(i18next.t("notice.dataviewJsDisabled", { count: result.skippedDataviewJs }));
-		if (result.warnings.length > 0)
-			warn(i18next.t("notice.missingImages", { list: result.warnings.join(", ") }));
-		if (plugin.settings.copyLinkAfterPublish)
-			await navigator.clipboard.writeText(result.url);
-		if (plugin.settings.openAfterPublish) window.open(result.url);
+		const skipped = results[0]?.skippedDataviewJs ?? 0;
+		if (skipped > 0) warn(i18next.t("notice.dataviewJsDisabled", { count: skipped }));
+		const warnings = [...new Set(results.flatMap((r) => r.warnings))];
+		if (warnings.length > 0)
+			warn(i18next.t("notice.missingImages", { list: warnings.join(", ") }));
+		const first = results[0];
+		if (first && plugin.settings.copyLinkAfterPublish)
+			await navigator.clipboard.writeText(first.url);
+		if (first && plugin.settings.openAfterPublish) window.open(first.url);
 	} catch (e) {
 		progress.done();
 		showError(e);
@@ -59,14 +64,14 @@ export async function publishFile(plugin: LeafletAtmosphere, file: TFile, site?:
 export async function pullFile(plugin: LeafletAtmosphere, file: TFile) {
 	try {
 		const found = await new Publisher(plugin).pull(file);
-		if (found) {
+		for (const post of found)
 			postNotice(i18next.t("notice.pulled"), {
 				title: file.basename,
-				url: found.url,
-				publication: found.url.replace(/^https?:\/\/([^/]+).*$/, "$1"),
+				url: post.url,
+				publication: post.url.replace(/^https?:\/\/([^/]+).*$/, "$1"),
 			});
-			plugin.notifyPostsChanged();
-		} else richNotice({ tone: "info", heading: i18next.t("notice.pullNotFound") });
+		if (found.length > 0) plugin.notifyPostsChanged();
+		else richNotice({ tone: "info", heading: i18next.t("notice.pullNotFound") });
 	} catch (e) {
 		showError(e);
 	}
@@ -133,9 +138,8 @@ export function canPublish(plugin: LeafletAtmosphere, file: TFile): boolean {
 	if (file.extension !== "md" || isExcalidraw(plugin.app, file)) return false;
 	const { publishKey, requirePublishFlag } = plugin.settings;
 	const fm = plugin.app.metadataCache.getFileCache(file)?.frontmatter;
-	const flag = getBoolean(fm, publishKey);
-	if (flag === false) return false;
-	return !(publishKey && requirePublishFlag && flag !== true);
+	if (getBoolean(fm, publishKey) === false) return false;
+	return !(publishKey && requirePublishFlag && !isMarkedNote(plugin.settings, fm));
 }
 
 /** Publishable notes of a selection, folders included. */
@@ -193,7 +197,7 @@ function confirmBatch(
 
 async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: TFile[]) {
 	const progress = new PublishProgress(plugin.statusBarEl);
-	const created = new Set<string>();
+	let created = 0;
 	const failed: string[] = [];
 	let updated = 0;
 	let skippedJs = 0;
@@ -208,10 +212,12 @@ async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: 
 			files.length
 		);
 		try {
-			const result = await publisher.publish(file);
-			skippedJs += result.skippedDataviewJs;
-			if (result.created) created.add(file.path);
-			else updated++;
+			const results = await publisher.publish(file);
+			skippedJs += results[0]?.skippedDataviewJs ?? 0;
+			for (const result of results) {
+				if (result.created) created++;
+				else updated++;
+			}
 		} catch (e) {
 			console.error("[Leaflet]", file.path, e);
 			failed.push(file.basename);
@@ -223,7 +229,7 @@ async function runBatch(plugin: LeafletAtmosphere, publisher: Publisher, files: 
 	richNotice({
 		tone: failed.length > 0 ? "warning" : "success",
 		heading: i18next.t("notice.batchDone", {
-			created: created.size,
+			created,
 			updated,
 			failed: failed.length,
 		}),

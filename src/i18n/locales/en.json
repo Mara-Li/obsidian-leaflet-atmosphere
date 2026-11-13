@@ -83,7 +83,10 @@
 			"refresh": "Refresh publications",
 			"refreshDesc": "Reload the publications of your account.",
 			"refreshButton": "Refresh",
-			"standalone": "Personal page"
+			"standalone": "Personal page",
+			"keysHeading": "Publish property per publication",
+			"keyDesc": "Notes where this property is true are published to this publication, in addition to those listed in leaflet_publication.",
+			"keyPlaceholder": "e.g. publish_blog"
 		},
 		"preferences": {
 			"heading": "Post preferences",
