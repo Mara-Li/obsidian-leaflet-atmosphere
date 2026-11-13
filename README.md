@@ -1,3 +1,8 @@
+<!--- https://www.flaticon.com/fr/icones-gratuites/article - Magnific Flaticon --->
+<div style="text-align: center;">
+    <img style="text-align: center;" src="showcase-blog/assets/un-journal.png" width=250 height=250 alt="Article"></img>
+</div>
+
 # Gazette
 
 Publish your Obsidian notes to [Leaflet](https://leaflet.pub), straight to your AT Protocol repository (PDS). Works on desktop and mobile.
@@ -16,17 +21,17 @@ The other settings are grouped in sub-pages: **Publication** (default publicatio
 
 ## 🚀 Usage
 
-| Command | Description |
-| --- | --- |
-| **Publish all marked notes** | Publish or update every note with `leaflet_publish: true`, after confirmation. |
-| **Publish folder to Leaflet** / **Publish N notes to Leaflet** | Right-click a folder, or several selected files, to publish all their notes after confirmation (optional, see **When publishing** in the settings). Notes with `leaflet_publish: false` and Excalidraw drawings are skipped; with **Only publish marked notes**, only marked notes are kept. |
-| **Publish current note** | Create or update the Leaflet post of the note. Also available in the ribbon and in the right-click menus of the file and of the editor (hidden for notes with `leaflet_publish: false`). |
-| **Publish current note to…** | Choose the publication (or your personal page) before publishing. |
-| **Retrieve the Leaflet link of current note** | Restore `leaflet_uri` and `leaflet_url` of a note that lost them, without publishing it. |
-| **Delete current note from Leaflet** | Delete the record from your PDS. The note is kept. |
-| **Copy Leaflet link** / **Open published note in browser** | Use the URL saved in the note. |
-| **Manage Leaflet posts** (also in the ribbon) | Open a view listing every post of your account, including posts without a note (written elsewhere or whose note was deleted). Search, filter by publication or by posts without note, open the note or the post, publish a note again, publish the selection or the marked notes, delete one or several posts. **Relink notes** links posts without note to their notes (by key, then by title when a single note matches); a post can also be linked to a chosen note. The list follows publications and deletions made elsewhere. |
-| **Refresh publications** | Reload the publications of your account. |
+| Command                                                        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Publish all marked notes**                                   | Publish or update every note with `leaflet_publish: true`, after confirmation.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **Publish folder to Leaflet** / **Publish N notes to Leaflet** | Right-click a folder, or several selected files, to publish all their notes after confirmation (optional, see **When publishing** in the settings). Notes with `leaflet_publish: false` and Excalidraw drawings are skipped; with **Only publish marked notes**, only marked notes are kept.                                                                                                                                                                                                                                        |
+| **Publish current note**                                       | Create or update the Leaflet post of the note. Also available in the ribbon and in the right-click menus of the file and of the editor (hidden for notes with `leaflet_publish: false`).                                                                                                                                                                                                                                                                                                                                            |
+| **Publish current note to…**                                   | Choose the publication (or your personal page) before publishing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **Retrieve the Leaflet link of current note**                  | Restore `leaflet_uri` and `leaflet_url` of a note that lost them, without publishing it.                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **Delete current note from Leaflet**                           | Delete the record from your PDS. The note is kept.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **Copy Leaflet link** / **Open published note in browser**     | Use the URL saved in the note.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **Manage Leaflet posts** (also in the ribbon)                  | Open a view listing every post of your account, including posts without a note (written elsewhere or whose note was deleted). Search, filter by publication or by posts without note, open the note or the post, publish a note again, publish the selection or the marked notes, delete one or several posts. **Relink notes** links posts without note to their notes (by key, then by title when a single note matches); a post can also be linked to a chosen note. The list follows publications and deletions made elsewhere. |
+| **Refresh publications**                                       | Reload the publications of your account.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 On desktop, the progress is shown in the status bar; on mobile, in a notice.
 
@@ -41,6 +46,7 @@ When a published note is deleted from the vault, the plugin asks whether to dele
 A note can be published to several publications, with one post on each:
 
 - list them in `leaflet_publication`:
+
   ```yaml
   leaflet_publication:
     - My garden
@@ -54,17 +60,17 @@ Links to another note point to its published post. When the linked note is marke
 
 ### Properties
 
-| Property | Default key | Usage |
-| --- | --- | --- |
-| Publish | `leaflet_publish` | `true` marks the note for **Publish all marked notes**, `false` blocks any publishing. With **Only publish marked notes**, `true` is required. |
-| Title | `title` | Falls back to the first `# heading` (removed from the body), then to the file name. |
-| Description | `description` | Post subtitle. |
-| Tags | `tags` | Leading `#` are removed. |
-| Cover image | `cover` | Vault path, `[[wikilink]]` or URL. |
-| Publication date | `date` | Defaults to the first publication date. |
-| Slug | `slug` | Record key used in the URL on first publish (`https://you.leaflet.pub/<slug>`). |
-| Publication | `leaflet_publication` | Name, URL or AT-URI of a publication, or `none` for your personal page. A list publishes the note to each of them. |
-| Preferences | `leaflet_discover`, `leaflet_comments`, `leaflet_mentions`, `leaflet_recommends` | `true` / `false`, override the defaults of the settings. |
+| Property         | Default key                                                                      | Usage                                                                                                                                          |
+| ---------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Publish          | `leaflet_publish`                                                                | `true` marks the note for **Publish all marked notes**, `false` blocks any publishing. With **Only publish marked notes**, `true` is required. |
+| Title            | `title`                                                                          | Falls back to the first `# heading` (removed from the body), then to the file name.                                                            |
+| Description      | `description`                                                                    | Post subtitle.                                                                                                                                 |
+| Tags             | `tags`                                                                           | Leading `#` are removed.                                                                                                                       |
+| Cover image      | `cover`                                                                          | Vault path, `[[wikilink]]` or URL.                                                                                                             |
+| Publication date | `date`                                                                           | Defaults to the first publication date.                                                                                                        |
+| Slug             | `slug`                                                                           | Record key used in the URL on first publish (`https://you.leaflet.pub/<slug>`).                                                                |
+| Publication      | `leaflet_publication`                                                            | Name, URL or AT-URI of a publication, or `none` for your personal page. A list publishes the note to each of them.                             |
+| Preferences      | `leaflet_discover`, `leaflet_comments`, `leaflet_mentions`, `leaflet_recommends` | `true` / `false`, override the defaults of the settings.                                                                                       |
 
 The keys of the first seven properties can be changed in the settings. Deleting a note from Leaflet sets `leaflet_publish` back to `false`.
 
@@ -78,33 +84,33 @@ The keys of the first seven properties can be changed in the settings. Deleting 
 
 ### Markdown support
 
-| Obsidian | Leaflet |
-| --- | --- |
-| Headings, paragraphs, line breaks (follows the **Strict line breaks** option) | Header and text blocks |
-| `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, `` `code` ``, `<u>underline</u>`, links | Rich text facets |
-| Colored highlights `==🔴red==`, `==🟠orange==`, `==🟡yellow==`, `==🟢green==`, `==🔵blue==`, `==🟣purple==` | Highlight in the color of Obsidian, emoji removed |
-| `@handle.bsky.social` | Mention of the Bluesky account (shown by Leaflet as a link to the profile); unknown handles stay text |
-| A date alone on its line: `@2026-11-13` or `@2026-11-13 14:30` | 📅 and the date written in the language of Obsidian, like the date block of the Leaflet editor (Leaflet does not publish that block) |
-| `[[wikilinks]]`, links to notes | Link to the published note when it has a `leaflet_url`, plain text otherwise |
-| `![[image.png\|alt\|300]]`, `![alt](url)` | Image blocks, uploaded to your PDS (resized and compressed under 1 MB) |
-| `![[note]]`, `![[note#heading]]`, `![[note#^block]]` | Configurable in **Conversion → Embedded notes**: content inserted in place (also inside lists and quotes), a card opening a sub-page holding only the embedded part (whole note, section or block; the alias of `![[note\|alias]]` becomes its heading), or a link |
-| Dataview queries (DQL, DataviewJS, inline) | Replaced by their result in Markdown (requires Dataview) |
-| Excalidraw drawings `![[drawing.excalidraw]]` | PNG image exported by Excalidraw (requires Excalidraw) |
-| Mermaid diagrams | Image rendered by Obsidian, or code block |
-| Bullet, numbered and task lists (nested) | List blocks with checkboxes |
-| Blockquotes | Blockquote blocks |
-| Grid callouts `> [!grid]` holding images | Image gallery (one image: an image block); `> [!grid\|masonry]`, `carousel` or `strip` choose its layout. A grid callout without image is converted like other callouts |
-| Callouts `> [!note] Title` | Configurable in **Conversion → Callouts**: a blockquote with an emoji and a title on the color of the type, a colored HTML box like Obsidian (with the fonts, size and text color of the publication), or a card opening a sub-page of the post. Foldable callouts (`[!note]+`, `[!note]-`) become sub-pages in every mode (can be disabled) |
-| Code blocks | Code blocks with language and theme |
-| `$$ math $$` / `$inline$` | Math blocks / inline code |
-| Footnotes `[^1]` and inline footnotes `^[note]` | Leaflet footnotes |
-| `---` | Horizontal rule |
-| Tables | HTML block (with the fonts of the publication) or code block |
-| A Bluesky post alone on its line: bare or labelled link (`bsky.app` or another client), `at://` URI, or the embed code copied from Bluesky | Bluesky post embed (a post that cannot be found becomes a link card, with a warning) |
-| A YouTube link alone on its line, or `![](youtube url)` | Video embed |
-| A web address alone on its line | Link card with the title, description and image of the page; a standard.site post or publication gets its Leaflet card |
-| `<iframe src="…">` | Embed block |
-| `%%comments%%`, `<!-- comments -->`, block IDs, frontmatter | Removed |
+| Obsidian                                                                                                                                   | Leaflet                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Headings, paragraphs, line breaks (follows the **Strict line breaks** option)                                                              | Header and text blocks                                                                                                                                                                                                                                                                                                                       |
+| `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, `` `code` ``, `<u>underline</u>`, links                                             | Rich text facets                                                                                                                                                                                                                                                                                                                             |
+| Colored highlights `==🔴red==`, `==🟠orange==`, `==🟡yellow==`, `==🟢green==`, `==🔵blue==`, `==🟣purple==`                                | Highlight in the color of Obsidian, emoji removed                                                                                                                                                                                                                                                                                            |
+| `@handle.bsky.social`                                                                                                                      | Mention of the Bluesky account (shown by Leaflet as a link to the profile); unknown handles stay text                                                                                                                                                                                                                                        |
+| A date alone on its line: `@2026-11-13` or `@2026-11-13 14:30`                                                                             | 📅 and the date written in the language of Obsidian, like the date block of the Leaflet editor (Leaflet does not publish that block)                                                                                                                                                                                                         |
+| `[[wikilinks]]`, links to notes                                                                                                            | Link to the published note when it has a `leaflet_url`, plain text otherwise                                                                                                                                                                                                                                                                 |
+| `![[image.png\|alt\|300]]`, `![alt](url)`                                                                                                  | Image blocks, uploaded to your PDS (resized and compressed under 1 MB)                                                                                                                                                                                                                                                                       |
+| `![[note]]`, `![[note#heading]]`, `![[note#^block]]`                                                                                       | Configurable in **Conversion → Embedded notes**: content inserted in place (also inside lists and quotes), a card opening a sub-page holding only the embedded part (whole note, section or block; the alias of `![[note\|alias]]` becomes its heading), or a link                                                                           |
+| Dataview queries (DQL, DataviewJS, inline)                                                                                                 | Replaced by their result in Markdown (requires Dataview)                                                                                                                                                                                                                                                                                     |
+| Excalidraw drawings `![[drawing.excalidraw]]`                                                                                              | PNG image exported by Excalidraw (requires Excalidraw)                                                                                                                                                                                                                                                                                       |
+| Mermaid diagrams                                                                                                                           | Image rendered by Obsidian, or code block                                                                                                                                                                                                                                                                                                    |
+| Bullet, numbered and task lists (nested)                                                                                                   | List blocks with checkboxes                                                                                                                                                                                                                                                                                                                  |
+| Blockquotes                                                                                                                                | Blockquote blocks                                                                                                                                                                                                                                                                                                                            |
+| Grid callouts `> [!grid]` holding images                                                                                                   | Image gallery (one image: an image block); `> [!grid\|masonry]`, `carousel` or `strip` choose its layout. A grid callout without image is converted like other callouts                                                                                                                                                                      |
+| Callouts `> [!note] Title`                                                                                                                 | Configurable in **Conversion → Callouts**: a blockquote with an emoji and a title on the color of the type, a colored HTML box like Obsidian (with the fonts, size and text color of the publication), or a card opening a sub-page of the post. Foldable callouts (`[!note]+`, `[!note]-`) become sub-pages in every mode (can be disabled) |
+| Code blocks                                                                                                                                | Code blocks with language and theme                                                                                                                                                                                                                                                                                                          |
+| `$$ math $$` / `$inline$`                                                                                                                  | Math blocks / inline code                                                                                                                                                                                                                                                                                                                    |
+| Footnotes `[^1]` and inline footnotes `^[note]`                                                                                            | Leaflet footnotes                                                                                                                                                                                                                                                                                                                            |
+| `---`                                                                                                                                      | Horizontal rule                                                                                                                                                                                                                                                                                                                              |
+| Tables                                                                                                                                     | HTML block (with the fonts of the publication) or code block                                                                                                                                                                                                                                                                                 |
+| A Bluesky post alone on its line: bare or labelled link (`bsky.app` or another client), `at://` URI, or the embed code copied from Bluesky | Bluesky post embed (a post that cannot be found becomes a link card, with a warning)                                                                                                                                                                                                                                                         |
+| A YouTube link alone on its line, or `![](youtube url)`                                                                                    | Video embed                                                                                                                                                                                                                                                                                                                                  |
+| A web address alone on its line                                                                                                            | Link card with the title, description and image of the page; a standard.site post or publication gets its Leaflet card                                                                                                                                                                                                                       |
+| `<iframe src="…">`                                                                                                                         | Embed block                                                                                                                                                                                                                                                                                                                                  |
+| `%%comments%%`, `<!-- comments -->`, block IDs, frontmatter                                                                                | Removed                                                                                                                                                                                                                                                                                                                                      |
 
 ## 🙏 Credits
 
@@ -127,10 +133,10 @@ Nothing else is collected or sent.
 - [ ] From Obsidian's community plugins
 - [x] Using BRAT with `https://github.com/Mara-Li/gazette`
 - [x] From the release page:
-    - Download the latest release
-    - Unzip `gazette.zip` in `.obsidian/plugins/` path
-    - In Obsidian settings, reload the plugin
-    - Enable the plugin
+  - Download the latest release
+  - Unzip `gazette.zip` in `.obsidian/plugins/` path
+  - In Obsidian settings, reload the plugin
+  - Enable the plugin
 - [x] Manually: copy `main.js`, `manifest.json` and `styles.css` (if any) to `<Vault>/.obsidian/plugins/gazette/`
 
 ## 🛠️ Development
@@ -155,14 +161,15 @@ Nothing else is collected or sent.
 - [x] French
 
 To add a translation:
+
 1. Fork the repository
 2. Add the translation in the `src/i18n/locales` folder with the name of the language (ex: `fr.json`).
-    - You can get your locale language from Obsidian using [obsidian translation](https://github.com/obsidianmd/obsidian-translations) or using the commands (in templater for example) : `<% tp.obsidian.moment.locale() %>`
-    - Copy the content of the [`en.json`](./src/i18n/locales/en.json) file in the new file
-    - Translate the content
+   - You can get your locale language from Obsidian using [obsidian translation](https://github.com/obsidianmd/obsidian-translations) or using the commands (in templater for example) : `<% tp.obsidian.moment.locale() %>`
+   - Copy the content of the [`en.json`](./src/i18n/locales/en.json) file in the new file
+   - Translate the content
 3. Edit `i18n/index.ts` :
-    - Add `import <lang> from "./locales/<lang>.json";`
-    - Edit the `resources` part with adding : `<lang>: { translation: <lang> }`
+   - Add `import <lang> from "./locales/<lang>.json";`
+   - Edit the `resources` part with adding : `<lang>: { translation: <lang> }`
 
 ## 📚 References
 
