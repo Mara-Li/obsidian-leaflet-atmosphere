@@ -1,5 +1,3 @@
-## [1.0.0](https://github.com/Mara-Li/obsidian-leaflet-atmosphere/compare/0.0.1...1.0.0) (2026-11-14)
-
 ## 0.0.1 (2026-11-14)
 ### Features
 
