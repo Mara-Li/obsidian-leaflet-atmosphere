@@ -1,7 +1,7 @@
 {
 	"id": "gazette",
 	"name": "Gazette",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"minAppVersion": "1.13.2",
 	"description": "Publish your notes to Leaflet (leaflet.pub), the AT Protocol blogging platform.",
 	"author": "Mara-Li",
