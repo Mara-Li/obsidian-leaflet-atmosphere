@@ -1,7 +1,7 @@
 {
-  "name": "leaflet-atmosphere",
+  "name": "gazette",
   "version": "0.0.0",
-  "description": "Publish to your atmosphere blog without leaving Obsidian!",
+  "description": "Publish your notes to Leaflet, the AT Protocol blogging platform.",
   "main": "main.js",
   "private": true,
   "scripts": {
@@ -25,6 +25,7 @@
   "author": "Mara-Li",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@atproto/lexicon": "^0.7.19",
     "@biomejs/biome": "^2.0.0-beta.5",
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.6",
@@ -53,7 +54,9 @@
     "commit-and-tag-version": "^13.3.0",
     "dedent": "^1.5.3",
     "dotenv-cli": "^11.1.0",
+    "marked": "^18.2.0",
     "obsidian-typings": "^6.59.0",
+    "preact": "^11.2.0",
     "wdio-obsidian-reporter": "^3.5.0",
     "wdio-obsidian-service": "^3.5.0"
   },

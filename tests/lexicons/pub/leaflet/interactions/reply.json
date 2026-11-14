@@ -1,0 +1,40 @@
+{
+  "lexicon": 1,
+  "id": "pub.leaflet.interactions.reply",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "description": "Submits one of the author's own documents as a reply to another document",
+      "record": {
+        "type": "object",
+        "required": [
+          "subject",
+          "document",
+          "createdAt"
+        ],
+        "properties": {
+          "subject": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "The document being replied to."
+          },
+          "document": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "The reply: a document in the same repo as this record."
+          },
+          "block": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "The key of the pub.leaflet.blocks.reply block on the subject this was submitted through, when the subject has more than one."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

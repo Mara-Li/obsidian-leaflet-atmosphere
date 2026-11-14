@@ -1,6 +1,8 @@
 {
 	"compilerOptions": {
 		"noEmit": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "preact",
 		"inlineSourceMap": true,
 		"inlineSources": true,
 		"skipLibCheck": true,
@@ -41,6 +43,7 @@
 	},
 	"include": [
 		"**/*.ts",
+		"**/*.tsx",
 		"wdio.conf.mts"
 	]
 }

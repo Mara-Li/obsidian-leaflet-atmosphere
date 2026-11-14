@@ -1,8 +1,225 @@
-/*
+.gazette-muted {
+	color: var(--text-muted);
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.gazette-offscreen {
+	position: fixed;
+	left: -10000px;
+	top: 0;
+	width: 1000px;
+	pointer-events: none;
+}
 
-If your plugin does not need CSS, delete this file.
+.gazette-status {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+}
 
-*/
+.gazette-status-text {
+	max-width: 240px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.gazette-status-bar {
+	width: 80px;
+	height: 6px;
+	accent-color: var(--interactive-accent);
+}
+
+.gazette-manager {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-3);
+	max-width: 900px;
+	margin: 0 auto;
+}
+
+.gazette-manager-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--size-4-2);
+}
+
+.gazette-manager-toolbar input[type="search"] {
+	flex: 1 1 200px;
+}
+
+.gazette-manager-check {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
+	white-space: nowrap;
+}
+
+.gazette-manager-summary {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 var(--size-4-2);
+}
+
+.gazette-manager-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+}
+
+.gazette-manager-row {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-3);
+	padding: var(--size-4-2) var(--size-4-3);
+}
+
+.gazette-manager-row + .gazette-manager-row {
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.gazette-manager-main {
+	flex: 1;
+	min-width: 0;
+}
+
+.gazette-manager-title {
+	font-weight: var(--font-semibold);
+}
+
+.gazette-manager-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-1) var(--size-4-3);
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.gazette-manager-note {
+	color: var(--text-muted);
+	cursor: pointer;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.gazette-manager-orphan {
+	color: var(--text-warning);
+}
+
+.gazette-manager-actions {
+	display: flex;
+	gap: var(--size-4-1);
+}
+
+.gazette-manager-error {
+	color: var(--text-error);
+}
+
+.gazette-icon {
+	display: flex;
+}
+
+.gazette-danger {
+	color: var(--text-error);
+}
+
+.gazette-manager-toolbar button,
+.gazette-manager-summary button {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
+}
+
+.gazette-manager-summary {
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+}
+
+.gazette-manager-spacer {
+	flex: 1;
+}
+
+.gazette-notice {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-2-2);
+	min-width: 220px;
+}
+
+.gazette-notice-header {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+	font-weight: var(--font-semibold);
+}
+
+.gazette-notice-icon {
+	display: flex;
+	flex-shrink: 0;
+}
+
+.gazette-notice.is-success .gazette-notice-icon {
+	color: var(--color-green);
+}
+
+.gazette-notice.is-info .gazette-notice-icon {
+	color: var(--text-accent);
+}
+
+.gazette-notice.is-warning .gazette-notice-icon {
+	color: var(--color-orange);
+}
+
+.gazette-notice.is-error .gazette-notice-icon {
+	color: var(--color-red);
+}
+
+.gazette-notice-title {
+	font-weight: var(--font-semibold);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.gazette-notice-meta {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	overflow-wrap: anywhere;
+}
+
+.gazette-notice-actions {
+	display: flex;
+	gap: var(--size-4-2);
+	margin-top: var(--size-2-2);
+}
+
+.gazette-notice-actions button {
+	font-size: var(--font-ui-smaller);
+	padding: var(--size-2-1) var(--size-4-2);
+	height: auto;
+}
+
+.gazette-replacement .setting-item-control,
+.gazette-replacement.is-invalid .setting-item-control {
+	flex: 1 1 auto;
+	flex-wrap: wrap;
+	max-width: none;
+}
+
+.gazette-replacement .setting-item-error {
+	order: 1;
+	flex-basis: 100%;
+}
+
+.gazette-replacement .setting-item-control input {
+	flex: 1 1 0;
+	min-width: 0;
+	font-family: var(--font-monospace);
+}
+
+.gazette-replacement .setting-item-info {
+	display: none;
+}

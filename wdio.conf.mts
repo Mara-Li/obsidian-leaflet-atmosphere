@@ -6,7 +6,7 @@ import { obsidianBetaAvailable, resolveObsidianVersions } from "wdio-obsidian-se
 const cacheDir = path.resolve(os.tmpdir(), ".obsidian-cache");
 if (fs.existsSync(".env")) loadEnvFile();
 
-console.log(`Using obsidian vault: ${process.env.VAULT_TEST}`);
+console.log(`Using obsidian vault: ${process.env.VAULT_TEST || "tests/vault"}`);
 console.log(`Using obsidian cache dir: ${cacheDir}`);
 
 let versions: [string, string][]; // [appVersion, installerVersion][]
@@ -50,12 +50,19 @@ export const config: WebdriverIO.Config = {
 			plugins: ["./dist"],
 			// If you need to switch between multiple vaults, you can omit this and use
 			// `reloadObsidian` to open vaults during the test.
-			vault: process.env.VAULT_TEST,
+			vault: process.env.VAULT_TEST || "tests/vault",
 		},
 	})),
 
 	framework: "mocha",
 	services: ["obsidian"],
+	// The tests read English texts: Obsidian follows the system language, unless set
+	beforeSuite: async () => {
+		const lang = await browser.executeObsidian(({ obsidian }) => obsidian.getLanguage());
+		if (lang === "en") return;
+		await browser.execute(() => localStorage.setItem("language", "en"));
+		await browser.reloadObsidian();
+	},
 	// You can use any wdio reporter, but by default they show the chromium version instead of the Obsidian version a
 	// test is running on. obsidian-reporter is just a wrapper around spec-reporter that shows the Obsidian version.
 	reporters: [
