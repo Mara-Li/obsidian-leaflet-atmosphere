@@ -130,8 +130,8 @@ Nothing else is collected or sent.
 
 ## 📥 Installation
 
-- [ ] From Obsidian's community plugins
-- [x] Using BRAT with `https://github.com/Mara-Li/gazette`
+- [x] From Obsidian's community plugins (not reviewed)
+- [x] Using BRAT with `https://github.com/Mara-Li/obsidian-leaflet-atmosphere`
 - [x] From the release page:
   - Download the latest release
   - Unzip `gazette.zip` in `.obsidian/plugins/` path
@@ -171,7 +171,3 @@ To add a translation:
    - Add `import <lang> from "./locales/<lang>.json";`
    - Edit the `resources` part with adding : `<lang>: { translation: <lang> }`
 
-## 📚 References
-
-- [Obsidian API documentation](https://docs.obsidian.md)
-- [Plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines)
