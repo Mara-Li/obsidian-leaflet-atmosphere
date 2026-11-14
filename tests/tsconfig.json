@@ -1,0 +1,22 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"types": [
+			"obsidian-typings",
+			"bun",
+			"@wdio/globals/types",
+			"@wdio/mocha-framework",
+			"wdio-obsidian-service",
+			"mocha"
+		]
+	},
+	"include": [
+		"./**/*.ts",
+		"./**/*.mts",
+		"../src/**/*.ts",
+		"../src/**/*.tsx"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}

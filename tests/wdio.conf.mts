@@ -4,9 +4,9 @@ import * as fs from "node:fs";
 import { loadEnvFile } from "node:process";
 import { obsidianBetaAvailable, resolveObsidianVersions } from "wdio-obsidian-service";
 const cacheDir = path.resolve(os.tmpdir(), ".obsidian-cache");
-if (fs.existsSync(".env")) loadEnvFile();
+if (fs.existsSync("../.env")) loadEnvFile("../.env");
 
-console.log(`Using obsidian vault: ${process.env.VAULT_TEST || "tests/vault"}`);
+console.log(`Using obsidian vault: ${process.env.VAULT_TEST || "vault"}`);
 console.log(`Using obsidian cache dir: ${cacheDir}`);
 
 let versions: [string, string][]; // [appVersion, installerVersion][]
@@ -37,7 +37,7 @@ if (process.env.OBSIDIAN_VERSIONS) {
 export const config: WebdriverIO.Config = {
 	runner: "local",
 
-	specs: ["./tests/specs/**/*.e2e.ts"],
+	specs: ["./specs/**/*.e2e.ts"],
 
 	// How many instances of Obsidian should be launched in parallel during testing.
 	maxInstances: Number(process.env["WDIO_MAX_INSTANCES"] || 4),
@@ -47,10 +47,10 @@ export const config: WebdriverIO.Config = {
 		browserVersion: appVersion,
 		"wdio:obsidianOptions": {
 			installerVersion: installerVersion,
-			plugins: ["./dist"],
+			plugins: ["../dist"],
 			// If you need to switch between multiple vaults, you can omit this and use
 			// `reloadObsidian` to open vaults during the test.
-			vault: process.env.VAULT_TEST || "tests/vault",
+			vault: process.env.VAULT_TEST || "vault",
 		},
 	})),
 

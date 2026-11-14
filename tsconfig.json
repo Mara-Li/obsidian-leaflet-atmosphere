@@ -24,11 +24,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"types": [
 			"obsidian-typings",
-			"bun",
-			"@wdio/globals/types",
-			"@wdio/mocha-framework",
-			"wdio-obsidian-service",
-			"mocha"
+			"bun"
 		],
 		"lib": [
 			"DOM",
@@ -43,7 +39,11 @@
 	},
 	"include": [
 		"**/*.ts",
-		"**/*.tsx",
-		"wdio.conf.mts"
+		"**/*.tsx"
+	],
+	"exclude": [
+		"tests",
+		"node_modules",
+		"dist"
 	]
 }

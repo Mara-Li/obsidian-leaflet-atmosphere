@@ -20,6 +20,6 @@ jobs:
               with:
                   node-version: 26
                   cache: "pnpm"
-            - run: pnpm install --frozen-lockfile
+            - run: pnpm install --frozen-lockfile --filter gazette
             - run: pnpm run build
             - run: pnpm run lint

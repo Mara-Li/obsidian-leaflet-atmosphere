@@ -18,7 +18,6 @@ export default defineConfig(
 		'commit-and-tag-version.mjs',
 		'hooks',
 		'tests',
-		'wdio.conf.mts',
 	]),
 	{
 		languageOptions: {
