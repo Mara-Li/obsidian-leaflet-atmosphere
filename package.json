@@ -16,7 +16,7 @@
 		"deploy": "pnpm run export",
 		"lint": "eslint .",
 		"format": "biome format --write src/",
-		"e2e": "pnpm run build && pnpm --filter gazette-e2e run e2e"
+		"e2e": "pnpm run build && pnpm --dir tests install --frozen-lockfile && pnpm --dir tests run e2e"
 	},
 	"engines": {
 		"node": "^26"
