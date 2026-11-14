@@ -1,6 +1,6 @@
 {
   "name": "gazette",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Publish your notes to Leaflet, the AT Protocol blogging platform.",
   "main": "main.js",
   "private": true,
